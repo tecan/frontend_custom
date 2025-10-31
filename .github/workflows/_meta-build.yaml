@@ -1,0 +1,131 @@
+on:
+  workflow_call:
+    inputs:
+      app-version:
+        type: string
+        required: false
+        default: 'snapshot'
+        description: 'Set the version that should be set/used as tag for the container image'
+      publish-container:
+        type: boolean
+        required: false
+        default: false
+        description: 'Set if the container image gets publish and scan once its build'
+      ref-name:
+        type: string
+        required: true
+        description: 'Short ref name of the branch or tag that triggered the workflow run'
+    secrets:
+      registry-0-usr:
+        required: true
+      registry-0-psw:
+        required: true
+
+jobs:
+  build-node:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5.0.0
+
+      - name: Set up NodeJs
+        uses: actions/setup-node@v6.0.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Run Npm Build
+        env:
+          CI: true
+        run: |-
+          npm ci
+          npm run build --if-present
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v5.0.0
+        with:
+          name: assembled-frontend
+          path: |-
+            dist/
+            bom.*
+
+  build-container:
+    runs-on: ubuntu-latest
+    needs:
+      - build-node
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5.0.0
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v6.0.0
+        with:
+          name: assembled-frontend
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3.6.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.11.1
+        id: buildx
+        with:
+          install: true
+
+      - name: Login to Docker.io
+        uses: docker/login-action@v3.6.0
+        if: ${{ inputs.publish-container }}
+        with:
+          registry: docker.io
+          username: ${{ secrets.registry-0-usr }}
+          password: ${{ secrets.registry-0-psw }}
+
+      - name: Set Container Tags
+        id: tags
+        run: |-
+          IMAGE_NAME="docker.io/dependencytrack/frontend"
+          REF_NAME="${{ inputs.ref-name }}"
+          TAGS=""
+
+          if [[ $REF_NAME == feature-* ]]; then
+            TAGS="${IMAGE_NAME}:${REF_NAME,,}"
+          else
+            TAGS="${IMAGE_NAME}:${{ inputs.app-version }}"
+            if [[ "${{ inputs.app-version }}" != "snapshot" ]]; then
+              TAGS="${TAGS},${IMAGE_NAME}:latest"
+            fi
+          fi
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+
+      - name: Build multi-arch Container Image
+        uses: docker/build-push-action@v6.18.0
+        with:
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |-
+            APP_VERSION=${{ inputs.app-version }}
+            COMMIT_SHA=${{ github.sha }}
+          platforms: linux/amd64,linux/arm64
+          push: ${{ inputs.publish-container }}
+          context: .
+          file: docker/Dockerfile.alpine
+
+      - name: Run Trivy Vulnerability Scanner
+        if: ${{ inputs.publish-container }}
+        uses: aquasecurity/trivy-action@0.33.1
+        env:
+          # https://github.com/aquasecurity/trivy-action/issues/389
+          TRIVY_DB_REPOSITORY: 'public.ecr.aws/aquasecurity/trivy-db:2'
+          TRIVY_JAVA_DB_REPOSITORY: 'public.ecr.aws/aquasecurity/trivy-java-db:1'
+        with:
+          image-ref: docker.io/dependencytrack/frontend:${{ inputs.app-version }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          ignore-unfixed: true
+          vuln-type: 'os'
+
+      - name: Upload Trivy Scan Results to GitHub Security Tab
+        if: ${{ inputs.publish-container }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-results.sarif'
