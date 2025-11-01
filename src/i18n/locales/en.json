@@ -972,4 +972,10 @@
     "medium": "Medium Severity Vulnerabilities (excluding aliases)",
     "unassigned": "Unassigned Vulnerabilities (excluding aliases)"
   }
+  ,
+  "audit": {
+    "comment_placeholder": "<Add all participants for the review/assessment>",
+    "details_instruction": "1.  Affected Software Items: Identify which software items are impacted. Assess whether third-party code within supported software is affected. If third-party or open source components are involved, determine in the next step whether the issue should be disclosed to the vendor or published on the appropriate platform.\n2.  Security Context: What is the security context in which the vulnerability was discovered? Consider the intended environment of use and any defense-in-depth strategies in place.\n3.  Risk Assessment: Perform a security risk assessment in accordance with the scoring defined in the SOP Product Security Risk Management.\n4.  Root Cause Analysis: What is the root cause of vulnerability? Is it consistent across different products or does it vary?\n5.  Threat Model Coverage: Is the vulnerability addressed by existing threat models?\n6.  Related Security Issues: Is there other related security issues present in the same product?\n7.  Product Safety Impact: Does vulnerability impact product safety? If yes, review and update the safety risk assessment as necessary.\n8.  Only for vulnerability with risk critical and high: define the Customer Communication strategy (PM with input from RA)"
+}
+
 }

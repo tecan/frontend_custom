@@ -137,6 +137,7 @@
         <b-form-textarea
           id="input-8"
           v-model="comment"
+          :placeholder="$t('audit.comment_placeholder')"
           rows="4"
           class="form-control"
           trim
@@ -223,20 +224,18 @@
       >
         <b-form-textarea
           id="analysisDetailsField"
-          v-model="analysisDetails"
+          v-model="localAnalysisDetails"
           rows="7"
-          class="form-control"
-          :disabled="
-            analysisState === null ||
-            !this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)
-          "
+          :class="['form-control', { 'text-muted': detailsWasEmptyOnLoad && localAnalysisDetails === $t('audit.details_instruction') }]"
+          :disabled="!this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
           v-b-tooltip.hover
           :title="this.$t('message.analysis_details_tooltip')"
+          aria-describedby="analysisDetailsInstruction"
         />
+        <small id="analysisDetailsInstruction" class="sr-only">{{ $t('audit.details_instruction') }}</small>
         <div class="pull-right">
           <b-button
             v-if="this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
-            :disabled="analysisState === null"
             size="sm"
             variant="outline-primary"
             @click="makeAnalysis"
@@ -326,6 +325,8 @@ export default {
       analysisJustification: null,
       analysisResponse: null,
       analysisDetails: null,
+      localAnalysisDetails: null,
+      detailsWasEmptyOnLoad: false,
     };
   },
   watch: {
@@ -339,6 +340,12 @@ export default {
           null,
           currentValue,
         );
+      }
+    },
+    // If the finding prop is passed asynchronously, load analysis when it becomes available
+    finding: function (newVal, oldVal) {
+      if (newVal && newVal !== oldVal) {
+        this.getAnalysis();
       }
     },
   },
@@ -403,6 +410,13 @@ export default {
       if (Object.prototype.hasOwnProperty.call(analysis, 'analysisDetails')) {
         this.analysisDetails = analysis.analysisDetails;
       }
+      // Use a boolean sentinel to track whether details were empty on load
+      this.detailsWasEmptyOnLoad = !this.analysisDetails || this.analysisDetails === '';
+      if (this.detailsWasEmptyOnLoad) {
+        this.localAnalysisDetails = this.$t('audit.details_instruction');
+      } else {
+        this.localAnalysisDetails = this.analysisDetails;
+      }
       if (Object.prototype.hasOwnProperty.call(analysis, 'isSuppressed')) {
         this.isSuppressed = analysis.isSuppressed;
       } else {
@@ -410,22 +424,50 @@ export default {
       }
     },
     makeAnalysis: function () {
+      // Determine what to send for details
+      let detailsToSend = null;
+
+      // Case 1: User has edited the instruction or provided new content
+      if (this.localAnalysisDetails &&
+          this.localAnalysisDetails.trim() !== '' &&
+          this.localAnalysisDetails !== this.$t('audit.details_instruction')) {
+        // User wrote something different from the instruction = send it
+        detailsToSend = this.localAnalysisDetails;
+      }
+      // Case 2: Details were NOT empty on load (preserve existing saved content)
+      else if (!this.detailsWasEmptyOnLoad && this.localAnalysisDetails) {
+        // There was already saved content = preserve it
+        detailsToSend = this.localAnalysisDetails;
+      }
+      // Case 3: Instruction text is unchanged = send null (don't persist instruction)
+
       this.callRestEndpoint(
         this.analysisState,
         this.analysisJustification,
         this.analysisResponse,
-        this.analysisDetails,
+        detailsToSend,
         null,
         null,
       );
     },
     addComment: function () {
       if (this.comment != null) {
+        // When adding a comment, use the same logic to determine what details to send
+        let detailsToSendForComment = null;
+
+        if (this.localAnalysisDetails &&
+            this.localAnalysisDetails.trim() !== '' &&
+            this.localAnalysisDetails !== this.$t('audit.details_instruction')) {
+          detailsToSendForComment = this.localAnalysisDetails;
+        } else if (!this.detailsWasEmptyOnLoad && this.localAnalysisDetails) {
+          detailsToSendForComment = this.localAnalysisDetails;
+        }
+
         this.callRestEndpoint(
           this.analysisState,
           this.analysisJustification,
           this.analysisResponse,
-          this.analysisDetails,
+          detailsToSendForComment,
           this.comment,
           null,
         );
@@ -464,6 +506,17 @@ export default {
   },
   beforeMount() {
     this.finding && this.getAnalysis();
+  },
+
+  created() {
+    // Fallback: ensure localAnalysisDetails contains the instruction so the UI shows guidance
+    if (!this.localAnalysisDetails) {
+      try {
+        this.localAnalysisDetails = this.$t('audit.details_instruction');
+      } catch (e) {
+        // ignore i18n errors in environments where $t may not be available yet
+      }
+    }
   },
   components: {
     BootstrapToggle,
