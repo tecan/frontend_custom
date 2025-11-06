@@ -35,6 +35,8 @@ const Email = () => import('@/views/administration/configuration/Email');
 const Jira = () => import('@/views/administration/configuration/JiraConfig');
 const InternalComponents = () =>
   import('@/views/administration/configuration/InternalComponents');
+const SeverityLevels = () =>
+  import('@/views/administration/configuration/SeverityLevels');
 const TaskScheduler = () =>
   import('@/views/administration/configuration/TaskScheduler');
 const Telemetry = () =>
@@ -423,6 +425,17 @@ function configRoutes() {
             {
               path: 'configuration/internalComponents',
               component: InternalComponents,
+              meta: {
+                title: i18n.t('message.administration'),
+                i18n: 'message.administration',
+                sectionPath: '/admin',
+                sectionName: 'Admin',
+                permission: 'SYSTEM_CONFIGURATION',
+              },
+            },
+            {
+              path: 'configuration/severityLevels',
+              component: SeverityLevels,
               meta: {
                 title: i18n.t('message.administration'),
                 i18n: 'message.administration',
