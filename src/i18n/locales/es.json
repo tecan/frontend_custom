@@ -944,6 +944,7 @@
     "selectPlaceholder": "Seleccionar...",
     "resultLabel": "Riesgo calculado",
     "actionLabel": "Acción recomendada",
+    "residualTitle": "Evaluación de riesgo residual",
     "justificationLabel": "Justificación",
     "justificationPlaceholder": "Explique el motivo de los niveles de impacto y probabilidad seleccionados...",
     "justificationRequired": "Proporcione una justificación antes de actualizar.",

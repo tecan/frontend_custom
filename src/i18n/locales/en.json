@@ -958,6 +958,7 @@
     "selectPlaceholder": "Select...",
     "resultLabel": "Calculated Risk",
     "actionLabel": "Recommended Action",
+    "residualTitle": "Residual Risk Assessment",
     "justificationLabel": "Justification",
     "justificationPlaceholder": "Explain the rationale for the selected impact and likelihood...",
     "justificationRequired": "Please provide a justification before updating.",

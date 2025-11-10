@@ -944,6 +944,7 @@
     "selectPlaceholder": "Wybierz...",
     "resultLabel": "Obliczone ryzyko",
     "actionLabel": "Zalecane działanie",
+    "residualTitle": "Ocena ryzyka resztkowego",
     "justificationLabel": "Uzasadnienie",
     "justificationPlaceholder": "Wyjaśnij uzasadnienie wybranego poziomu wpływu i prawdopodobieństwa...",
     "justificationRequired": "Przed aktualizacją podaj uzasadnienie.",

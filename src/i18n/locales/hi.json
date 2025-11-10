@@ -944,6 +944,7 @@
     "selectPlaceholder": "चयन करें...",
     "resultLabel": "गणना किया गया जोखिम",
     "actionLabel": "अनुशंसित कार्रवाई",
+    "residualTitle": "अवशिष्ट जोखिम मूल्यांकन",
     "justificationLabel": "औचित्य",
     "justificationPlaceholder": "चयनित प्रभाव और संभावना स्तरों का तर्क समझाएँ...",
     "justificationRequired": "अपडेट करने से पहले कृपया औचित्य प्रदान करें।",

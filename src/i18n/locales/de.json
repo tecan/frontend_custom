@@ -944,6 +944,7 @@
     "selectPlaceholder": "Auswählen...",
     "resultLabel": "Berechnetes Risiko",
     "actionLabel": "Empfohlene Maßnahme",
+    "residualTitle": "Rest-Risikobewertung",
     "justificationLabel": "Begründung",
     "justificationPlaceholder": "Erläutern Sie die Begründung für die gewählte Auswirkung und Wahrscheinlichkeit...",
     "justificationRequired": "Bitte geben Sie vor dem Aktualisieren eine Begründung an.",

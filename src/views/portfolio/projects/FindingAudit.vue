@@ -129,6 +129,68 @@
         />
       </b-form-group>
       <b-form-group
+        id="fieldset-residual-risk"
+        :label="$t('riskMatrix.residualTitle')"
+      >
+        <div class="risk-matrix-inline">
+          <div class="risk-matrix-field">
+            <label class="risk-matrix-label" for="residualRiskImpact">
+              {{ $t('riskMatrix.impact') }} <span class="text-danger">*</span>
+            </label>
+            <b-form-select
+              id="residualRiskImpact"
+              v-model="residualImpact"
+              :options="riskImpactChoices"
+              :disabled="!canEditRiskMatrix"
+            >
+              <template #first>
+                <b-form-select-option :value="null" disabled>
+                  {{ $t('riskMatrix.selectPlaceholder') }}
+                </b-form-select-option>
+              </template>
+            </b-form-select>
+          </div>
+          <div class="risk-matrix-field">
+            <label class="risk-matrix-label" for="residualRiskLikelihood">
+              {{ $t('riskMatrix.likelihood') }} <span class="text-danger">*</span>
+            </label>
+            <b-form-select
+              id="residualRiskLikelihood"
+              v-model="residualLikelihood"
+              :options="riskLikelihoodChoices"
+              :disabled="!canEditRiskMatrix"
+            >
+              <template #first>
+                <b-form-select-option :value="null" disabled>
+                  {{ $t('riskMatrix.selectPlaceholder') }}
+                </b-form-select-option>
+              </template>
+            </b-form-select>
+          </div>
+          <div class="risk-matrix-field">
+            <label class="risk-matrix-label">
+              {{ $t('riskMatrix.resultLabel') }}
+            </label>
+            <div
+              class="calculated-risk-field"
+              :class="{ 'calculated-risk-empty': !residualCalculatedRisk }"
+              :style="residualCalculatedRisk ? residualCalculatedRiskStyle : null"
+            >
+              {{ residualCalculatedRiskText }}
+            </div>
+          </div>
+        </div>
+        <b-form-group class="mt-2 mb-0" :label="$t('riskMatrix.justificationLabel')">
+          <b-form-textarea
+            id="residualRiskJustification"
+            v-model="riskJustification"
+            rows="3"
+            :placeholder="$t('riskMatrix.justificationPlaceholder')"
+            :disabled="!canEditRiskMatrix"
+          />
+        </b-form-group>
+      </b-form-group>
+      <b-form-group
         v-if="finding.vulnerability.recommendation"
         id="fieldset-4"
         :label="this.$t('message.recommendation')"
@@ -138,9 +200,9 @@
           id="input-4"
           :value="finding.vulnerability.recommendation"
           rows="7"
-    
-    
-    
+
+
+
           trim
         />
       </b-form-group>
@@ -408,6 +470,8 @@ export default {
       detailsWasEmptyOnLoad: false,
       selectedImpact: null,
       selectedLikelihood: null,
+      residualImpact: null,
+      residualLikelihood: null,
       riskImpactChoices: [
         { value: 'LOW', text: this.$t('severity.low') },
         { value: 'MEDIUM', text: this.$t('severity.medium') },
@@ -449,28 +513,18 @@ export default {
         this.getAnalysis();
         this.selectedImpact = null;
         this.selectedLikelihood = null;
+        this.residualImpact = null;
+        this.residualLikelihood = null;
         this.riskJustification = '';
       }
     },
   },
   computed: {
     calculatedRisk() {
-      if (!this.selectedImpact || !this.selectedLikelihood) {
-        return null;
-      }
-      const likelihoodRow = RISK_MATRIX_TABLE[this.selectedLikelihood];
-      if (!likelihoodRow) {
-        return null;
-      }
-      const entry = likelihoodRow[this.selectedImpact];
-      if (!entry) {
-        return null;
-      }
-      return {
-        ...entry,
-        ratingText: this.$t(`riskMatrix.ratings.${entry.rating}`),
-        actionText: this.$t(`riskMatrix.actions.${entry.action}`),
-      };
+      return this.lookupRiskEntry(
+        this.selectedLikelihood,
+        this.selectedImpact,
+      );
     },
     calculatedRiskText() {
       if (!this.calculatedRisk) {
@@ -488,6 +542,28 @@ export default {
         borderColor: this.calculatedRisk.textColor,
       };
     },
+    residualCalculatedRisk() {
+      return this.lookupRiskEntry(
+        this.residualLikelihood,
+        this.residualImpact,
+      );
+    },
+    residualCalculatedRiskText() {
+      if (!this.residualCalculatedRisk) {
+        return '--';
+      }
+      return `${this.residualCalculatedRisk.ratingText} (${this.residualCalculatedRisk.actionText})`;
+    },
+    residualCalculatedRiskStyle() {
+      if (!this.residualCalculatedRisk) {
+        return {};
+      }
+      return {
+        backgroundColor: this.residualCalculatedRisk.color,
+        color: this.residualCalculatedRisk.textColor,
+        borderColor: this.residualCalculatedRisk.textColor,
+      };
+    },
     canEditRiskMatrix() {
       return this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS);
     },
@@ -499,6 +575,24 @@ export default {
         vulnSource ? vulnSource : this.source,
         aliases,
       );
+    },
+    lookupRiskEntry: function (likelihood, impact) {
+      if (!likelihood || !impact) {
+        return null;
+      }
+      const likelihoodRow = RISK_MATRIX_TABLE[likelihood];
+      if (!likelihoodRow) {
+        return null;
+      }
+      const entry = likelihoodRow[impact];
+      if (!entry) {
+        return null;
+      }
+      return {
+        ...entry,
+        ratingText: this.$t(`riskMatrix.ratings.${entry.rating}`),
+        actionText: this.$t(`riskMatrix.actions.${entry.action}`),
+      };
     },
     getAnalysis: function () {
       let queryString =
@@ -549,6 +643,28 @@ export default {
       }
       if (Object.prototype.hasOwnProperty.call(analysis, 'analysisResponse')) {
         this.analysisResponse = analysis.analysisResponse;
+      }
+      if (Object.prototype.hasOwnProperty.call(analysis, 'riskImpact')) {
+        this.selectedImpact = analysis.riskImpact;
+      }
+      if (Object.prototype.hasOwnProperty.call(analysis, 'riskLikelihood')) {
+        this.selectedLikelihood = analysis.riskLikelihood;
+      }
+      if (
+        Object.prototype.hasOwnProperty.call(analysis, 'residualRiskImpact')
+      ) {
+        this.residualImpact = analysis.residualRiskImpact;
+      }
+      if (
+        Object.prototype.hasOwnProperty.call(
+          analysis,
+          'residualRiskLikelihood',
+        )
+      ) {
+        this.residualLikelihood = analysis.residualRiskLikelihood;
+      }
+      if (Object.prototype.hasOwnProperty.call(analysis, 'riskJustification')) {
+        this.riskJustification = analysis.riskJustification;
       }
       if (Object.prototype.hasOwnProperty.call(analysis, 'analysisDetails')) {
         this.analysisDetails = analysis.analysisDetails;
@@ -642,6 +758,12 @@ export default {
           analysisJustification: analysisJustification,
           analysisResponse: analysisResponse,
           analysisDetails: analysisDetails,
+          // risk matrix fields
+          riskImpact: this.selectedImpact,
+          riskLikelihood: this.selectedLikelihood,
+          residualRiskImpact: this.residualImpact,
+          residualRiskLikelihood: this.residualLikelihood,
+          riskJustification: this.riskJustification,
           comment: comment,
           isSuppressed: isSuppressed,
         })
@@ -707,4 +829,5 @@ export default {
   margin-bottom: 0.25rem;
   font-weight: 600;
 }
+
 </style>
