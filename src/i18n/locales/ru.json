@@ -937,6 +937,35 @@
     "total": "Всего нарушений",
     "warns": "Предупреждения о нарушениях"
   },
+  "riskMatrix": {
+    "title": "Оценка риска",
+    "impact": "Воздействие",
+    "likelihood": "Вероятность",
+    "selectPlaceholder": "Выберите...",
+    "resultLabel": "Расчётный риск",
+    "actionLabel": "Рекомендуемое действие",
+    "ratings": {
+      "very_low": "Очень низкий",
+      "low": "Низкий",
+      "medium": "Средний",
+      "high": "Высокий",
+      "critical": "Критический"
+    },
+    "actions": {
+      "accept": "Принять",
+      "monitor": "Мониторить",
+      "monitor_plan": "Мониторить и планировать",
+      "mitigate": "Снизить",
+      "mitigate_immediately": "Снизить немедленно"
+    },
+    "likelihoods": {
+      "virtually_impossible": "Практически невозможно",
+      "unlikely": "Маловероятно",
+      "possible": "Возможно",
+      "likely": "Вероятно",
+      "almost_certain": "Почти наверняка"
+    }
+  },
   "severity": {
     "critical": "Критический",
     "critical_severity": "Критическая степень",

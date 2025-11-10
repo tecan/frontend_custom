@@ -951,6 +951,38 @@
     "total": "Total Violations",
     "warns": "Violation Warnings"
   },
+  "riskMatrix": {
+    "title": "Risk Assessment",
+    "impact": "Impact",
+    "likelihood": "Likelihood",
+    "selectPlaceholder": "Select...",
+    "resultLabel": "Calculated Risk",
+    "actionLabel": "Recommended Action",
+    "justificationLabel": "Justification",
+    "justificationPlaceholder": "Explain the rationale for the selected impact and likelihood...",
+    "justificationRequired": "Please provide a justification before updating.",
+    "ratings": {
+      "very_low": "Very Low",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "actions": {
+      "accept": "Accept",
+      "monitor": "Monitor",
+      "monitor_plan": "Monitor & Plan",
+      "mitigate": "Mitigate",
+      "mitigate_immediately": "Mitigate Immediately"
+    },
+    "likelihoods": {
+      "virtually_impossible": "Virtually Impossible",
+      "unlikely": "Unlikely",
+      "possible": "Possible",
+      "likely": "Likely",
+      "almost_certain": "Almost Certain"
+    }
+  },
   "severity": {
     "critical": "Critical",
     "critical_severity": "Critical Severity",

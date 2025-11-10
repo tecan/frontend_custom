@@ -937,6 +937,38 @@
     "total": "कुल उल्लंघन",
     "warns": "उल्लंघन की चेतावनियाँ"
   },
+  "riskMatrix": {
+    "title": "जोखिम मूल्यांकन",
+    "impact": "प्रभाव",
+    "likelihood": "संभावना",
+    "selectPlaceholder": "चयन करें...",
+    "resultLabel": "गणना किया गया जोखिम",
+    "actionLabel": "अनुशंसित कार्रवाई",
+    "justificationLabel": "औचित्य",
+    "justificationPlaceholder": "चयनित प्रभाव और संभावना स्तरों का तर्क समझाएँ...",
+    "justificationRequired": "अपडेट करने से पहले कृपया औचित्य प्रदान करें।",
+    "ratings": {
+      "very_low": "बहुत कम",
+      "low": "कम",
+      "medium": "मध्यम",
+      "high": "उच्च",
+      "critical": "गंभीर"
+    },
+    "actions": {
+      "accept": "स्वीकार करें",
+      "monitor": "निगरानी करें",
+      "monitor_plan": "निगरानी करें और योजना बनाएं",
+      "mitigate": "कम करें",
+      "mitigate_immediately": "तुरंत कम करें"
+    },
+    "likelihoods": {
+      "virtually_impossible": "लगभग असंभव",
+      "unlikely": "असंभव सा",
+      "possible": "संभव",
+      "likely": "संभावित",
+      "almost_certain": "लगभग निश्चित"
+    }
+  },
   "severity": {
     "critical": "गंभीर",
     "critical_severity": "गंभीर गंभीरता",

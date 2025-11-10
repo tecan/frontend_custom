@@ -937,6 +937,38 @@
     "total": "Całkowite naruszenia",
     "warns": "Ostrzeżenia o naruszeniu"
   },
+  "riskMatrix": {
+    "title": "Ocena ryzyka",
+    "impact": "Wpływ",
+    "likelihood": "Prawdopodobieństwo",
+    "selectPlaceholder": "Wybierz...",
+    "resultLabel": "Obliczone ryzyko",
+    "actionLabel": "Zalecane działanie",
+    "justificationLabel": "Uzasadnienie",
+    "justificationPlaceholder": "Wyjaśnij uzasadnienie wybranego poziomu wpływu i prawdopodobieństwa...",
+    "justificationRequired": "Przed aktualizacją podaj uzasadnienie.",
+    "ratings": {
+      "very_low": "Bardzo niskie",
+      "low": "Niskie",
+      "medium": "Średnie",
+      "high": "Wysokie",
+      "critical": "Krytyczne"
+    },
+    "actions": {
+      "accept": "Zaakceptuj",
+      "monitor": "Monitoruj",
+      "monitor_plan": "Monitoruj i planuj",
+      "mitigate": "Ogranicz",
+      "mitigate_immediately": "Natychmiast ogranicz"
+    },
+    "likelihoods": {
+      "virtually_impossible": "Praktycznie niemożliwe",
+      "unlikely": "Mało prawdopodobne",
+      "possible": "Możliwe",
+      "likely": "Prawdopodobne",
+      "almost_certain": "Prawie pewne"
+    }
+  },
   "severity": {
     "critical": "Krytyczny",
     "critical_severity": "Krytyczna ważność",

@@ -937,6 +937,38 @@
     "total": "Gesamtzahl der Verstöße",
     "warns": "Verstöße mit Schweregrad Warnung"
   },
+  "riskMatrix": {
+    "title": "Risikobewertung",
+    "impact": "Auswirkung",
+    "likelihood": "Eintrittswahrscheinlichkeit",
+    "selectPlaceholder": "Auswählen...",
+    "resultLabel": "Berechnetes Risiko",
+    "actionLabel": "Empfohlene Maßnahme",
+    "justificationLabel": "Begründung",
+    "justificationPlaceholder": "Erläutern Sie die Begründung für die gewählte Auswirkung und Wahrscheinlichkeit...",
+    "justificationRequired": "Bitte geben Sie vor dem Aktualisieren eine Begründung an.",
+    "ratings": {
+      "very_low": "Sehr gering",
+      "low": "Gering",
+      "medium": "Mittel",
+      "high": "Hoch",
+      "critical": "Kritisch"
+    },
+    "actions": {
+      "accept": "Akzeptieren",
+      "monitor": "Überwachen",
+      "monitor_plan": "Überwachen & Planen",
+      "mitigate": "Mindern",
+      "mitigate_immediately": "Sofort mindern"
+    },
+    "likelihoods": {
+      "virtually_impossible": "Praktisch unmöglich",
+      "unlikely": "Unwahrscheinlich",
+      "possible": "Möglich",
+      "likely": "Wahrscheinlich",
+      "almost_certain": "Nahezu sicher"
+    }
+  },
   "severity": {
     "critical": "Kritisch",
     "critical_severity": "Kritischer Schweregrad",

@@ -937,6 +937,38 @@
     "total": "Total de violaciones",
     "warns": "Advertencias de infracción"
   },
+  "riskMatrix": {
+    "title": "Evaluación de riesgos",
+    "impact": "Impacto",
+    "likelihood": "Probabilidad",
+    "selectPlaceholder": "Seleccionar...",
+    "resultLabel": "Riesgo calculado",
+    "actionLabel": "Acción recomendada",
+    "justificationLabel": "Justificación",
+    "justificationPlaceholder": "Explique el motivo de los niveles de impacto y probabilidad seleccionados...",
+    "justificationRequired": "Proporcione una justificación antes de actualizar.",
+    "ratings": {
+      "very_low": "Muy bajo",
+      "low": "Bajo",
+      "medium": "Medio",
+      "high": "Alto",
+      "critical": "Crítico"
+    },
+    "actions": {
+      "accept": "Aceptar",
+      "monitor": "Monitorizar",
+      "monitor_plan": "Monitorizar y planificar",
+      "mitigate": "Mitigar",
+      "mitigate_immediately": "Mitigar de inmediato"
+    },
+    "likelihoods": {
+      "virtually_impossible": "Prácticamente imposible",
+      "unlikely": "Improbable",
+      "possible": "Posible",
+      "likely": "Probable",
+      "almost_certain": "Casi seguro"
+    }
+  },
   "severity": {
     "critical": "Crítico",
     "critical_severity": "Gravedad crítica",

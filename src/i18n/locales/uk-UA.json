@@ -937,6 +937,35 @@
     "total": "Сумарні порушення",
     "warns": "Попередження про порушення"
   },
+  "riskMatrix": {
+    "title": "Оцінка ризику",
+    "impact": "Вплив",
+    "likelihood": "Ймовірність",
+    "selectPlaceholder": "Виберіть...",
+    "resultLabel": "Розрахований ризик",
+    "actionLabel": "Рекомендована дія",
+    "ratings": {
+      "very_low": "Дуже низький",
+      "low": "Низький",
+      "medium": "Середній",
+      "high": "Високий",
+      "critical": "Критичний"
+    },
+    "actions": {
+      "accept": "Прийняти",
+      "monitor": "Моніторити",
+      "monitor_plan": "Моніторити та планувати",
+      "mitigate": "Зменшити",
+      "mitigate_immediately": "Негайно зменшити"
+    },
+    "likelihoods": {
+      "virtually_impossible": "Практично неможливо",
+      "unlikely": "Малоймовірно",
+      "possible": "Можливо",
+      "likely": "Ймовірно",
+      "almost_certain": "Майже напевно"
+    }
+  },
   "severity": {
     "critical": "Критичний",
     "critical_severity": "Критична серйозність",

@@ -937,6 +937,35 @@
     "total": "违规总数",
     "warns": "违规警告"
   },
+  "riskMatrix": {
+    "title": "风险评估",
+    "impact": "影响",
+    "likelihood": "可能性",
+    "selectPlaceholder": "请选择...",
+    "resultLabel": "计算风险",
+    "actionLabel": "推荐措施",
+    "ratings": {
+      "very_low": "非常低",
+      "low": "低",
+      "medium": "中",
+      "high": "高",
+      "critical": "严重"
+    },
+    "actions": {
+      "accept": "接受",
+      "monitor": "监控",
+      "monitor_plan": "监控并规划",
+      "mitigate": "缓解",
+      "mitigate_immediately": "立即缓解"
+    },
+    "likelihoods": {
+      "virtually_impossible": "几乎不可能",
+      "unlikely": "不太可能",
+      "possible": "可能",
+      "likely": "很可能",
+      "almost_certain": "几乎肯定"
+    }
+  },
   "severity": {
     "critical": "严重",
     "critical_severity": "严重漏洞",

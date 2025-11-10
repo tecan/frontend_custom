@@ -937,6 +937,35 @@
     "total": "Violações totais",
     "warns": "Avisos de violação"
   },
+  "riskMatrix": {
+    "title": "Avaliação de risco",
+    "impact": "Impacto",
+    "likelihood": "Probabilidade",
+    "selectPlaceholder": "Selecione...",
+    "resultLabel": "Risco calculado",
+    "actionLabel": "Ação recomendada",
+    "ratings": {
+      "very_low": "Muito baixo",
+      "low": "Baixo",
+      "medium": "Médio",
+      "high": "Alto",
+      "critical": "Crítico"
+    },
+    "actions": {
+      "accept": "Aceitar",
+      "monitor": "Monitorar",
+      "monitor_plan": "Monitorar e planejar",
+      "mitigate": "Mitigar",
+      "mitigate_immediately": "Mitigar imediatamente"
+    },
+    "likelihoods": {
+      "virtually_impossible": "Praticamente impossível",
+      "unlikely": "Improvável",
+      "possible": "Possível",
+      "likely": "Provável",
+      "almost_certain": "Quase certo"
+    }
+  },
   "severity": {
     "critical": "Crítico",
     "critical_severity": "Gravidade Crítica",

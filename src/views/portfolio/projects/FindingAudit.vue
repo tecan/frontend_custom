@@ -69,6 +69,65 @@
           trim
         />
       </b-form-group>
+      <b-form-group id="fieldset-risk-matrix" :label="$t('riskMatrix.title')">
+        <div class="risk-matrix-inline">
+          <div class="risk-matrix-field">
+            <label class="risk-matrix-label" for="riskMatrixImpact">
+              {{ $t('riskMatrix.impact') }} <span class="text-danger">*</span>
+            </label>
+            <b-form-select
+              id="riskMatrixImpact"
+              v-model="selectedImpact"
+              :options="riskImpactChoices"
+              :disabled="!canEditRiskMatrix"
+            >
+              <template #first>
+                <b-form-select-option :value="null" disabled>
+                  {{ $t('riskMatrix.selectPlaceholder') }}
+                </b-form-select-option>
+              </template>
+            </b-form-select>
+          </div>
+          <div class="risk-matrix-field">
+            <label class="risk-matrix-label" for="riskMatrixLikelihood">
+              {{ $t('riskMatrix.likelihood') }} <span class="text-danger">*</span>
+            </label>
+            <b-form-select
+              id="riskMatrixLikelihood"
+              v-model="selectedLikelihood"
+              :options="riskLikelihoodChoices"
+              :disabled="!canEditRiskMatrix"
+            >
+              <template #first>
+                <b-form-select-option :value="null" disabled>
+                  {{ $t('riskMatrix.selectPlaceholder') }}
+                </b-form-select-option>
+              </template>
+            </b-form-select>
+          </div>
+          <div class="risk-matrix-field">
+            <label class="risk-matrix-label">
+              {{ $t('riskMatrix.resultLabel') }}
+            </label>
+            <div
+              class="calculated-risk-field"
+              :class="{ 'calculated-risk-empty': !calculatedRisk }"
+              :style="calculatedRisk ? calculatedRiskStyle : null"
+            >
+              {{ calculatedRiskText }}
+            </div>
+          </div>
+        </div>
+      </b-form-group>
+      <b-form-group :label="$t('riskMatrix.justificationLabel')">
+        <b-form-textarea
+          id="riskMatrixJustification"
+          v-model="riskJustification"
+          rows="3"
+          :placeholder="$t('riskMatrix.justificationPlaceholder')"
+          :disabled="!canEditRiskMatrix"
+        />
+      </b-form-group>
       <b-form-group
         v-if="finding.vulnerability.recommendation"
         id="fieldset-4"
@@ -79,22 +138,9 @@
           id="input-4"
           :value="finding.vulnerability.recommendation"
           rows="7"
-          class="form-control disabled"
-          readonly
-          trim
-        />
-      </b-form-group>
-      <b-form-group
-        v-if="finding.vulnerability.cvssV2Vector"
-        id="fieldset-5"
-        :label="this.$t('message.cvss_v2_vector')"
-        label-for="input-5"
-      >
-        <b-form-input
-          id="input-5"
-          :value="finding.vulnerability.cvssV2Vector"
-          class="form-control disabled"
-          readonly
+    
+    
+    
           trim
         />
       </b-form-group>
@@ -238,7 +284,7 @@
             v-if="this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
             size="sm"
             variant="outline-primary"
-            @click="makeAnalysis"
+            @click="makeAnalysis(true)"
             ><span class="fa fa-comment-o"></span>
             {{ this.$t('message.update_details') }}</b-button
           >
@@ -252,6 +298,39 @@
 import common from '@/shared/common';
 import BootstrapToggle from 'vue-bootstrap-toggle';
 import permissionsMixin from '@/mixins/permissionsMixin';
+
+const RISK_MATRIX_TABLE = {
+  VIRTUALLY_IMPOSSIBLE: {
+    LOW: { rating: 'very_low', action: 'accept', color: '#66bb6a', textColor: '#0d3317' },
+    MEDIUM: { rating: 'very_low', action: 'accept', color: '#66bb6a', textColor: '#0d3317' },
+    HIGH: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
+    CRITICAL: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
+  },
+  UNLIKELY: {
+    LOW: { rating: 'very_low', action: 'accept', color: '#66bb6a', textColor: '#0d3317' },
+    MEDIUM: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
+    HIGH: { rating: 'medium', action: 'monitor_plan', color: '#ffca28', textColor: '#5c3d00' },
+    CRITICAL: { rating: 'high', action: 'mitigate', color: '#ff7043', textColor: '#3b0b00' },
+  },
+  POSSIBLE: {
+    LOW: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
+    MEDIUM: { rating: 'medium', action: 'monitor_plan', color: '#ffca28', textColor: '#5c3d00' },
+    HIGH: { rating: 'high', action: 'mitigate', color: '#ff7043', textColor: '#3b0b00' },
+    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#e53935', textColor: '#ffffff' },
+  },
+  LIKELY: {
+    LOW: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
+    MEDIUM: { rating: 'high', action: 'mitigate', color: '#ff7043', textColor: '#3b0b00' },
+    HIGH: { rating: 'high', action: 'mitigate', color: '#ff7043', textColor: '#3b0b00' },
+    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#e53935', textColor: '#ffffff' },
+  },
+  ALMOST_CERTAIN: {
+    LOW: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
+    MEDIUM: { rating: 'high', action: 'mitigate', color: '#ff7043', textColor: '#3b0b00' },
+    HIGH: { rating: 'critical', action: 'mitigate_immediately', color: '#e53935', textColor: '#ffffff' },
+    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#e53935', textColor: '#ffffff' },
+  },
+};
 
 export default {
   props: {
@@ -327,6 +406,28 @@ export default {
       analysisDetails: null,
       localAnalysisDetails: null,
       detailsWasEmptyOnLoad: false,
+      selectedImpact: null,
+      selectedLikelihood: null,
+      riskImpactChoices: [
+        { value: 'LOW', text: this.$t('severity.low') },
+        { value: 'MEDIUM', text: this.$t('severity.medium') },
+        { value: 'HIGH', text: this.$t('severity.high') },
+        { value: 'CRITICAL', text: this.$t('severity.critical') },
+      ],
+      riskLikelihoodChoices: [
+        {
+          value: 'VIRTUALLY_IMPOSSIBLE',
+          text: this.$t('riskMatrix.likelihoods.virtually_impossible'),
+        },
+        { value: 'UNLIKELY', text: this.$t('riskMatrix.likelihoods.unlikely') },
+        { value: 'POSSIBLE', text: this.$t('riskMatrix.likelihoods.possible') },
+        { value: 'LIKELY', text: this.$t('riskMatrix.likelihoods.likely') },
+        {
+          value: 'ALMOST_CERTAIN',
+          text: this.$t('riskMatrix.likelihoods.almost_certain'),
+        },
+      ],
+      riskJustification: '',
     };
   },
   watch: {
@@ -346,7 +447,49 @@ export default {
     finding: function (newVal, oldVal) {
       if (newVal && newVal !== oldVal) {
         this.getAnalysis();
+        this.selectedImpact = null;
+        this.selectedLikelihood = null;
+        this.riskJustification = '';
       }
+    },
+  },
+  computed: {
+    calculatedRisk() {
+      if (!this.selectedImpact || !this.selectedLikelihood) {
+        return null;
+      }
+      const likelihoodRow = RISK_MATRIX_TABLE[this.selectedLikelihood];
+      if (!likelihoodRow) {
+        return null;
+      }
+      const entry = likelihoodRow[this.selectedImpact];
+      if (!entry) {
+        return null;
+      }
+      return {
+        ...entry,
+        ratingText: this.$t(`riskMatrix.ratings.${entry.rating}`),
+        actionText: this.$t(`riskMatrix.actions.${entry.action}`),
+      };
+    },
+    calculatedRiskText() {
+      if (!this.calculatedRisk) {
+        return '--';
+      }
+      return `${this.calculatedRisk.ratingText} (${this.calculatedRisk.actionText})`;
+    },
+    calculatedRiskStyle() {
+      if (!this.calculatedRisk) {
+        return {};
+      }
+      return {
+        backgroundColor: this.calculatedRisk.color,
+        color: this.calculatedRisk.textColor,
+        borderColor: this.calculatedRisk.textColor,
+      };
+    },
+    canEditRiskMatrix() {
+      return this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS);
     },
   },
   mixins: [permissionsMixin],
@@ -423,7 +566,14 @@ export default {
         this.isSuppressed = false;
       }
     },
-    makeAnalysis: function () {
+    makeAnalysis: function (requireRiskJustification = false) {
+      if (
+        requireRiskJustification &&
+        (!this.riskJustification || this.riskJustification.trim() === '')
+      ) {
+        this.$toastr.w(this.$t('riskMatrix.justificationRequired'));
+        return;
+      }
       // Determine what to send for details
       let detailsToSend = null;
 
@@ -523,3 +673,38 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.calculated-risk-field {
+  min-height: 38px;
+  border: 1px solid #495057;
+  border-radius: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.calculated-risk-empty {
+  color: #adb5bd;
+  background-color: transparent;
+}
+
+.risk-matrix-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.risk-matrix-field {
+  flex: 1 1 0;
+  min-width: 12rem;
+}
+
+.risk-matrix-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+</style>
