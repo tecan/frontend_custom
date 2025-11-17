@@ -183,7 +183,7 @@
         <b-form-group class="mt-2 mb-0" :label="$t('riskMatrix.justificationLabel')">
           <b-form-textarea
             id="residualRiskJustification"
-            v-model="riskJustification"
+            v-model="residualRiskJustification"
             rows="3"
             :placeholder="$t('riskMatrix.justificationPlaceholder')"
             :disabled="!canEditRiskMatrix"
@@ -492,6 +492,7 @@ export default {
         },
       ],
       riskJustification: '',
+      residualRiskJustification: '',
     };
   },
   watch: {
@@ -516,6 +517,7 @@ export default {
         this.residualImpact = null;
         this.residualLikelihood = null;
         this.riskJustification = '';
+        this.residualRiskJustification = '';
       }
     },
   },
@@ -666,6 +668,9 @@ export default {
       if (Object.prototype.hasOwnProperty.call(analysis, 'riskJustification')) {
         this.riskJustification = analysis.riskJustification;
       }
+      if (Object.prototype.hasOwnProperty.call(analysis, 'residualRiskJustification')) {
+        this.residualRiskJustification = analysis.residualRiskJustification;
+      }
       if (Object.prototype.hasOwnProperty.call(analysis, 'analysisDetails')) {
         this.analysisDetails = analysis.analysisDetails;
       }
@@ -764,6 +769,7 @@ export default {
           residualRiskImpact: this.residualImpact,
           residualRiskLikelihood: this.residualLikelihood,
           riskJustification: this.riskJustification,
+          residualRiskJustification: this.residualRiskJustification,
           comment: comment,
           isSuppressed: isSuppressed,
         })
