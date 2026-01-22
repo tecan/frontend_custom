@@ -3,6 +3,10 @@ node_modules
 /dist
 /coverage
 
+# BOM files (build artifacts)
+bom.json
+bom.xml
+
 /tests/e2e/reports/
 selenium-debug.log
 
