@@ -37,6 +37,8 @@ const InternalComponents = () =>
   import('@/views/administration/configuration/InternalComponents');
 const SeverityLevels = () =>
   import('@/views/administration/configuration/SeverityLevels');
+const Customization = () =>
+  import('@/views/administration/configuration/Customization');
 const TaskScheduler = () =>
   import('@/views/administration/configuration/TaskScheduler');
 const Telemetry = () =>
@@ -435,7 +437,11 @@ function configRoutes() {
             },
             {
               path: 'configuration/severityLevels',
-              component: SeverityLevels,
+              redirect: 'configuration/customization#severity',
+            },
+            {
+              path: 'configuration/customization',
+              component: Customization,
               meta: {
                 title: i18n.t('message.administration'),
                 i18n: 'message.administration',

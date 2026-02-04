@@ -107,9 +107,9 @@ export default {
               route: 'configuration/internalComponents',
             },
             {
-              component: 'SeverityLevels',
-              name: this.$t('admin.severity_levels'),
-              route: 'configuration/severityLevels',
+              component: 'Customization',
+              name: this.$t('admin.customization'),
+              route: 'configuration/customization',
             },
             {
               component: 'TaskScheduler',

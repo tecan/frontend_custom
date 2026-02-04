@@ -23,7 +23,7 @@ import BomFormats from './configuration/BomFormats';
 import Email from './configuration/Email';
 import General from './configuration/General';
 import InternalComponents from './configuration/InternalComponents';
-import SeverityLevels from './configuration/SeverityLevels';
+import Customization from './configuration/Customization';
 import Jira from './configuration/JiraConfig';
 import Search from './configuration/Search.vue';
 import TaskScheduler from './configuration/TaskScheduler.vue';
@@ -80,7 +80,7 @@ export default {
     Email,
     Jira,
     InternalComponents,
-    SeverityLevels,
+    Customization,
     TaskScheduler,
     Telemetry,
     Search,
