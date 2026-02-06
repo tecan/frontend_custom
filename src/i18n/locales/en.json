@@ -182,6 +182,7 @@
     "reset_policy_never": "Never",
     "reset_policy_yearly": "Yearly",
     "reset_policy_monthly": "Monthly",
+    "reset_policy_daily": "Daily",
     "preview_id": "PREVIEW ID",
     "preview": "Preview",
     "reset_to_defaults": "Reset to defaults",
@@ -391,10 +392,12 @@
     "pt": "Portuguese (Portugal)",
     "pt-BR": "Portuguese (Brazil)",
     "ru": "Russian",
+    "uk-UA": "Ukrainian",
     "zh": "Chinese"
   },
   "message": {
     "about": "About",
+    "actions": "Actions",
     "active": "Active",
     "add": "Add",
     "add_affected_component": "Add Affected Component",
@@ -970,6 +973,7 @@
     "vulnerability_updated_desc": "The date the vulnerability record was last updated",
     "vulnerability_vuln_id": "Vulnerability ID",
     "vulnerability_vuln_id_desc": "The identifier which uniquely identifies this vulnerability within the same source",
+    "vulnerability_id_generation_failed": "Failed to generate vulnerability ID. Please try again.",
     "vulnerable": "Vulnerable",
     "vulnerable_components": "Vulnerable Components",
     "vulnerable_projects": "Vulnerable Projects",

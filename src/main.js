@@ -9,6 +9,7 @@ import router from './router';
 import i18n from './i18n';
 import './validation';
 import './plugins/table.js';
+import customizationPlugin from './plugins/customization.js';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 import vueDebounce from 'vue-debounce';
@@ -22,6 +23,7 @@ import { getContextPath } from './shared/utils';
 
 Vue.use(BootstrapVue);
 Vue.use(VueAxios, axios);
+Vue.use(customizationPlugin);
 Vue.use(VueToastr, {
   defaultTimeout: 5000,
   defaultProgressBar: false,
@@ -83,6 +85,10 @@ function createVueApp() {
     .get(`${Vue.prototype.$api.BASE_URL}/${Vue.prototype.$api.URL_ABOUT}`)
     .then((result) => {
       Vue.prototype.$dtrack = result.data;
+      // Preload customization settings for instant vulnerability ID generation
+      if (Vue.prototype.$customization && Vue.prototype.$customization.preloadVulnIdSettings) {
+        Vue.prototype.$customization.preloadVulnIdSettings();
+      }
     });
 
   Vue.prototype.$version = version;

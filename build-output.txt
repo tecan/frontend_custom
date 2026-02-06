@@ -1,0 +1,233 @@
+
+> @dependencytrack/frontend@4.13.0 prebuild
+> cross-env NODE_OPTIONS=--openssl-legacy-provider node update-embedded-version.js
+
+
+> @dependencytrack/frontend@4.13.0 build
+> npm run prebuild && cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service build
+
+
+> @dependencytrack/frontend@4.13.0 prebuild
+> cross-env NODE_OPTIONS=--openssl-legacy-provider node update-embedded-version.js
+
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+-  Building for production...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+DEPRECATION WARNING: Using / for division outside of calc() is deprecated and will be removed in Dart Sass 2.0.0.
+
+Recommendation: math.div(30em, 14) or calc(30em / 14)
+
+More info and automated migrator: https://sass-lang.com/d/slash-div
+
+   ÔòÀ
+12 Ôöé $fa-li-width:         (30em / 14) !default;
+   Ôöé                        ^^^^^^^^^
+   ÔòÁ
+    node_modules\font-awesome\scss\_variables.scss 12:24  @import
+    node_modules\font-awesome\scss\font-awesome.scss 6:9  @import
+    stdin 4:9                                             root stylesheet
+
+DEPRECATION WARNING: Using / for division outside of calc() is deprecated and will be removed in Dart Sass 2.0.0.
+
+Recommendation: math.div(4em, 3) or calc(4em / 3)
+
+More info and automated migrator: https://sass-lang.com/d/slash-div
+
+  ÔòÀ
+6 Ôöé   font-size: (4em / 3);
+  Ôöé               ^^^^^^^
+  ÔòÁ
+    node_modules\font-awesome\scss\_larger.scss 6:15       @import
+    node_modules\font-awesome\scss\font-awesome.scss 10:9  @import
+    stdin 4:9                                              root stylesheet
+
+DEPRECATION WARNING: Using / for division outside of calc() is deprecated and will be removed in Dart Sass 2.0.0.
+
+Recommendation: math.div(3em, 4) or calc(3em / 4)
+
+More info and automated migrator: https://sass-lang.com/d/slash-div
+
+  ÔòÀ
+7 Ôöé   line-height: (3em / 4);
+  Ôöé                 ^^^^^^^
+  ÔòÁ
+    node_modules\font-awesome\scss\_larger.scss 7:17       @import
+    node_modules\font-awesome\scss\font-awesome.scss 10:9  @import
+    stdin 4:9                                              root stylesheet
+
+DEPRECATION WARNING: Using / for division outside of calc() is deprecated and will be removed in Dart Sass 2.0.0.
+
+Recommendation: math.div(18em, 14) or calc(18em / 14)
+
+More info and automated migrator: https://sass-lang.com/d/slash-div
+
+  ÔòÀ
+4 Ôöé   width: (18em / 14);
+  Ôöé           ^^^^^^^^^
+  ÔòÁ
+    node_modules\font-awesome\scss\_fixed-width.scss 4:11  @import
+    node_modules\font-awesome\scss\font-awesome.scss 11:9  @import
+    stdin 4:9                                              root stylesheet
+
+DEPRECATION WARNING: Using / for division outside of calc() is deprecated and will be removed in Dart Sass 2.0.0.
+
+Recommendation: math.div(2em, 14) or calc(2em / 14)
+
+More info and automated migrator: https://sass-lang.com/d/slash-div
+
+   ÔòÀ
+14 Ôöé   top: (2em / 14);
+   Ôöé         ^^^^^^^^
+   ÔòÁ
+    node_modules\font-awesome\scss\_list.scss 14:9         @import
+    node_modules\font-awesome\scss\font-awesome.scss 12:9  @import
+    stdin 4:9                                              root stylesheet
+
+WARNING: 90 repetitive deprecation warnings omitted.
+
+(node:17048) [DEP0170] DeprecationWarning: The URL git+ssh://git@github.com:apertureless/vue-chartjs.git is invalid. Future versions of Node.js will throw an error.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+CycloneDX: Identified root module as: pkg:npm/%40dependencytrack/frontend@4.13.0
+ WARNING  Compiled with 2 warnings1:14:13 PM
+
+ warning  
+
+asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+This can impact web performance.
+Assets: 
+  img/fontawesome-webfont.912ec66d.svg (434 KiB)
+  img/CoreUI-Icons-Free.317cee0c.svg (365 KiB)
+  css/app.e7acc1db.css (337 KiB)
+  js/app.55c5cb56.js (828 KiB)
+  js/chunk-0eb803bc.a1503b2b.js (290 KiB)
+  js/chunk-5dd74c8e.3719f916.js (484 KiB)
+  js/chunk-f73372b2.a909770a.js (334 KiB)
+  js/chunk-vendors.f3bd3775.js (1.21 MiB)
+  static/js/oidc-client.min.js (372 KiB)
+
+ warning  
+
+entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (244 KiB). This can impact web performance.
+Entrypoints:
+  app (2.46 MiB)
+      css/chunk-vendors.cbae0c98.css
+      js/chunk-vendors.f3bd3775.js
+      css/app.e7acc1db.css
+      js/app.55c5cb56.js
+
+
+  File                                    Size              Gzipped
+
+  dist\static\js\oidc-client.min.js       372.21 KiB        102.86 KiB
+  dist\static\js\axios.min.js             52.72 KiB         18.34 KiB
+  dist\js\chunk-vendors.f3bd3775.js       1239.84 KiB       375.13 KiB
+  dist\js\app.55c5cb56.js                 827.61 KiB        235.89 KiB
+  dist\js\chunk-5dd74c8e.3719f916.js      484.35 KiB        136.57 KiB
+  dist\js\chunk-f73372b2.a909770a.js      334.01 KiB        79.30 KiB
+  dist\js\chunk-0eb803bc.a1503b2b.js      289.61 KiB        74.69 KiB
+  dist\js\chunk-2932dc29.674f93b1.js      227.94 KiB        43.34 KiB
+  dist\js\chunk-872407c2.2b855712.js      211.26 KiB        58.15 KiB
+  dist\js\chunk-2a925dbc.7ef08b73.js      103.59 KiB        28.27 KiB
+  dist\js\chunk-4e72c02c.6d64cd31.js      84.36 KiB         17.86 KiB
+  dist\js\chunk-2a827b3c.bf551d33.js      72.84 KiB         18.91 KiB
+  dist\js\chunk-64c4730c.f9deb386.js      57.55 KiB         12.97 KiB
+  dist\js\chunk-9c39ffe4.1c1bf4eb.js      55.28 KiB         11.32 KiB
+  dist\js\chunk-3062aeda.8339d0bf.js      37.13 KiB         10.32 KiB
+  dist\js\chunk-2d217c19.75d75b7e.js      35.89 KiB         11.22 KiB
+  dist\js\chunk-db88eb44.5e704f13.js      34.21 KiB         4.29 KiB
+  dist\js\chunk-b1eb11a4.edb83772.js      33.66 KiB         7.71 KiB
+  dist\js\chunk-3303fa60.3ac4f39e.js      33.12 KiB         9.05 KiB
+  dist\js\chunk-24b5dac1.24405948.js      32.48 KiB         5.37 KiB
+  dist\js\chunk-f18a2366.a766e93e.js      29.20 KiB         6.77 KiB
+  dist\js\chunk-34811345.96496f4f.js      25.29 KiB         7.60 KiB
+  dist\js\chunk-7365a007.29346c25.js      24.08 KiB         5.41 KiB
+  dist\js\chunk-125704f8.627841ca.js      20.33 KiB         6.17 KiB
+  dist\js\chunk-26777cb2.4a64d9c5.js      20.12 KiB         4.19 KiB
+  dist\js\chunk-4e20b107.5303b819.js      19.80 KiB         8.08 KiB
+  dist\js\chunk-c1c31e40.7f860335.js      18.18 KiB         4.37 KiB
+  dist\js\chunk-564653f4.b190bc2e.js      16.78 KiB         4.50 KiB
+  dist\js\chunk-235382dd.f20ecf38.js      16.29 KiB         4.39 KiB
+  dist\js\chunk-260ca6fc.1f50ed78.js      16.28 KiB         4.39 KiB
+  dist\js\chunk-8947a604.781b6281.js      15.69 KiB         4.01 KiB
+  dist\js\chunk-0eda292e.ffbe7f91.js      14.14 KiB         4.55 KiB
+  dist\js\chunk-c668f61a.a6d7b84a.js      14.03 KiB         4.31 KiB
+  dist\js\chunk-35ce0d1c.bdf51478.js      12.10 KiB         5.46 KiB
+  dist\js\chunk-c7e1c436.9cf51dbb.js      12.01 KiB         3.38 KiB
+  dist\js\chunk-1cd6620a.c6b22b4b.js      11.96 KiB         3.16 KiB
+  dist\js\chunk-24cca1cf.ee86a410.js      11.91 KiB         3.27 KiB
+  dist\js\chunk-3c0fa460.62290b2d.js      11.39 KiB         2.57 KiB
+  dist\js\chunk-3c3b5002.95595fd1.js      9.98 KiB          3.05 KiB
+  dist\js\chunk-3c3c16d6.6354bddd.js      9.98 KiB          2.83 KiB
+  dist\js\chunk-b3c4836e.df2e1800.js      9.36 KiB          2.85 KiB
+  dist\js\chunk-4a8c0358.8b156b2f.js      8.57 KiB          3.00 KiB
+  dist\js\chunk-62f3a85c.ed194e55.js      8.24 KiB          2.88 KiB
+  dist\js\chunk-03a1e2f5.9336ad50.js      7.98 KiB          2.59 KiB
+  dist\js\chunk-14156bfe.1a374058.js      6.68 KiB          2.17 KiB
+  dist\js\chunk-3c0b0d46.491e7579.js      6.14 KiB          2.04 KiB
+  dist\js\chunk-3c101c3e.2a96b054.js      5.97 KiB          2.04 KiB
+  dist\js\chunk-3c0d3e6e.f0341e66.js      5.86 KiB          2.02 KiB
+  dist\js\chunk-3c0d79ba.2d093708.js      5.85 KiB          2.03 KiB
+  dist\js\chunk-72bde645.c05d2bae.js      5.83 KiB          2.05 KiB
+  dist\js\chunk-3c363584.9de23a46.js      5.69 KiB          2.01 KiB
+  dist\js\chunk-3c3b48da.d4d7a23b.js      5.66 KiB          2.01 KiB
+  dist\js\chunk-3c35c5f8.8574a096.js      5.56 KiB          2.07 KiB
+  dist\js\chunk-06d7adc7.87c76922.js      5.42 KiB          1.62 KiB
+  dist\js\chunk-3c3b4c40.b9f8f262.js      5.37 KiB          1.94 KiB
+  dist\js\chunk-7016b12f.f33a87fe.js      5.23 KiB          1.55 KiB
+  dist\js\chunk-aa5df248.be2903fb.js      4.33 KiB          1.24 KiB
+  dist\js\chunk-aa61511e.08540a8a.js      3.55 KiB          1.37 KiB
+  dist\js\chunk-aa619552.00cc1427.js      1.89 KiB          0.87 KiB
+  dist\js\chunk-2d0a512f.cc62c231.js      1.80 KiB          0.81 KiB
+  dist\js\chunk-2d0e97fd.3e236079.js      1.17 KiB          0.65 KiB
+  dist\js\chunk-2d0c4303.53b5073f.js      0.81 KiB          0.46 KiB
+  dist\js\chunk-2d0ac037.2c7906bf.js      0.38 KiB          0.29 KiB
+  dist\js\chunk-2d0da78e.58b460d8.js      0.38 KiB          0.29 KiB
+  dist\js\chunk-2d0a40db.14127fee.js      0.38 KiB          0.29 KiB
+  dist\js\chunk-2d0b59e4.a6f441f8.js      0.38 KiB          0.29 KiB
+  dist\js\chunk-2d0cc9c3.53f68619.js      0.38 KiB          0.29 KiB
+  dist\js\chunk-2d2131a5.bde2a726.js      0.38 KiB          0.29 KiB
+  dist\js\chunk-2d0b62fe.e1d34da0.js      0.38 KiB          0.28 KiB
+  dist\js\chunk-2d0c7ed5.6d6e58fe.js      0.38 KiB          0.29 KiB
+  dist\js\chunk-2d21a407.f0dabacb.js      0.38 KiB          0.29 KiB
+  dist\js\chunk-7728330d.ba37ca9d.js      0.38 KiB          0.28 KiB
+  dist\js\chunk-2d0ba8f9.6c0d5724.js      0.38 KiB          0.28 KiB
+  dist\js\chunk-2d0b8ed5.4b7d1f8e.js      0.38 KiB          0.28 KiB
+  dist\js\chunk-2d0cfdf8.31c7a7fb.js      0.38 KiB          0.28 KiB
+  dist\css\app.e7acc1db.css               337.17 KiB        51.53 KiB
+  dist\css\chunk-vendors.cbae0c98.css     116.37 KiB        18.07 KiB
+  dist\css\chunk-f73372b2.d099b41b.css    11.80 KiB         2.32 KiB
+  dist\css\chunk-4e72c02c.6cc617dc.css    3.00 KiB          1.02 KiB
+  dist\css\chunk-872407c2.d74cd7d2.css    3.00 KiB          1.02 KiB
+  dist\css\chunk-2932dc29.baced6d4.css    2.91 KiB          1.05 KiB
+  dist\css\chunk-2a925dbc.1e63e92b.css    2.60 KiB          0.90 KiB
+  dist\css\chunk-b1eb11a4.d4acaf0c.css    2.59 KiB          0.89 KiB
+  dist\css\chunk-64c4730c.04a4a4ad.css    2.41 KiB          0.84 KiB
+  dist\css\chunk-06d7adc7.135680f1.css    2.16 KiB          0.75 KiB
+  dist\css\chunk-f18a2366.f0fa4389.css    0.89 KiB          0.27 KiB
+  dist\css\chunk-9c39ffe4.5dcb14b3.css    0.70 KiB          0.31 KiB
+  dist\css\chunk-0eda292e.ea7deda1.css    0.43 KiB          0.21 KiB
+  dist\css\chunk-235382dd.ea7deda1.css    0.43 KiB          0.21 KiB
+  dist\css\chunk-260ca6fc.ea7deda1.css    0.43 KiB          0.21 KiB
+  dist\css\chunk-35ce0d1c.ea7deda1.css    0.43 KiB          0.21 KiB
+  dist\css\chunk-7365a007.ea7deda1.css    0.43 KiB          0.21 KiB
+  dist\css\chunk-c668f61a.ea7deda1.css    0.43 KiB          0.21 KiB
+  dist\css\chunk-34811345.e8719dc1.css    0.27 KiB          0.20 KiB
+  dist\css\chunk-7016b12f.47a22e10.css    0.26 KiB          0.16 KiB
+  dist\css\chunk-26777cb2.033ad8fe.css    0.25 KiB          0.15 KiB
+  dist\css\chunk-125704f8.ab8405b4.css    0.17 KiB          0.15 KiB
+  dist\css\chunk-c7e1c436.f27a6e87.css    0.16 KiB          0.11 KiB
+  dist\css\chunk-3303fa60.7639a7a0.css    0.10 KiB          0.08 KiB
+  dist\css\chunk-8947a604.29c92c19.css    0.07 KiB          0.09 KiB
+  dist\css\chunk-4a8c0358.14b6919e.css    0.06 KiB          0.08 KiB
+  dist\css\chunk-db88eb44.35a545a8.css    0.05 KiB          0.06 KiB
+
+  Images and other types of assets omitted.
+
+ DONE  Build complete. The dist directory is ready to be deployed.
+ INFO  Check out deployment instructions at https://cli.vuejs.org/guide/deployment.html
+      
