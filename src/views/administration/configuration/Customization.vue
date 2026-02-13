@@ -183,7 +183,7 @@ export default {
   data() {
     return {
       activeTab: 0,
-      availablePlaceholders: ['{ORG_CODE}', '{PROJECT_NAME}', '{YYYY}', '{MM}', '{DD}', '{SEQUENCE}'],
+      availablePlaceholders: ['{ORG_CODE}', '{PROJECT_NAME}', '{PROJECT_CODE}', '{YYYY}', '{MM}', '{DD}', '{SEQUENCE}'],
       resetPolicyOptions: [
         { value: 'NEVER', text: this.$t('admin.reset_policy_never') },
         { value: 'YEARLY', text: this.$t('admin.reset_policy_yearly') },
@@ -192,7 +192,7 @@ export default {
       ],
       vulnIdConfig: {
         orgCode: 'DT',
-        projectCode: 'myproject',
+        projectCode: 'project',
         template: '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
         sequencePadding: 5,
         resetPolicy: 'YEARLY',
@@ -216,6 +216,7 @@ export default {
       let id = this.vulnIdConfig.template || '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}';
       id = id.replace(/{ORG_CODE}/g, this.vulnIdConfig.orgCode || 'TECAN');
       id = id.replace(/{PROJECT_NAME}/g, this.vulnIdConfig.projectCode || 'myproject');
+      id = id.replace(/{PROJECT_CODE}/g, this.vulnIdConfig.projectCode || 'myproject');
       id = id.replace(/{YYYY}/g, year);
       id = id.replace(/{MM}/g, month);
       id = id.replace(/{DD}/g, day);
@@ -262,7 +263,7 @@ export default {
     resetVulnIdDefaults() {
       this.vulnIdConfig = {
         orgCode: 'DT',
-        projectCode: 'myproject',
+        projectCode: 'project',
         template: '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
         sequencePadding: 5,
         resetPolicy: 'YEARLY',
@@ -273,17 +274,18 @@ export default {
         this.isLoading = true;
         const payload = {
           orgCode: this.vulnIdConfig.orgCode,
+          projectCode: this.vulnIdConfig.projectCode,
           template: this.vulnIdConfig.template,
           resetPolicy: this.vulnIdConfig.resetPolicy,
           sequencePadding: this.vulnIdConfig.sequencePadding,
         };
 
         const response = await this.$customization.updateVulnerabilityIdSettings(payload);
-        if (response.status === 200) {
-          this.$toastr.s(this.$t('message.configuration_saved'));
+        if (response.status >= 200 && response.status < 300) {
+          this.$toastr.s(this.$t('admin.configuration_saved'));
         }
       } catch (error) {
-        this.$toastr.e(this.$t('message.configuration_save_failed'));
+        this.$toastr.w(this.$t('condition.unsuccessful_action'));
         console.error('Failed to save vulnerability ID configuration:', error);
       } finally {
         this.isLoading = false;
@@ -291,7 +293,7 @@ export default {
     },
     saveTextConfig() {
       // TODO: Implement API call to save text configuration
-      this.$toastr.s(this.$t('message.configuration_saved'));
+      this.$toastr.s(this.$t('admin.configuration_saved'));
     },
     async loadConfig() {
       try {
@@ -301,10 +303,10 @@ export default {
           // Load from API
           this.vulnIdConfig = {
             orgCode: response.data.orgCode || 'DT',
+            projectCode: response.data.projectCode || 'project',
             template: response.data.template || '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
             sequencePadding: response.data.sequencePadding || 5,
             resetPolicy: response.data.resetPolicy || 'YEARLY',
-            projectCode: 'myproject', // For preview only, not persisted
           };
         }
       } catch (error) {
