@@ -130,6 +130,22 @@
               :placeholder="$t('admin.recommendation_placeholder_default')"
             />
           </b-form-group>
+
+          <b-form-group :label="$t('message.details')">
+            <b-form-textarea
+              v-model="textConfig.detailPlaceholder"
+              rows="2"
+              placeholder="<Add additional details>"
+            />
+          </b-form-group>
+
+          <b-form-group :label="$t('message.references')">
+            <b-form-textarea
+              v-model="textConfig.referencesPlaceholder"
+              rows="2"
+              placeholder="<Add any references if available, example: CPE / CVE references>"
+            />
+          </b-form-group>
         </b-card>
 
         <b-card class="mb-4">
@@ -148,6 +164,22 @@
               v-model="textConfig.residualRiskPlaceholder"
               rows="2"
               :placeholder="$t('admin.residual_risk_placeholder_default')"
+            />
+          </b-form-group>
+
+          <b-form-group :label="$t('message.comment')">
+            <b-form-textarea
+              v-model="textConfig.commentPlaceholder"
+              rows="2"
+              :placeholder="$t('audit.comment_placeholder')"
+            />
+          </b-form-group>
+
+          <b-form-group :label="$t('message.details')">
+            <b-form-textarea
+              v-model="textConfig.analysisDetailsInstruction"
+              rows="6"
+              :placeholder="$t('audit.details_instruction')"
             />
           </b-form-group>
         </b-card>
@@ -199,9 +231,13 @@ export default {
       },
       textConfig: {
         descriptionPlaceholder: '',
+        detailPlaceholder: '',
         recommendationPlaceholder: '',
+        referencesPlaceholder: '',
         riskJustificationPlaceholder: '',
         residualRiskPlaceholder: '',
+        commentPlaceholder: '',
+        analysisDetailsInstruction: '',
       },
       isLoading: false,
     };
@@ -291,27 +327,69 @@ export default {
         this.isLoading = false;
       }
     },
-    saveTextConfig() {
-      // TODO: Implement API call to save text configuration
-      this.$toastr.s(this.$t('admin.configuration_saved'));
+    async saveTextConfig() {
+      try {
+        this.isLoading = true;
+        const payload = {
+          descriptionPlaceholder: this.textConfig.descriptionPlaceholder,
+          detailPlaceholder: this.textConfig.detailPlaceholder,
+          recommendationPlaceholder: this.textConfig.recommendationPlaceholder,
+          referencesPlaceholder: this.textConfig.referencesPlaceholder,
+          riskJustificationPlaceholder: this.textConfig.riskJustificationPlaceholder,
+          residualRiskPlaceholder: this.textConfig.residualRiskPlaceholder,
+          commentPlaceholder: this.textConfig.commentPlaceholder,
+          analysisDetailsInstruction: this.textConfig.analysisDetailsInstruction,
+        };
+        const response = await this.$customization.updateTextPlaceholderSettings(payload);
+        if (response.status >= 200 && response.status < 300) {
+          this.$toastr.s(this.$t('admin.configuration_saved'));
+        }
+      } catch (error) {
+        this.$toastr.w(this.$t('condition.unsuccessful_action'));
+        console.error('Failed to save text placeholder configuration:', error);
+      } finally {
+        this.isLoading = false;
+      }
     },
     async loadConfig() {
       try {
         this.isLoading = true;
-        const response = await this.$customization.getVulnerabilityIdSettings();
-        if (response && response.data) {
+        const [vulnIdResponse, textResponse] = await Promise.all([
+          this.$customization.getVulnerabilityIdSettings().catch((error) => {
+            console.warn('Failed to load vulnerability ID configuration from backend, using defaults:', error);
+            return null;
+          }),
+          this.$customization.getTextPlaceholderSettings().catch((error) => {
+            console.warn('Failed to load text placeholder configuration from backend, using defaults:', error);
+            return null;
+          }),
+        ]);
+
+        if (vulnIdResponse && vulnIdResponse.data) {
           // Load from API
           this.vulnIdConfig = {
-            orgCode: response.data.orgCode || 'DT',
-            projectCode: response.data.projectCode || 'project',
-            template: response.data.template || '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
-            sequencePadding: response.data.sequencePadding || 5,
-            resetPolicy: response.data.resetPolicy || 'YEARLY',
+            orgCode: vulnIdResponse.data.orgCode || 'DT',
+            projectCode: vulnIdResponse.data.projectCode || 'project',
+            template: vulnIdResponse.data.template || '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
+            sequencePadding: vulnIdResponse.data.sequencePadding || 5,
+            resetPolicy: vulnIdResponse.data.resetPolicy || 'YEARLY',
+          };
+        }
+
+        if (textResponse && textResponse.data) {
+          this.textConfig = {
+            descriptionPlaceholder: textResponse.data.descriptionPlaceholder || '',
+            detailPlaceholder: textResponse.data.detailPlaceholder || '',
+            recommendationPlaceholder: textResponse.data.recommendationPlaceholder || '',
+            referencesPlaceholder: textResponse.data.referencesPlaceholder || '',
+            riskJustificationPlaceholder: textResponse.data.riskJustificationPlaceholder || '',
+            residualRiskPlaceholder: textResponse.data.residualRiskPlaceholder || '',
+            commentPlaceholder: textResponse.data.commentPlaceholder || '',
+            analysisDetailsInstruction: textResponse.data.analysisDetailsInstruction || '',
           };
         }
       } catch (error) {
-        console.warn('Failed to load vulnerability ID configuration from backend, using defaults:', error);
-        // Configuration will use defaults from data()
+        console.warn('Failed to load customization configuration, using defaults:', error);
       } finally {
         this.isLoading = false;
       }

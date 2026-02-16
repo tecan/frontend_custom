@@ -37,10 +37,16 @@ Vue.use(VuePageTitle, { prefix: 'Dependency-Track -', router });
 Vue.prototype.$api = api;
 Vue.prototype.$oidc = oidc;
 const contextPath = getContextPath();
+const isLocalDevHost =
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1';
 axios
   .get(contextPath + '/static/config.json')
   .then((response) => {
-    if (response.data.API_BASE_URL && response.data.API_BASE_URL !== '') {
+    // In local development always use relative API paths so webpack-dev-server proxy can forward /api calls.
+    if (isLocalDevHost) {
+      Vue.prototype.$api.BASE_URL = '';
+    } else if (response.data.API_BASE_URL && response.data.API_BASE_URL !== '') {
       Vue.prototype.$api.BASE_URL = response.data.API_BASE_URL;
     } else {
       Vue.prototype.$api.BASE_URL = contextPath;
@@ -68,6 +74,9 @@ axios
     console.log(
       'Cannot retrieve static/config.json from host. This is expected behavior in development environments.',
     );
+    if (isLocalDevHost) {
+      Vue.prototype.$api.BASE_URL = '';
+    }
     createVueApp();
   });
 

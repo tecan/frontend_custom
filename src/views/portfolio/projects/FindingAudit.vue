@@ -124,7 +124,7 @@
           id="riskMatrixJustification"
           v-model="riskJustification"
           rows="3"
-          :placeholder="$t('riskMatrix.justificationPlaceholder')"
+          :placeholder="auditTextPlaceholders.riskJustificationPlaceholder"
           :disabled="!canEditRiskMatrix"
         />
       </b-form-group>
@@ -185,7 +185,7 @@
             id="residualRiskJustification"
             v-model="residualRiskJustification"
             rows="3"
-            :placeholder="$t('riskMatrix.justificationPlaceholder')"
+            :placeholder="auditTextPlaceholders.residualRiskPlaceholder"
             :disabled="!canEditRiskMatrix"
           />
         </b-form-group>
@@ -245,7 +245,7 @@
         <b-form-textarea
           id="input-8"
           v-model="comment"
-          :placeholder="$t('audit.comment_placeholder')"
+          :placeholder="auditTextPlaceholders.commentPlaceholder"
           rows="4"
           class="form-control"
           trim
@@ -334,13 +334,13 @@
           id="analysisDetailsField"
           v-model="localAnalysisDetails"
           rows="7"
-          :class="['form-control', { 'text-muted': detailsWasEmptyOnLoad && localAnalysisDetails === $t('audit.details_instruction') }]"
+          :class="['form-control', { 'text-muted': detailsWasEmptyOnLoad && localAnalysisDetails === analysisDetailsInstructionText }]"
           :disabled="!this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
           v-b-tooltip.hover
           :title="this.$t('message.analysis_details_tooltip')"
           aria-describedby="analysisDetailsInstruction"
         />
-        <small id="analysisDetailsInstruction" class="sr-only">{{ $t('audit.details_instruction') }}</small>
+        <small id="analysisDetailsInstruction" class="sr-only">{{ analysisDetailsInstructionText }}</small>
         <div class="pull-right">
           <b-button
             v-if="this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
@@ -493,6 +493,12 @@ export default {
       ],
       riskJustification: '',
       residualRiskJustification: '',
+      auditTextPlaceholders: {
+        riskJustificationPlaceholder: this.$t('riskMatrix.justificationPlaceholder'),
+        residualRiskPlaceholder: this.$t('riskMatrix.justificationPlaceholder'),
+        commentPlaceholder: this.$t('audit.comment_placeholder'),
+        analysisDetailsInstruction: this.$t('audit.details_instruction'),
+      },
     };
   },
   watch: {
@@ -569,9 +575,42 @@ export default {
     canEditRiskMatrix() {
       return this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS);
     },
+    analysisDetailsInstructionText() {
+      return this.auditTextPlaceholders.analysisDetailsInstruction || this.$t('audit.details_instruction');
+    },
   },
   mixins: [permissionsMixin],
   methods: {
+    applyAuditTextPlaceholderSettings(settings) {
+      if (!settings) {
+        return;
+      }
+      this.auditTextPlaceholders = {
+        riskJustificationPlaceholder: settings.riskJustificationPlaceholder || this.$t('riskMatrix.justificationPlaceholder'),
+        residualRiskPlaceholder: settings.residualRiskPlaceholder || this.$t('riskMatrix.justificationPlaceholder'),
+        commentPlaceholder: settings.commentPlaceholder || this.$t('audit.comment_placeholder'),
+        analysisDetailsInstruction: settings.analysisDetailsInstruction || this.$t('audit.details_instruction'),
+      };
+    },
+    loadAuditTextPlaceholderSettings() {
+      if (!this.$customization) {
+        return;
+      }
+      if (this.$customization.getCachedTextPlaceholderSettings) {
+        this.applyAuditTextPlaceholderSettings(this.$customization.getCachedTextPlaceholderSettings());
+      }
+      if (this.$customization.preloadTextPlaceholderSettings) {
+        this.$customization.preloadTextPlaceholderSettings().then((settings) => {
+          this.applyAuditTextPlaceholderSettings(settings);
+          if (this.detailsWasEmptyOnLoad &&
+            (!this.localAnalysisDetails || this.localAnalysisDetails.trim() === '' || this.localAnalysisDetails === this.$t('audit.details_instruction'))) {
+            this.localAnalysisDetails = this.analysisDetailsInstructionText;
+          }
+        }).catch(() => {
+          // Keep fallback placeholders if loading customization fails.
+        });
+      }
+    },
     resolveVulnAliases: function (aliases, vulnSource) {
       return common.resolveVulnAliases(
         vulnSource ? vulnSource : this.source,
@@ -677,7 +716,7 @@ export default {
       // Use a boolean sentinel to track whether details were empty on load
       this.detailsWasEmptyOnLoad = !this.analysisDetails || this.analysisDetails === '';
       if (this.detailsWasEmptyOnLoad) {
-        this.localAnalysisDetails = this.$t('audit.details_instruction');
+        this.localAnalysisDetails = this.analysisDetailsInstructionText;
       } else {
         this.localAnalysisDetails = this.analysisDetails;
       }
@@ -701,7 +740,7 @@ export default {
       // Case 1: User has edited the instruction or provided new content
       if (this.localAnalysisDetails &&
           this.localAnalysisDetails.trim() !== '' &&
-          this.localAnalysisDetails !== this.$t('audit.details_instruction')) {
+          this.localAnalysisDetails !== this.analysisDetailsInstructionText) {
         // User wrote something different from the instruction = send it
         detailsToSend = this.localAnalysisDetails;
       }
@@ -728,7 +767,7 @@ export default {
 
         if (this.localAnalysisDetails &&
             this.localAnalysisDetails.trim() !== '' &&
-            this.localAnalysisDetails !== this.$t('audit.details_instruction')) {
+            this.localAnalysisDetails !== this.analysisDetailsInstructionText) {
           detailsToSendForComment = this.localAnalysisDetails;
         } else if (!this.detailsWasEmptyOnLoad && this.localAnalysisDetails) {
           detailsToSendForComment = this.localAnalysisDetails;
@@ -787,10 +826,11 @@ export default {
   },
 
   created() {
+    this.loadAuditTextPlaceholderSettings();
     // Fallback: ensure localAnalysisDetails contains the instruction so the UI shows guidance
     if (!this.localAnalysisDetails) {
       try {
-        this.localAnalysisDetails = this.$t('audit.details_instruction');
+        this.localAnalysisDetails = this.analysisDetailsInstructionText;
       } catch (e) {
         // ignore i18n errors in environments where $t may not be available yet
       }

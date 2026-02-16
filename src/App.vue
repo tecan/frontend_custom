@@ -71,22 +71,27 @@ export default {
     }
 
     this.axios.interceptors.response.use(null, (error) => {
+      const response = error && error.response ? error.response : null;
+      if (!response) {
+        this.$toastr.e(error && error.message ? error.message : this.$t('condition.server_error'), this.$t('condition.http_request_error'));
+        return Promise.reject(error);
+      }
       // On error status codes (4xx - 5xx), display a toast with either:
       //  * The problem title and detail in case of an RFC 9457 response
       //  * the HTTP status code and text
-      if (error.response.status >= 400 && error.response.status < 500) {
+      if (response.status >= 400 && response.status < 500) {
         if (
-          error.response.headers['content-type'] === 'application/problem+json'
+          response.headers['content-type'] === 'application/problem+json'
         ) {
-          this.$toastr.w(error.response.data.detail, error.response.data.title);
+          this.$toastr.w(response.data.detail, response.data.title);
         } else if (
-          error.response.status === 400 &&
-          error.response.headers['content-type'] === 'application/json' &&
-          error.response.data &&
-          Array.isArray(error.response.data) &&
-          error.response.data[0].hasOwnProperty('invalidValue')
+          response.status === 400 &&
+          response.headers['content-type'] === 'application/json' &&
+          response.data &&
+          Array.isArray(response.data) &&
+          response.data[0].hasOwnProperty('invalidValue')
         ) {
-          let validationError = error.response.data
+          let validationError = response.data
             .map((failure) => `${failure.path}: ${failure.message}`)
             .join('\n');
           this.$toastr.w(
@@ -95,13 +100,13 @@ export default {
           );
         } else {
           this.$toastr.e(
-            error.response.statusText + ' (' + error.response.status + ')',
+            response.statusText + ' (' + response.status + ')',
             this.$t('condition.http_request_error'),
           );
         }
       } else {
         this.$toastr.e(
-          error.response.statusText + ' (' + error.response.status + ')',
+          response.statusText + ' (' + response.status + ')',
           this.$t('condition.server_error'),
         );
       }

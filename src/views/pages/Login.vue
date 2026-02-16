@@ -188,8 +188,10 @@ export default {
           }
         })
         .catch((err) => {
-          if (err.response.status === 401) {
-            if (err.response.data === this.$api.FORCE_PASSWORD_CHANGE) {
+          const status = err && err.response ? err.response.status : null;
+          const responseData = err && err.response ? err.response.data : null;
+          if (status === 401) {
+            if (responseData === this.$api.FORCE_PASSWORD_CHANGE) {
               this.$router.replace({
                 name: 'PasswordForceChange',
                 query: { redirect: redirectTo },
@@ -198,9 +200,11 @@ export default {
             }
             this.$bvModal.show('modal-informational');
             this.loginError = this.$t('message.login_unauthorized');
-          } else if (err.response.status === 403) {
+          } else if (status === 403) {
             this.$bvModal.show('modal-informational');
             this.loginError = this.$t('message.login_forbidden');
+          } else {
+            this.$toastr.e(this.$t('condition.http_request_error'));
           }
         });
     },
@@ -292,12 +296,15 @@ export default {
               }
             })
             .catch((err) => {
-              if (err.response.status === 401) {
+              const status = err && err.response ? err.response.status : null;
+              if (status === 401) {
                 this.$bvModal.show('modal-informational');
                 this.loginError = this.$t('message.login_unauthorized');
-              } else if (err.response.status === 403) {
+              } else if (status === 403) {
                 this.$bvModal.show('modal-informational');
                 this.loginError = this.$t('message.login_forbidden');
+              } else {
+                this.$toastr.e(this.$t('condition.http_request_error'));
               }
             })
             .finally(() => {
