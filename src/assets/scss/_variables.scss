@@ -248,6 +248,11 @@ $recessed: $grey-850;
   --primary: #{$blue};
   --primary-lighter: #{$light-blue};
   --recessed: #{$recessed};
+
+  // Keep table-like custom components aligned with official DPT table theme
+  --table-head-bg: #{$table-head-bg};
+  --table-head-color: #{$table-head-color};
+  --table-border-color: #{$table-border-color};
 }
 
 // Modal override

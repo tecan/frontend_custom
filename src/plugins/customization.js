@@ -247,6 +247,50 @@ export default {
           return response;
         });
       },
+
+      /**
+       * Get risk matrix draft configuration settings
+       * @returns {Promise} Response containing risk matrix draft model
+       */
+      getRiskMatrixDraft() {
+        return axios.get(vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/risk-matrix/draft',
+          {
+            withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
+            headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
+          }
+        );
+      },
+
+      /**
+       * Update risk matrix draft configuration settings
+       * @param {Object} settings - Risk matrix configuration draft
+       * @returns {Promise} Response from update operation
+       */
+      updateRiskMatrixDraft(settings) {
+        return axios.put(
+          vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/risk-matrix/draft',
+          settings,
+          {
+            withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
+            headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
+          }
+        );
+      },
+
+      /**
+       * Publish current risk matrix draft
+       * @returns {Promise} Response from publish operation
+       */
+      publishRiskMatrix() {
+        return axios.post(
+          vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/risk-matrix/publish',
+          {},
+          {
+            withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
+            headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
+          }
+        );
+      },
     };
 
     // Register customization service as Vue plugin property
