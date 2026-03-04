@@ -98,6 +98,10 @@ function createVueApp() {
       if (Vue.prototype.$customization && Vue.prototype.$customization.preloadVulnIdSettings) {
         Vue.prototype.$customization.preloadVulnIdSettings();
       }
+      // Preload risk matrix config so the audit form has it available instantly
+      if (Vue.prototype.$customization && Vue.prototype.$customization.preloadRiskMatrixConfig) {
+        Vue.prototype.$customization.preloadRiskMatrixConfig();
+      }
     });
 
   Vue.prototype.$version = version;

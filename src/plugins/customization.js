@@ -34,6 +34,10 @@ export default {
     let cachedTextPlaceholderSettings = null;
     let textSettingsLoaded = false;
     let textLoadingPromise = null;
+    // Cache for risk matrix config - loaded once at startup, used by audit form
+    let cachedRiskMatrixConfig = null;
+    let riskMatrixLoaded = false;
+    let riskMatrixLoadingPromise = null;
 
     // Initialize customization API service
     const customizationService = {
@@ -249,47 +253,94 @@ export default {
       },
 
       /**
-       * Get risk matrix draft configuration settings
-       * @returns {Promise} Response containing risk matrix draft model
+       * Get cached risk matrix config (instant access)
+       * Returns cached config or { enabled: false } if not yet loaded.
+       * @returns {Object} Cached risk matrix configuration
        */
-      getRiskMatrixDraft() {
-        return axios.get(vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/risk-matrix/draft',
-          {
-            withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
-            headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
-          }
-        );
+      getCachedRiskMatrixConfig() {
+        return cachedRiskMatrixConfig || { enabled: false };
       },
 
       /**
-       * Update risk matrix draft configuration settings
-       * @param {Object} settings - Risk matrix configuration draft
+       * Preload risk matrix config (call at app startup)
+       * Fetches config from API and caches it for instant access by the audit form.
+       * @returns {Promise} Resolves when config is loaded
+       */
+      async preloadRiskMatrixConfig() {
+        if (riskMatrixLoaded) return cachedRiskMatrixConfig;
+        if (riskMatrixLoadingPromise) return riskMatrixLoadingPromise;
+        riskMatrixLoadingPromise = this.getRiskMatrixSettings()
+          .then((response) => {
+            if (response && response.data && response.data.enabled !== undefined) {
+              cachedRiskMatrixConfig = response.data;
+            } else {
+              cachedRiskMatrixConfig = { enabled: false };
+            }
+            riskMatrixLoaded = true;
+            return cachedRiskMatrixConfig;
+          })
+          .catch(() => {
+            cachedRiskMatrixConfig = { enabled: false };
+            riskMatrixLoaded = true;
+            return cachedRiskMatrixConfig;
+          })
+          .finally(() => {
+            riskMatrixLoadingPromise = null;
+          });
+        return riskMatrixLoadingPromise;
+      },
+
+      /**
+       * Invalidate risk matrix cache (call when admin saves new config)
+       */
+      invalidateRiskMatrixCache() {
+        cachedRiskMatrixConfig = null;
+        riskMatrixLoaded = false;
+      },
+
+      /**
+       * Get risk matrix configuration settings
+       * @returns {Promise} Response containing risk matrix model
+       */
+      async getRiskMatrixSettings() {
+        const options = {
+          withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
+          headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
+        };
+        const baseUrl = vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/risk-matrix';
+        try {
+          return await axios.get(baseUrl, options);
+        } catch (error) {
+          if (error?.response?.status === 404) {
+            return axios.get(baseUrl + '/draft', options);
+          }
+          throw error;
+        }
+      },
+
+      /**
+       * Update risk matrix configuration settings
+       * @param {Object} settings - Risk matrix configuration
        * @returns {Promise} Response from update operation
        */
-      updateRiskMatrixDraft(settings) {
-        return axios.put(
-          vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/risk-matrix/draft',
-          settings,
-          {
-            withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
-            headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
+      async updateRiskMatrixSettings(settings) {
+        const options = {
+          withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
+          headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
+        };
+        const baseUrl = vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/risk-matrix';
+        try {
+          const response = await axios.put(baseUrl, settings, options);
+          this.invalidateRiskMatrixCache();
+          return response;
+        } catch (error) {
+          if (error?.response?.status === 404) {
+            const response = await axios.put(baseUrl + '/draft', settings, options);
+            this.invalidateRiskMatrixCache();
+            return response;
           }
-        );
-      },
-
-      /**
-       * Publish current risk matrix draft
-       * @returns {Promise} Response from publish operation
-       */
-      publishRiskMatrix() {
-        return axios.post(
-          vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/risk-matrix/publish',
-          {},
-          {
-            withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
-            headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
-          }
-        );
+          throw error;
+        }
       },
     };
 

@@ -7,34 +7,37 @@
       <small class="text-muted d-block mt-1">{{ $t('riskMatrix.enableCustomHelp') }}</small>
     </b-form-group>
 
-    <b-row class="mb-2">
-      <b-col md="6" class="mb-2 mb-md-0">
-        <b-form-group :label="$t('riskMatrix.impact')" class="mb-0">
-          <b-form-input
-            v-model="draft.axisLabels.impact"
-            :disabled="!draft.enabled"
-            maxlength="40"
-            @input="isDirty = true"
-          />
-        </b-form-group>
-      </b-col>
-      <b-col md="6">
-        <b-form-group :label="$t('riskMatrix.likelihood')" class="mb-0">
-          <b-form-input
-            v-model="draft.axisLabels.likelihood"
-            :disabled="!draft.enabled"
-            maxlength="40"
-            @input="isDirty = true"
-          />
-        </b-form-group>
-      </b-col>
-    </b-row>
-
     <b-row>
       <b-col lg="4" class="mb-3">
         <b-card class="h-100" no-body>
           <div class="matrix-card-header d-flex justify-content-between align-items-center">
-            <span>{{ $t('riskMatrix.impactValues') }}</span>
+            <div class="d-flex align-items-center flex-grow-1 mr-2" style="min-width:0">
+              <template v-if="editingImpactLabel">
+                <b-form-input
+                  ref="impactLabelInput"
+                  v-model="draft.axisLabels.impact"
+                  size="sm"
+                  class="inline-label-input"
+                  :placeholder="$t('riskMatrix.impact')"
+                  maxlength="40"
+                  @blur="editingImpactLabel = false; isDirty = true"
+                  @keyup.enter="editingImpactLabel = false; isDirty = true"
+                  @keyup.esc="editingImpactLabel = false"
+                />
+              </template>
+              <template v-else>
+                <span class="mr-1">{{ axisImpactLabel }}</span>
+                <b-button
+                  v-if="draft.enabled"
+                  size="sm"
+                  variant="link"
+                  class="p-0 inline-edit-btn"
+                  @click="editingImpactLabel = true; $nextTick(() => $refs.impactLabelInput && $refs.impactLabelInput.focus())"
+                >
+                  <i class="fa fa-pencil fa-sm"></i>
+                </b-button>
+              </template>
+            </div>
             <b-badge variant="secondary">{{ $t('riskMatrix.columns') }}</b-badge>
           </div>
           <div class="matrix-card-body">
@@ -62,7 +65,33 @@
       <b-col lg="4" class="mb-3">
         <b-card class="h-100" no-body>
           <div class="matrix-card-header d-flex justify-content-between align-items-center">
-            <span>{{ $t('riskMatrix.likelihoodValues') }}</span>
+            <div class="d-flex align-items-center flex-grow-1 mr-2" style="min-width:0">
+              <template v-if="editingLikelihoodLabel">
+                <b-form-input
+                  ref="likelihoodLabelInput"
+                  v-model="draft.axisLabels.likelihood"
+                  size="sm"
+                  class="inline-label-input"
+                  :placeholder="$t('riskMatrix.likelihood')"
+                  maxlength="40"
+                  @blur="editingLikelihoodLabel = false; isDirty = true"
+                  @keyup.enter="editingLikelihoodLabel = false; isDirty = true"
+                  @keyup.esc="editingLikelihoodLabel = false"
+                />
+              </template>
+              <template v-else>
+                <span class="mr-1">{{ axisLikelihoodLabel }}</span>
+                <b-button
+                  v-if="draft.enabled"
+                  size="sm"
+                  variant="link"
+                  class="p-0 inline-edit-btn"
+                  @click="editingLikelihoodLabel = true; $nextTick(() => $refs.likelihoodLabelInput && $refs.likelihoodLabelInput.focus())"
+                >
+                  <i class="fa fa-pencil fa-sm"></i>
+                </b-button>
+              </template>
+            </div>
             <b-badge variant="secondary">{{ $t('riskMatrix.rows') }}</b-badge>
           </div>
           <div class="matrix-card-body">
@@ -182,7 +211,7 @@
     </b-card>
 
     <div class="matrix-footer text-right">
-      <b-button variant="primary" @click="saveDraft">
+      <b-button variant="primary" @click="saveSettings">
         {{ $t('message.save_changes') }}
       </b-button>
     </div>
@@ -258,8 +287,6 @@
 </template>
 
 <script>
-const STORAGE_DRAFT_KEY = 'risk-matrix-draft-v1';
-
 const DEFAULT_ACTION_BY_LEVEL = {
   VERY_LOW: 'Accept',
   LOW: 'Monitor',
@@ -386,8 +413,9 @@ export default {
   data() {
     return {
       draft: createDefaultDraft(),
-      savedSnapshot: createDefaultDraft(),
       isDirty: false,
+      editingImpactLabel: false,
+      editingLikelihoodLabel: false,
       valueModalMode: 'create',
       valueModalType: 'impact',
       valueModal: { originalKey: null, key: '', label: '' },
@@ -440,26 +468,24 @@ export default {
     },
   },
   methods: {
-    async loadDraft() {
+    async loadSettings() {
       let loaded = null;
-      if (this.$customization && this.$customization.getRiskMatrixDraft) {
+      if (this.$customization && this.$customization.getRiskMatrixSettings) {
         try {
-          const response = await this.$customization.getRiskMatrixDraft();
+          const response = await this.$customization.getRiskMatrixSettings();
           if (response && response.data) {
             loaded = response.data;
           }
         } catch (e) {
-          // Local fallback is intentional while backend endpoint is being introduced.
+          // Use defaults if settings endpoint is unavailable.
         }
       }
 
       if (!loaded) {
-        const local = localStorage.getItem(STORAGE_DRAFT_KEY);
-        loaded = local ? JSON.parse(local) : createDefaultDraft();
+        loaded = createDefaultDraft();
       }
 
       this.draft = this.normalizeDraft(loaded);
-      this.savedSnapshot = clone(this.draft);
       this.isDirty = false;
     },
     normalizeDraft(input) {
@@ -745,27 +771,22 @@ export default {
       this.ensureCellShape();
       this.isDirty = true;
     },
-    async saveDraft() {
+    async saveSettings() {
       const payload = clone(this.draft);
-      if (this.$customization && this.$customization.updateRiskMatrixDraft) {
-        try {
-          await this.$customization.updateRiskMatrixDraft(payload);
-        } catch (e) {
-          // Local fallback while backend is not available.
+      try {
+        if (this.$customization && this.$customization.updateRiskMatrixSettings) {
+          await this.$customization.updateRiskMatrixSettings(payload);
         }
+      } catch (e) {
+        this.$toastr.w(this.$t('condition.unsuccessful_action'));
+        return;
       }
-      localStorage.setItem(STORAGE_DRAFT_KEY, JSON.stringify(payload));
-      this.savedSnapshot = clone(payload);
       this.isDirty = false;
       this.$toastr.s(this.$t('admin.configuration_saved'));
     },
-    resetDraft() {
-      this.draft = clone(this.savedSnapshot);
-      this.isDirty = false;
-    },
   },
   mounted() {
-    this.loadDraft();
+    this.loadSettings();
   },
 };
 </script>
@@ -926,5 +947,24 @@ export default {
 
 .matrix-footer {
   margin-top: 1rem;
+}
+
+.inline-label-input {
+  height: 1.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.1rem 0.4rem;
+  background: transparent;
+  border-color: var(--primary);
+  color: inherit;
+  max-width: 180px;
+}
+
+.inline-edit-btn {
+  opacity: 0.5;
+  line-height: 1;
+}
+.inline-edit-btn:hover {
+  opacity: 1;
 }
 </style>

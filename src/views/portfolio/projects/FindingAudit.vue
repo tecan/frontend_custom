@@ -73,7 +73,7 @@
         <div class="risk-matrix-inline">
           <div class="risk-matrix-field">
             <label class="risk-matrix-label" for="riskMatrixImpact">
-              {{ $t('riskMatrix.impact') }} <span class="text-danger">*</span>
+              {{ axisImpactLabel }} <span class="text-danger">*</span>
             </label>
             <b-form-select
               id="riskMatrixImpact"
@@ -90,7 +90,7 @@
           </div>
           <div class="risk-matrix-field">
             <label class="risk-matrix-label" for="riskMatrixLikelihood">
-              {{ $t('riskMatrix.likelihood') }} <span class="text-danger">*</span>
+              {{ axisLikelihoodLabel }} <span class="text-danger">*</span>
             </label>
             <b-form-select
               id="riskMatrixLikelihood"
@@ -135,7 +135,7 @@
         <div class="risk-matrix-inline">
           <div class="risk-matrix-field">
             <label class="risk-matrix-label" for="residualRiskImpact">
-              {{ $t('riskMatrix.impact') }} <span class="text-danger">*</span>
+              {{ axisImpactLabel }} <span class="text-danger">*</span>
             </label>
             <b-form-select
               id="residualRiskImpact"
@@ -152,7 +152,7 @@
           </div>
           <div class="risk-matrix-field">
             <label class="risk-matrix-label" for="residualRiskLikelihood">
-              {{ $t('riskMatrix.likelihood') }} <span class="text-danger">*</span>
+              {{ axisLikelihoodLabel }} <span class="text-danger">*</span>
             </label>
             <b-form-select
               id="residualRiskLikelihood"
@@ -468,6 +468,7 @@ export default {
       analysisDetails: null,
       localAnalysisDetails: null,
       detailsWasEmptyOnLoad: false,
+      customMatrix: null,
       selectedImpact: null,
       selectedLikelihood: null,
       residualImpact: null,
@@ -575,6 +576,16 @@ export default {
     canEditRiskMatrix() {
       return this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS);
     },
+    axisImpactLabel() {
+      return (this.customMatrix && this.customMatrix.enabled && this.customMatrix.axisLabels && this.customMatrix.axisLabels.impact)
+        ? this.customMatrix.axisLabels.impact
+        : this.$t('riskMatrix.impact');
+    },
+    axisLikelihoodLabel() {
+      return (this.customMatrix && this.customMatrix.enabled && this.customMatrix.axisLabels && this.customMatrix.axisLabels.likelihood)
+        ? this.customMatrix.axisLabels.likelihood
+        : this.$t('riskMatrix.likelihood');
+    },
     analysisDetailsInstructionText() {
       return this.auditTextPlaceholders.analysisDetailsInstruction || this.$t('audit.details_instruction');
     },
@@ -621,6 +632,26 @@ export default {
       if (!likelihood || !impact) {
         return null;
       }
+      // Use custom matrix when admin has enabled it
+      if (this.customMatrix && this.customMatrix.enabled) {
+        const cellKey = likelihood + '::' + impact;
+        const cell = this.customMatrix.cells[cellKey];
+        if (cell) {
+          const level = this.customMatrix.levels.find((l) => l.key === cell.levelKey);
+          if (level) {
+            return {
+              rating: level.key,
+              action: cell.action,
+              color: level.color,
+              textColor: '#fff',
+              ratingText: level.label,
+              actionText: cell.action,
+            };
+          }
+        }
+        return null;
+      }
+      // Fallback: hardcoded matrix (default behaviour, no regression)
       const likelihoodRow = RISK_MATRIX_TABLE[likelihood];
       if (!likelihoodRow) {
         return null;
@@ -827,6 +858,25 @@ export default {
 
   created() {
     this.loadAuditTextPlaceholderSettings();
+    // Apply custom risk matrix if configured by admin.
+    // Use preloadRiskMatrixConfig() (not getCachedRiskMatrixConfig) so that:
+    // - if already cached it resolves instantly from memory
+    // - if cache was invalidated (admin just saved) it reloads from backend
+    if (this.$customization && this.$customization.preloadRiskMatrixConfig) {
+      this.$customization.preloadRiskMatrixConfig().then((matrixConfig) => {
+        if (matrixConfig && matrixConfig.enabled) {
+          this.customMatrix = matrixConfig;
+          this.riskImpactChoices = matrixConfig.impactValues
+            .slice()
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((v) => ({ value: v.key, text: v.label }));
+          this.riskLikelihoodChoices = matrixConfig.likelihoodValues
+            .slice()
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((v) => ({ value: v.key, text: v.label }));
+        }
+      });
+    }
     // Fallback: ensure localAnalysisDetails contains the instruction so the UI shows guidance
     if (!this.localAnalysisDetails) {
       try {
