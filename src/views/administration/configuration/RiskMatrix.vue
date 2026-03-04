@@ -7,6 +7,70 @@
       <small class="text-muted d-block mt-1">{{ $t('riskMatrix.enableCustomHelp') }}</small>
     </b-form-group>
 
+    <b-card class="mb-3" no-body>
+      <div class="matrix-card-header">{{ $t('riskMatrix.sectionLabelsTitle') }}</div>
+      <div class="matrix-card-body">
+        <b-row>
+          <b-col sm="6" class="d-flex align-items-center mb-2 mb-sm-0">
+            <template v-if="editingRiskAssessmentLabel">
+              <b-form-input
+                ref="riskAssessmentLabelInput"
+                v-model="draft.sectionLabels.riskAssessment"
+                size="sm"
+                class="inline-label-input"
+                :placeholder="$t('riskMatrix.title')"
+                maxlength="60"
+                :disabled="!draft.enabled"
+                @blur="editingRiskAssessmentLabel = false; isDirty = true"
+                @keyup.enter="editingRiskAssessmentLabel = false; isDirty = true"
+                @keyup.esc="editingRiskAssessmentLabel = false"
+              />
+            </template>
+            <template v-else>
+              <span class="mr-1">{{ riskAssessmentLabel }}</span>
+              <b-button
+                v-if="draft.enabled"
+                size="sm"
+                variant="link"
+                class="p-0 inline-edit-btn"
+                @click="editingRiskAssessmentLabel = true; $nextTick(() => $refs.riskAssessmentLabelInput && $refs.riskAssessmentLabelInput.focus())"
+              >
+                <i class="fa fa-pencil fa-sm"></i>
+              </b-button>
+            </template>
+          </b-col>
+          <b-col sm="6" class="d-flex align-items-center">
+            <template v-if="editingResidualRiskLabel">
+              <b-form-input
+                ref="residualRiskLabelInput"
+                v-model="draft.sectionLabels.residualRisk"
+                size="sm"
+                class="inline-label-input"
+                :placeholder="$t('riskMatrix.residualTitle')"
+                maxlength="60"
+                :disabled="!draft.enabled"
+                @blur="editingResidualRiskLabel = false; isDirty = true"
+                @keyup.enter="editingResidualRiskLabel = false; isDirty = true"
+                @keyup.esc="editingResidualRiskLabel = false"
+              />
+            </template>
+            <template v-else>
+              <span class="mr-1">{{ residualRiskLabel }}</span>
+              <b-button
+                v-if="draft.enabled"
+                size="sm"
+                variant="link"
+                class="p-0 inline-edit-btn"
+                @click="editingResidualRiskLabel = true; $nextTick(() => $refs.residualRiskLabelInput && $refs.residualRiskLabelInput.focus())"
+              >
+                <i class="fa fa-pencil fa-sm"></i>
+              </b-button>
+            </template>
+          </b-col>
+        </b-row>
+      </div>
+    </b-card>
+
     <b-row>
       <b-col lg="4" class="mb-3">
         <b-card class="h-100" no-body>
@@ -119,7 +183,33 @@
       <b-col lg="4" class="mb-3">
         <b-card class="h-100" no-body>
           <div class="matrix-card-header d-flex justify-content-between align-items-center">
-            <span>{{ $t('riskMatrix.levelDefinitions') }}</span>
+            <div class="d-flex align-items-center flex-grow-1 mr-2" style="min-width:0">
+              <template v-if="editingLevelLabel">
+                <b-form-input
+                  ref="levelLabelInput"
+                  v-model="draft.levelDefinitionsLabel"
+                  size="sm"
+                  class="inline-label-input"
+                  :placeholder="$t('riskMatrix.levelDefinitions')"
+                  maxlength="40"
+                  @blur="editingLevelLabel = false; isDirty = true"
+                  @keyup.enter="editingLevelLabel = false; isDirty = true"
+                  @keyup.esc="editingLevelLabel = false"
+                />
+              </template>
+              <template v-else>
+                <span class="mr-1">{{ levelLabel }}</span>
+                <b-button
+                  v-if="draft.enabled"
+                  size="sm"
+                  variant="link"
+                  class="p-0 inline-edit-btn"
+                  @click="editingLevelLabel = true; $nextTick(() => $refs.levelLabelInput && $refs.levelLabelInput.focus())"
+                >
+                  <i class="fa fa-pencil fa-sm"></i>
+                </b-button>
+              </template>
+            </div>
           </div>
           <div class="matrix-card-body">
             <div
@@ -248,9 +338,6 @@
       <b-form-group :label="$t('admin.severity_level_label')">
         <b-form-input v-model="valueModal.label" />
       </b-form-group>
-      <b-form-group :label="$t('message.identifier')">
-        <b-form-input v-model="valueModal.key" :disabled="valueModalMode === 'edit'" />
-      </b-form-group>
       <template v-slot:modal-footer="{ cancel }">
         <b-button size="sm" variant="secondary" @click="cancel()">{{ $t('message.cancel') }}</b-button>
         <b-button size="sm" variant="primary" @click="saveValueModal">{{ $t('message.save') }}</b-button>
@@ -264,9 +351,6 @@
     >
       <b-form-group :label="$t('admin.severity_level_label')">
         <b-form-input v-model="levelModal.label" />
-      </b-form-group>
-      <b-form-group :label="$t('message.identifier')">
-        <b-form-input v-model="levelModal.key" :disabled="levelModalMode === 'edit'" />
       </b-form-group>
       <b-form-group :label="$t('admin.severity_level_color')">
         <div class="d-flex align-items-center">
@@ -401,6 +485,11 @@ function createDefaultDraft() {
       impact: 'Impact',
       likelihood: 'Likelihood',
     },
+    levelDefinitionsLabel: 'Calculated Risk',
+    sectionLabels: {
+      riskAssessment: 'Risk Assessment',
+      residualRisk: 'Residual Risk Assessment',
+    },
     impactValues,
     likelihoodValues,
     levels,
@@ -416,6 +505,9 @@ export default {
       isDirty: false,
       editingImpactLabel: false,
       editingLikelihoodLabel: false,
+      editingLevelLabel: false,
+      editingRiskAssessmentLabel: false,
+      editingResidualRiskLabel: false,
       valueModalMode: 'create',
       valueModalType: 'impact',
       valueModal: { originalKey: null, key: '', label: '' },
@@ -446,6 +538,18 @@ export default {
       const label = String(this.draft?.axisLabels?.likelihood || '').trim();
       return label || this.$t('riskMatrix.likelihood');
     },
+    levelLabel() {
+      const label = String(this.draft?.levelDefinitionsLabel || '').trim();
+      return label || this.$t('riskMatrix.levelDefinitions');
+    },
+    riskAssessmentLabel() {
+      const label = String(this.draft?.sectionLabels?.riskAssessment || '').trim();
+      return label || this.$t('riskMatrix.title');
+    },
+    residualRiskLabel() {
+      const label = String(this.draft?.sectionLabels?.residualRisk || '').trim();
+      return label || this.$t('riskMatrix.residualTitle');
+    },
     levelOptions() {
       return this.draft.levels
         .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -465,6 +569,18 @@ export default {
         }
       });
       return used;
+    },
+  },
+  watch: {
+    'valueModal.label'(val) {
+      if (this.valueModalMode === 'create') {
+        this.valueModal.key = val.trim().toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '');
+      }
+    },
+    'levelModal.label'(val) {
+      if (this.levelModalMode === 'create') {
+        this.levelModal.key = val.trim().toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '');
+      }
     },
   },
   methods: {
@@ -495,6 +611,11 @@ export default {
         axisLabels: {
           impact: String(input?.axisLabels?.impact || fallback.axisLabels.impact || '').trim(),
           likelihood: String(input?.axisLabels?.likelihood || fallback.axisLabels.likelihood || '').trim(),
+        },
+        levelDefinitionsLabel: String(input?.levelDefinitionsLabel || fallback.levelDefinitionsLabel || '').trim(),
+        sectionLabels: {
+          riskAssessment: String(input?.sectionLabels?.riskAssessment || fallback.sectionLabels.riskAssessment || '').trim(),
+          residualRisk: String(input?.sectionLabels?.residualRisk || fallback.sectionLabels.residualRisk || '').trim(),
         },
         impactValues: Array.isArray(input?.impactValues) && input.impactValues.length > 0 ? input.impactValues : fallback.impactValues,
         likelihoodValues: Array.isArray(input?.likelihoodValues) && input.likelihoodValues.length > 0 ? input.likelihoodValues : fallback.likelihoodValues,
@@ -817,7 +938,7 @@ export default {
   border-radius: 0.2rem;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 80%;
   margin-right: 0.5rem;
   background: rgba(255, 255, 255, 0.08);
 }
@@ -865,7 +986,7 @@ export default {
 }
 
 .matrix-axis-title {
-  font-size: 0.82rem;
+  font-size: 80%;
   font-weight: 700;
   color: var(--table-head-color);
   line-height: 1.25;
@@ -878,7 +999,6 @@ export default {
 }
 
 .matrix-col-label {
-  font-size: 1.15rem;
   font-weight: 700;
   line-height: 1.1;
   color: var(--table-head-color);
@@ -901,7 +1021,6 @@ export default {
 }
 
 .matrix-row-label {
-  font-size: 1.1rem;
   font-weight: 700;
 }
 
@@ -932,7 +1051,6 @@ export default {
 
 .matrix-level-title {
   margin-top: 0.15rem;
-  font-size: 1.03rem;
   font-weight: 800;
   line-height: 1.1;
   color: var(--table-head-color);
@@ -940,7 +1058,7 @@ export default {
 
 .matrix-action-label {
   margin-top: 0.35rem;
-  font-size: 0.82rem;
+  font-size: 80%;
   font-weight: 600;
   color: var(--table-head-color);
 }
@@ -951,7 +1069,6 @@ export default {
 
 .inline-label-input {
   height: 1.6rem;
-  font-size: 0.85rem;
   font-weight: 600;
   padding: 0.1rem 0.4rem;
   background: transparent;

@@ -191,14 +191,6 @@
         </div>
       </b-tab>
 
-      <!-- Severity Levels Tab -->
-      <b-tab :title="$t('admin.severity_levels')">
-        <p class="text-muted mb-3">
-          {{ $t('admin.severity_levels_desc') }}
-        </p>
-        <severity-levels />
-      </b-tab>
-
       <!-- Risk Matrix Tab -->
       <b-tab :title="$t('admin.risk_matrix')">
         <risk-matrix />
@@ -209,14 +201,12 @@
 
 <script>
 import permissionsMixin from '../../../mixins/permissionsMixin';
-import SeverityLevels from './SeverityLevels.vue';
 import RiskMatrix from './RiskMatrix.vue';
 
 export default {
   name: 'Customization',
   mixins: [permissionsMixin],
   components: {
-    SeverityLevels,
     RiskMatrix,
   },
   data() {
@@ -281,22 +271,28 @@ export default {
       const tabMap = {
         '#vulnerability-ids': 0,
         '#text-placeholders': 1,
-        '#severity': 2,
-        '#risk-matrix': 3,
+        '#risk-matrix': 2,
       };
+      const maxTabIndex = 2;
       if (hash && tabMap[hash] !== undefined) {
         this.activeTab = tabMap[hash];
       } else {
         // Restore from localStorage
         const saved = localStorage.getItem('customization-active-tab');
         if (saved !== null) {
-          this.activeTab = parseInt(saved, 10);
+          const parsedTab = parseInt(saved, 10);
+          if (!Number.isNaN(parsedTab) && parsedTab >= 0 && parsedTab <= maxTabIndex) {
+            this.activeTab = parsedTab;
+          } else {
+            this.activeTab = 0;
+            localStorage.setItem('customization-active-tab', 0);
+          }
         }
       }
     },
     onTabChange(tabIndex) {
       localStorage.setItem('customization-active-tab', tabIndex);
-      const hashMap = ['#vulnerability-ids', '#text-placeholders', '#severity', '#risk-matrix'];
+      const hashMap = ['#vulnerability-ids', '#text-placeholders', '#risk-matrix'];
       if (this.$route.hash !== hashMap[tabIndex]) {
         this.$router.replace({ hash: hashMap[tabIndex] }).catch(() => {});
       }

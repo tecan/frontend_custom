@@ -35,8 +35,6 @@ const Email = () => import('@/views/administration/configuration/Email');
 const Jira = () => import('@/views/administration/configuration/JiraConfig');
 const InternalComponents = () =>
   import('@/views/administration/configuration/InternalComponents');
-const SeverityLevels = () =>
-  import('@/views/administration/configuration/SeverityLevels');
 const Customization = () =>
   import('@/views/administration/configuration/Customization');
 const TaskScheduler = () =>
@@ -434,10 +432,6 @@ function configRoutes() {
                 sectionName: 'Admin',
                 permission: 'SYSTEM_CONFIGURATION',
               },
-            },
-            {
-              path: 'configuration/severityLevels',
-              redirect: 'configuration/customization#severity',
             },
             {
               path: 'configuration/customization',

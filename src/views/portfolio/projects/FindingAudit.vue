@@ -69,7 +69,7 @@
           trim
         />
       </b-form-group>
-      <b-form-group id="fieldset-risk-matrix" :label="$t('riskMatrix.title')">
+      <b-form-group v-if="customMatrix && customMatrix.enabled" id="fieldset-risk-matrix" :label="riskAssessmentTitle">
         <div class="risk-matrix-inline">
           <div class="risk-matrix-field">
             <label class="risk-matrix-label" for="riskMatrixImpact">
@@ -107,7 +107,7 @@
           </div>
           <div class="risk-matrix-field">
             <label class="risk-matrix-label">
-              {{ $t('riskMatrix.resultLabel') }}
+              {{ resultLabel }}
             </label>
             <div
               class="calculated-risk-field"
@@ -118,19 +118,20 @@
             </div>
           </div>
         </div>
-      </b-form-group>
-      <b-form-group :label="$t('riskMatrix.justificationLabel')">
-        <b-form-textarea
-          id="riskMatrixJustification"
-          v-model="riskJustification"
-          rows="3"
-          :placeholder="auditTextPlaceholders.riskJustificationPlaceholder"
-          :disabled="!canEditRiskMatrix"
-        />
+        <b-form-group class="mt-2 mb-0" :label="$t('riskMatrix.justificationLabel')">
+          <b-form-textarea
+            id="riskMatrixJustification"
+            v-model="riskJustification"
+            rows="3"
+            :placeholder="auditTextPlaceholders.riskJustificationPlaceholder"
+            :disabled="!canEditRiskMatrix"
+          />
+        </b-form-group>
       </b-form-group>
       <b-form-group
+        v-if="customMatrix && customMatrix.enabled"
         id="fieldset-residual-risk"
-        :label="$t('riskMatrix.residualTitle')"
+        :label="residualRiskTitle"
       >
         <div class="risk-matrix-inline">
           <div class="risk-matrix-field">
@@ -169,7 +170,7 @@
           </div>
           <div class="risk-matrix-field">
             <label class="risk-matrix-label">
-              {{ $t('riskMatrix.resultLabel') }}
+              {{ resultLabel }}
             </label>
             <div
               class="calculated-risk-field"
@@ -585,6 +586,21 @@ export default {
       return (this.customMatrix && this.customMatrix.enabled && this.customMatrix.axisLabels && this.customMatrix.axisLabels.likelihood)
         ? this.customMatrix.axisLabels.likelihood
         : this.$t('riskMatrix.likelihood');
+    },
+    resultLabel() {
+      return (this.customMatrix && this.customMatrix.enabled && this.customMatrix.levelDefinitionsLabel)
+        ? this.customMatrix.levelDefinitionsLabel
+        : this.$t('riskMatrix.resultLabel');
+    },
+    riskAssessmentTitle() {
+      return (this.customMatrix && this.customMatrix.enabled && this.customMatrix.sectionLabels?.riskAssessment)
+        ? this.customMatrix.sectionLabels.riskAssessment
+        : this.$t('riskMatrix.title');
+    },
+    residualRiskTitle() {
+      return (this.customMatrix && this.customMatrix.enabled && this.customMatrix.sectionLabels?.residualRisk)
+        ? this.customMatrix.sectionLabels.residualRisk
+        : this.$t('riskMatrix.residualTitle');
     },
     analysisDetailsInstructionText() {
       return this.auditTextPlaceholders.analysisDetailsInstruction || this.$t('audit.details_instruction');
