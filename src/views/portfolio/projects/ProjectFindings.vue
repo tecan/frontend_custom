@@ -394,6 +394,9 @@ export default {
               propsData: {
                 finding: row,
                 projectUuid: this.uuid,
+                onSeverityUpdated: () => {
+                  this.refreshTable();
+                },
               },
               ...FindingAudit,
             })

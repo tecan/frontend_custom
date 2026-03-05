@@ -68,6 +68,18 @@
             </template>
           </b-col>
         </b-row>
+        <b-row class="mt-3">
+          <b-col sm="6">
+            <b-form-checkbox v-model="draft.requireRiskAssessment" :disabled="!draft.enabled" @change="isDirty = true">
+              {{ $t('riskMatrix.requireRiskAssessment') }}
+            </b-form-checkbox>
+          </b-col>
+          <b-col sm="6">
+            <b-form-checkbox v-model="draft.requireResidualRiskAssessment" :disabled="!draft.enabled" @change="isDirty = true">
+              {{ $t('riskMatrix.requireResidualRiskAssessment') }}
+            </b-form-checkbox>
+          </b-col>
+        </b-row>
       </div>
     </b-card>
 
@@ -490,6 +502,8 @@ function createDefaultDraft() {
       riskAssessment: 'Risk Assessment',
       residualRisk: 'Residual Risk Assessment',
     },
+    requireRiskAssessment: false,
+    requireResidualRiskAssessment: false,
     impactValues,
     likelihoodValues,
     levels,
@@ -617,6 +631,8 @@ export default {
           riskAssessment: String(input?.sectionLabels?.riskAssessment || fallback.sectionLabels.riskAssessment || '').trim(),
           residualRisk: String(input?.sectionLabels?.residualRisk || fallback.sectionLabels.residualRisk || '').trim(),
         },
+        requireRiskAssessment: input?.requireRiskAssessment === true,
+        requireResidualRiskAssessment: input?.requireResidualRiskAssessment === true,
         impactValues: Array.isArray(input?.impactValues) && input.impactValues.length > 0 ? input.impactValues : fallback.impactValues,
         likelihoodValues: Array.isArray(input?.likelihoodValues) && input.likelihoodValues.length > 0 ? input.likelihoodValues : fallback.likelihoodValues,
         levels: Array.isArray(input?.levels) && input.levels.length > 0 ? input.levels : fallback.levels,

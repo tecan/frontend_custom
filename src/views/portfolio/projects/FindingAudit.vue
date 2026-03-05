@@ -73,7 +73,7 @@
         <div class="risk-matrix-inline">
           <div class="risk-matrix-field">
             <label class="risk-matrix-label" for="riskMatrixImpact">
-              {{ axisImpactLabel }} <span class="text-danger">*</span>
+              {{ axisImpactLabel }} <span v-if="customMatrix && customMatrix.requireRiskAssessment" class="text-danger">*</span>
             </label>
             <b-form-select
               id="riskMatrixImpact"
@@ -82,7 +82,7 @@
               :disabled="!canEditRiskMatrix"
             >
               <template #first>
-                <b-form-select-option :value="null" disabled>
+                <b-form-select-option :value="null">
                   {{ $t('riskMatrix.selectPlaceholder') }}
                 </b-form-select-option>
               </template>
@@ -90,7 +90,7 @@
           </div>
           <div class="risk-matrix-field">
             <label class="risk-matrix-label" for="riskMatrixLikelihood">
-              {{ axisLikelihoodLabel }} <span class="text-danger">*</span>
+              {{ axisLikelihoodLabel }} <span v-if="customMatrix && customMatrix.requireRiskAssessment" class="text-danger">*</span>
             </label>
             <b-form-select
               id="riskMatrixLikelihood"
@@ -99,7 +99,7 @@
               :disabled="!canEditRiskMatrix"
             >
               <template #first>
-                <b-form-select-option :value="null" disabled>
+                <b-form-select-option :value="null">
                   {{ $t('riskMatrix.selectPlaceholder') }}
                 </b-form-select-option>
               </template>
@@ -136,7 +136,7 @@
         <div class="risk-matrix-inline">
           <div class="risk-matrix-field">
             <label class="risk-matrix-label" for="residualRiskImpact">
-              {{ axisImpactLabel }} <span class="text-danger">*</span>
+              {{ axisImpactLabel }} <span v-if="customMatrix && customMatrix.requireResidualRiskAssessment" class="text-danger">*</span>
             </label>
             <b-form-select
               id="residualRiskImpact"
@@ -145,7 +145,7 @@
               :disabled="!canEditRiskMatrix"
             >
               <template #first>
-                <b-form-select-option :value="null" disabled>
+                <b-form-select-option :value="null">
                   {{ $t('riskMatrix.selectPlaceholder') }}
                 </b-form-select-option>
               </template>
@@ -153,7 +153,7 @@
           </div>
           <div class="risk-matrix-field">
             <label class="risk-matrix-label" for="residualRiskLikelihood">
-              {{ axisLikelihoodLabel }} <span class="text-danger">*</span>
+              {{ axisLikelihoodLabel }} <span v-if="customMatrix && customMatrix.requireResidualRiskAssessment" class="text-danger">*</span>
             </label>
             <b-form-select
               id="residualRiskLikelihood"
@@ -162,7 +162,7 @@
               :disabled="!canEditRiskMatrix"
             >
               <template #first>
-                <b-form-select-option :value="null" disabled>
+                <b-form-select-option :value="null">
                   {{ $t('riskMatrix.selectPlaceholder') }}
                 </b-form-select-option>
               </template>
@@ -347,7 +347,7 @@
             v-if="this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
             size="sm"
             variant="outline-primary"
-            @click="makeAnalysis(true)"
+            @click="makeAnalysis()"
             ><span class="fa fa-comment-o"></span>
             {{ this.$t('message.update_details') }}</b-button
           >
@@ -399,6 +399,7 @@ export default {
   props: {
     finding: Object,
     projectUuid: String,
+    onSeverityUpdated: { type: Function, default: null },
   },
   data() {
     return {
@@ -773,13 +774,26 @@ export default {
         this.isSuppressed = false;
       }
     },
-    makeAnalysis: function (requireRiskJustification = false) {
-      if (
-        requireRiskJustification &&
-        (!this.riskJustification || this.riskJustification.trim() === '')
-      ) {
-        this.$toastr.w(this.$t('riskMatrix.justificationRequired'));
-        return;
+    makeAnalysis: function () {
+      if (this.customMatrix?.requireRiskAssessment) {
+        if (!this.selectedImpact || !this.selectedLikelihood) {
+          this.$toastr.w(this.$t('riskMatrix.riskAssessmentRequired'));
+          return;
+        }
+        if (!this.riskJustification || !this.riskJustification.trim()) {
+          this.$toastr.w(this.$t('riskMatrix.justificationRequired'));
+          return;
+        }
+      }
+      if (this.customMatrix?.requireResidualRiskAssessment) {
+        if (!this.residualImpact || !this.residualLikelihood) {
+          this.$toastr.w(this.$t('riskMatrix.residualRiskAssessmentRequired'));
+          return;
+        }
+        if (!this.residualRiskJustification || !this.residualRiskJustification.trim()) {
+          this.$toastr.w(this.$t('riskMatrix.justificationRequired'));
+          return;
+        }
       }
       // Determine what to send for details
       let detailsToSend = null;
@@ -831,6 +845,58 @@ export default {
       }
       this.comment = null;
     },
+    severityFromRiskLevel(rating) {
+      const VALID_SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'];
+      const POSITION_MAP = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+      if (!rating) return 'UNASSIGNED';
+      const key = rating.toUpperCase();
+      if (VALID_SEVERITIES.includes(key)) return key;
+      if (key === 'VERY_LOW') return 'LOW';
+      if (this.customMatrix?.levels) {
+        const sorted = [...this.customMatrix.levels].sort((a, b) => a.sortOrder - b.sortOrder);
+        const idx = sorted.findIndex((l) => l.key === key);
+        if (idx !== -1) {
+          const pos = Math.floor((idx / sorted.length) * POSITION_MAP.length);
+          return POSITION_MAP[Math.min(pos, POSITION_MAP.length - 1)];
+        }
+      }
+      return 'LOW';
+    },
+    updateVulnerabilitySeverity() {
+      if (!this.customMatrix?.enabled || this.finding.vulnerability.source !== 'INTERNAL') return;
+      let severity;
+      if (this.residualImpact && this.residualLikelihood && this.residualCalculatedRisk) {
+        severity = this.severityFromRiskLevel(this.residualCalculatedRisk.rating);
+      } else if (this.selectedImpact && this.selectedLikelihood && this.calculatedRisk) {
+        severity = this.severityFromRiskLevel(this.calculatedRisk.rating);
+      } else {
+        severity = 'UNASSIGNED';
+      }
+      const vuln = this.finding.vulnerability;
+      const getUrl = `${this.$api.BASE_URL}/${this.$api.URL_VULNERABILITY}/${vuln.uuid}`;
+      const postUrl = `${this.$api.BASE_URL}/${this.$api.URL_VULNERABILITY}`;
+      // Fetch the full vulnerability first so we don't accidentally clear fields
+      // (created, published, updated, detail, references) that are absent from the Finding response.
+      this.axios
+        .get(getUrl)
+        .then((response) => {
+          return this.axios.post(postUrl, { ...response.data, severity });
+        })
+        .then(() => {
+          this.finding.vulnerability.severity = severity;
+          if (this.onSeverityUpdated) {
+            this.onSeverityUpdated();
+          }
+        })
+        .catch((error) => {
+          const status = error?.response?.status;
+          if (status === 401 || status === 403) {
+            // User doesn't have VULNERABILITY_MANAGEMENT permission — silently skip
+            return;
+          }
+          this.$toastr.w(this.$t('condition.unsuccessful_action') + (status ? ` (${status})` : ''));
+        });
+    },
     callRestEndpoint: function (
       analysisState,
       analysisJustification,
@@ -862,6 +928,7 @@ export default {
         .then((response) => {
           this.$toastr.s(this.$t('message.updated'));
           this.updateAnalysisData(response.data);
+          this.updateVulnerabilitySeverity();
         })
         .catch(() => {
           this.$toastr.w(this.$t('condition.unsuccessful_action'));
