@@ -361,37 +361,38 @@
 import common from '@/shared/common';
 import BootstrapToggle from 'vue-bootstrap-toggle';
 import permissionsMixin from '@/mixins/permissionsMixin';
+import { contrastTextColor } from '@/shared/colorUtils';
 
 const RISK_MATRIX_TABLE = {
   VIRTUALLY_IMPOSSIBLE: {
-    LOW: { rating: 'very_low', action: 'accept', color: '#66bb6a', textColor: '#0d3317' },
-    MEDIUM: { rating: 'very_low', action: 'accept', color: '#66bb6a', textColor: '#0d3317' },
-    HIGH: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
-    CRITICAL: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
+    LOW: { rating: 'very_low', action: 'accept', color: '#4CAF50' },
+    MEDIUM: { rating: 'very_low', action: 'accept', color: '#4CAF50' },
+    HIGH: { rating: 'low', action: 'monitor', color: '#8BC34A' },
+    CRITICAL: { rating: 'low', action: 'monitor', color: '#8BC34A' },
   },
   UNLIKELY: {
-    LOW: { rating: 'very_low', action: 'accept', color: '#66bb6a', textColor: '#0d3317' },
-    MEDIUM: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
-    HIGH: { rating: 'medium', action: 'monitor_plan', color: '#ffca28', textColor: '#5c3d00' },
-    CRITICAL: { rating: 'high', action: 'mitigate', color: '#ff7043', textColor: '#3b0b00' },
+    LOW: { rating: 'very_low', action: 'accept', color: '#4CAF50' },
+    MEDIUM: { rating: 'low', action: 'monitor', color: '#8BC34A' },
+    HIGH: { rating: 'medium', action: 'monitor_plan', color: '#FF9800' },
+    CRITICAL: { rating: 'high', action: 'mitigate', color: '#f44336' },
   },
   POSSIBLE: {
-    LOW: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
-    MEDIUM: { rating: 'medium', action: 'monitor_plan', color: '#ffca28', textColor: '#5c3d00' },
-    HIGH: { rating: 'high', action: 'mitigate', color: '#ff7043', textColor: '#3b0b00' },
-    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#e53935', textColor: '#ffffff' },
+    LOW: { rating: 'low', action: 'monitor', color: '#8BC34A' },
+    MEDIUM: { rating: 'medium', action: 'monitor_plan', color: '#FF9800' },
+    HIGH: { rating: 'high', action: 'mitigate', color: '#f44336' },
+    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
   },
   LIKELY: {
-    LOW: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
-    MEDIUM: { rating: 'high', action: 'mitigate', color: '#ff7043', textColor: '#3b0b00' },
-    HIGH: { rating: 'high', action: 'mitigate', color: '#ff7043', textColor: '#3b0b00' },
-    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#e53935', textColor: '#ffffff' },
+    LOW: { rating: 'low', action: 'monitor', color: '#8BC34A' },
+    MEDIUM: { rating: 'high', action: 'mitigate', color: '#f44336' },
+    HIGH: { rating: 'high', action: 'mitigate', color: '#f44336' },
+    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
   },
   ALMOST_CERTAIN: {
-    LOW: { rating: 'low', action: 'monitor', color: '#a5d6a7', textColor: '#1c381f' },
-    MEDIUM: { rating: 'high', action: 'mitigate', color: '#ff7043', textColor: '#3b0b00' },
-    HIGH: { rating: 'critical', action: 'mitigate_immediately', color: '#e53935', textColor: '#ffffff' },
-    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#e53935', textColor: '#ffffff' },
+    LOW: { rating: 'low', action: 'monitor', color: '#8BC34A' },
+    MEDIUM: { rating: 'high', action: 'mitigate', color: '#f44336' },
+    HIGH: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
+    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
   },
 };
 
@@ -660,7 +661,7 @@ export default {
               rating: level.key,
               action: cell.action,
               color: level.color,
-              textColor: '#fff',
+              textColor: contrastTextColor(level.color),
               ratingText: level.label,
               actionText: cell.action,
             };
@@ -679,6 +680,7 @@ export default {
       }
       return {
         ...entry,
+        textColor: contrastTextColor(entry.color),
         ratingText: this.$t(`riskMatrix.ratings.${entry.rating}`),
         actionText: this.$t(`riskMatrix.actions.${entry.action}`),
       };

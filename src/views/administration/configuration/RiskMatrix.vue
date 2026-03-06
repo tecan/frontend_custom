@@ -383,6 +383,8 @@
 </template>
 
 <script>
+import { contrastTextColor } from '@/shared/colorUtils';
+
 const DEFAULT_ACTION_BY_LEVEL = {
   VERY_LOW: 'Accept',
   LOW: 'Monitor',
@@ -400,11 +402,11 @@ const LEGACY_ACTION_TO_TEXT = {
 };
 
 const LEVEL_COLOR_MAP = {
-  VERY_LOW: '#08b74a',
-  LOW: '#86df88',
-  MEDIUM: '#ffb300',
-  HIGH: '#ff4a0a',
-  CRITICAL: '#e10000',
+  VERY_LOW: '#4CAF50',
+  LOW: '#8BC34A',
+  MEDIUM: '#FF9800',
+  HIGH: '#f44336',
+  CRITICAL: '#D32F2F',
 };
 
 const DEFAULT_MATRIX = {
@@ -472,11 +474,11 @@ function createDefaultDraft() {
     { key: 'ALMOST_CERTAIN', label: 'Almost Certain', sortOrder: 5 },
   ];
   const levels = [
-    { key: 'VERY_LOW', label: 'Very Low', color: '#32c766', sortOrder: 1 },
-    { key: 'LOW', label: 'Low', color: '#8dd819', sortOrder: 2 },
-    { key: 'MEDIUM', label: 'Medium', color: '#f0c419', sortOrder: 3 },
-    { key: 'HIGH', label: 'High', color: '#ff8f1f', sortOrder: 4 },
-    { key: 'CRITICAL', label: 'Critical', color: '#ff5252', sortOrder: 5 },
+    { key: 'VERY_LOW', label: 'Very Low', color: '#4CAF50', sortOrder: 1 },
+    { key: 'LOW', label: 'Low', color: '#8BC34A', sortOrder: 2 },
+    { key: 'MEDIUM', label: 'Medium', color: '#FF9800', sortOrder: 3 },
+    { key: 'HIGH', label: 'High', color: '#f44336', sortOrder: 4 },
+    { key: 'CRITICAL', label: 'Critical', color: '#D32F2F', sortOrder: 5 },
   ];
 
   const cells = {};
@@ -725,9 +727,11 @@ export default {
     },
     getCellBackgroundStyle(likelihoodKey, impactKey) {
       const display = this.getCellDisplay(likelihoodKey, impactKey);
+      const bg = display.levelColor || LEVEL_COLOR_MAP[display.levelKey] || '#8BC34A';
       return {
-        backgroundColor: display.levelColor || LEVEL_COLOR_MAP[display.levelKey] || '#86df88',
+        backgroundColor: bg,
         borderColor: 'rgba(255,255,255,0.35)',
+        color: contrastTextColor(bg),
       };
     },
     openCellModal(likelihood, impact) {
@@ -1047,7 +1051,6 @@ export default {
   text-align: center;
   cursor: pointer;
   transition: filter 120ms ease, transform 120ms ease;
-  color: var(--table-head-color);
 }
 
 .matrix-cell-display--disabled {
@@ -1069,14 +1072,12 @@ export default {
   margin-top: 0.15rem;
   font-weight: 800;
   line-height: 1.1;
-  color: var(--table-head-color);
 }
 
 .matrix-action-label {
   margin-top: 0.35rem;
   font-size: 80%;
   font-weight: 600;
-  color: var(--table-head-color);
 }
 
 .matrix-footer {
