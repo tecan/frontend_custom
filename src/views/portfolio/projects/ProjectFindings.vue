@@ -458,6 +458,8 @@ export default {
           link.setAttribute('download', filename);
           document.body.appendChild(link);
           link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
         })
         .catch(() => {
           this.$toastr.w(this.$t('condition.unsuccessful_action'));
@@ -492,6 +494,8 @@ export default {
           link.setAttribute('download', filename);
           document.body.appendChild(link);
           link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
         })
         .catch(() => {
           this.$toastr.w(this.$t('condition.unsuccessful_action'));

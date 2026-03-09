@@ -7,7 +7,9 @@ Vue.use(VueI18n);
 
 async function getDefaultLanguage() {
   try {
-    let url = `${api.BASE_URL}/${api.URL_CONFIG_PROPERTY}/public/general/default.locale`;
+    // Use relative URL so the request goes through the same origin (NGINX proxy or webpack-dev-server).
+    // Cannot use api.BASE_URL here because config.json hasn't been loaded yet at import time.
+    let url = `/${api.URL_CONFIG_PROPERTY}/public/general/default.locale`;
     let response = await axios.get(url);
     return decodeURIComponent(response.data.propertyValue);
   } catch (error) {
