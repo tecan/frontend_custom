@@ -9,6 +9,7 @@ RUN npm run build
 
 FROM nginx:1.27-alpine
 COPY --from=build /src/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 EXPOSE 80
+ENV API_BACKEND_URL=http://apiserver:8080
 CMD ["nginx", "-g", "daemon off;"]

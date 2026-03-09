@@ -777,23 +777,34 @@ export default {
       }
     },
     makeAnalysis: function () {
+      const i18nParams = {
+        impact: this.axisImpactLabel,
+        likelihood: this.axisLikelihoodLabel,
+      };
+
       if (this.customMatrix?.requireRiskAssessment) {
         if (!this.selectedImpact || !this.selectedLikelihood) {
-          this.$toastr.w(this.$t('riskMatrix.riskAssessmentRequired'));
+          this.$toastr.w(this.$t('riskMatrix.riskAssessmentRequired', { ...i18nParams, section: this.riskAssessmentTitle }));
           return;
         }
+      }
+      // Justification required whenever impact + likelihood are both selected
+      if (this.selectedImpact && this.selectedLikelihood) {
         if (!this.riskJustification || !this.riskJustification.trim()) {
-          this.$toastr.w(this.$t('riskMatrix.justificationRequired'));
+          this.$toastr.w(this.$t('riskMatrix.justificationRequired', { section: this.riskAssessmentTitle }));
           return;
         }
       }
       if (this.customMatrix?.requireResidualRiskAssessment) {
         if (!this.residualImpact || !this.residualLikelihood) {
-          this.$toastr.w(this.$t('riskMatrix.residualRiskAssessmentRequired'));
+          this.$toastr.w(this.$t('riskMatrix.residualRiskAssessmentRequired', { ...i18nParams, section: this.residualRiskTitle }));
           return;
         }
+      }
+      // Justification required whenever residual impact + likelihood are both selected
+      if (this.residualImpact && this.residualLikelihood) {
         if (!this.residualRiskJustification || !this.residualRiskJustification.trim()) {
-          this.$toastr.w(this.$t('riskMatrix.justificationRequired'));
+          this.$toastr.w(this.$t('riskMatrix.justificationRequired', { section: this.residualRiskTitle }));
           return;
         }
       }
@@ -882,7 +893,8 @@ export default {
       this.axios
         .get(getUrl)
         .then((response) => {
-          return this.axios.post(postUrl, { ...response.data, severity });
+          const { normalizedCvssV2Vector, affectedProjectCount, affectedActiveProjectCount, affectedInactiveProjectCount, findingAttribution, ...vulnData } = response.data;
+          return this.axios.post(postUrl, { ...vulnData, severity });
         })
         .then(() => {
           this.finding.vulnerability.severity = severity;

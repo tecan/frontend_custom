@@ -947,7 +947,7 @@
     "residualTitle": "Evaluación de riesgo residual",
     "justificationLabel": "Justificación",
     "justificationPlaceholder": "Explique el motivo de los niveles de impacto y probabilidad seleccionados...",
-    "justificationRequired": "Proporcione una justificación antes de actualizar.",
+    "justificationRequired": "Proporcione una justificación para {section}.",
     "ratings": {
       "very_low": "Muy bajo",
       "low": "Bajo",

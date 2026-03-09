@@ -1,5 +1,5 @@
 {
-  "API_BASE_URL": "https://app-dependencytrack-backend-test.azurewebsites.net",
+  "API_BASE_URL": "",
   "API_WITH_CREDENTIALS": "",
   "OIDC_CLIENT_ID": "",
   "OIDC_FLOW": "code",

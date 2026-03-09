@@ -947,7 +947,7 @@
     "residualTitle": "Valutazione del rischio residuo",
     "justificationLabel": "Giustificazione",
     "justificationPlaceholder": "Spiega la motivazione per l'impatto e la probabilità selezionati...",
-    "justificationRequired": "Fornisci una giustificazione prima di aggiornare.",
+    "justificationRequired": "Fornisci una giustificazione per {section}.",
     "ratings": {
       "very_low": "Molto basso",
       "low": "Basso",

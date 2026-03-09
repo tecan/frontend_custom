@@ -10,10 +10,7 @@
         size="md"
         variant="outline-primary"
         v-b-modal.projectUploadVexModal
-        v-permission:or="[
-          PERMISSIONS.VIEW_VULNERABILITY,
-          PERMISSIONS.VULNERABILITY_ANALYSIS,
-        ]"
+        v-permission="PERMISSIONS.VULNERABILITY_ANALYSIS"
       >
         <span class="fa fa-upload"></span> {{ $t('message.apply_vex') }}
       </b-button>
@@ -26,10 +23,7 @@
         size="md"
         variant="outline-primary"
         @click="downloadVex()"
-        v-permission:or="[
-          PERMISSIONS.VIEW_VULNERABILITY,
-          PERMISSIONS.VULNERABILITY_ANALYSIS,
-        ]"
+        v-permission="PERMISSIONS.VULNERABILITY_ANALYSIS"
       >
         <span class="fa fa-download"></span> {{ $t('message.export_vex') }}
       </b-button>
@@ -42,10 +36,7 @@
         size="md"
         variant="outline-primary"
         @click="downloadVdr()"
-        v-permission:or="[
-          PERMISSIONS.VIEW_VULNERABILITY,
-          PERMISSIONS.VULNERABILITY_ANALYSIS,
-        ]"
+        v-permission="PERMISSIONS.VIEW_PORTFOLIO"
       >
         <span class="fa fa-download"></span> {{ $t('message.export_vdr') }}
       </b-button>
@@ -467,6 +458,9 @@ export default {
           link.setAttribute('download', filename);
           document.body.appendChild(link);
           link.click();
+        })
+        .catch(() => {
+          this.$toastr.w(this.$t('condition.unsuccessful_action'));
         });
     },
     downloadVdr: function () {
@@ -498,6 +492,9 @@ export default {
           link.setAttribute('download', filename);
           document.body.appendChild(link);
           link.click();
+        })
+        .catch(() => {
+          this.$toastr.w(this.$t('condition.unsuccessful_action'));
         });
     },
     reAnalyze: function (data) {

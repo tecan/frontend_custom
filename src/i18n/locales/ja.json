@@ -947,7 +947,7 @@
     "residualTitle": "残余リスク評価",
     "justificationLabel": "根拠",
     "justificationPlaceholder": "選択した影響度と発生可能性の根拠を説明してください...",
-    "justificationRequired": "更新する前に根拠を入力してください。",
+    "justificationRequired": "{section}の根拠を入力してください。",
     "ratings": {
       "very_low": "非常に低い",
       "low": "低",

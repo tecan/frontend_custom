@@ -947,7 +947,7 @@
     "residualTitle": "Rest-Risikobewertung",
     "justificationLabel": "Begründung",
     "justificationPlaceholder": "Erläutern Sie die Begründung für die gewählte Auswirkung und Wahrscheinlichkeit...",
-    "justificationRequired": "Bitte geben Sie vor dem Aktualisieren eine Begründung an.",
+    "justificationRequired": "Bitte geben Sie eine Begründung für {section} an.",
     "ratings": {
       "very_low": "Sehr gering",
       "low": "Gering",
