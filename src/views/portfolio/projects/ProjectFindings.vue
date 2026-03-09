@@ -22,10 +22,11 @@
         id="export-vex-button"
         size="md"
         variant="outline-primary"
+        :disabled="isDownloadingVex"
         @click="downloadVex()"
         v-permission="PERMISSIONS.VULNERABILITY_ANALYSIS"
       >
-        <span class="fa fa-download"></span> {{ $t('message.export_vex') }}
+        <span :class="isDownloadingVex ? 'fa fa-spinner fa-spin' : 'fa fa-download'"></span> {{ $t('message.export_vex') }}
       </b-button>
       <b-tooltip target="export-vex-button" triggers="hover focus">{{
         $t('message.export_vex_tooltip')
@@ -35,10 +36,11 @@
         id="export-vdr-button"
         size="md"
         variant="outline-primary"
+        :disabled="isDownloadingVdr"
         @click="downloadVdr()"
         v-permission="PERMISSIONS.VIEW_PORTFOLIO"
       >
-        <span class="fa fa-download"></span> {{ $t('message.export_vdr') }}
+        <span :class="isDownloadingVdr ? 'fa fa-spinner fa-spin' : 'fa fa-download'"></span> {{ $t('message.export_vdr') }}
       </b-button>
       <b-tooltip target="export-vdr-button" triggers="hover focus">{{
         $t('message.export_vdr_tooltip')
@@ -140,6 +142,8 @@ export default {
   data() {
     return {
       showSuppressedFindings: this.showSuppressedFindings,
+      isDownloadingVex: false,
+      isDownloadingVdr: false,
       labelIcon: {
         dataOn: '\u2713',
         dataOff: '\u2715',
@@ -432,6 +436,8 @@ export default {
       return url;
     },
     downloadVex: function () {
+      if (this.isDownloadingVex) return;
+      this.isDownloadingVex = true;
       let url = `${this.$api.BASE_URL}/${this.$api.URL_VEX}/cyclonedx/project/${this.uuid}`;
       this.axios
         .request({
@@ -463,9 +469,14 @@ export default {
         })
         .catch(() => {
           this.$toastr.w(this.$t('condition.unsuccessful_action'));
+        })
+        .finally(() => {
+          this.isDownloadingVex = false;
         });
     },
     downloadVdr: function () {
+      if (this.isDownloadingVdr) return;
+      this.isDownloadingVdr = true;
       let url = `${this.$api.BASE_URL}/${this.$api.URL_BOM}/cyclonedx/project/${this.uuid}`;
       this.axios
         .request({
@@ -499,6 +510,9 @@ export default {
         })
         .catch(() => {
           this.$toastr.w(this.$t('condition.unsuccessful_action'));
+        })
+        .finally(() => {
+          this.isDownloadingVdr = false;
         });
     },
     reAnalyze: function (data) {
