@@ -69,7 +69,15 @@
           trim
         />
       </b-form-group>
-      <b-form-group v-if="customMatrix && customMatrix.enabled" id="fieldset-risk-matrix" :label="riskAssessmentTitle">
+      <b-alert
+        v-if="showRiskMatrixLoadWarning"
+        variant="warning"
+        show
+        class="mb-3"
+      >
+        {{ riskMatrixLoadWarningMessage }}
+      </b-alert>
+      <b-form-group v-if="showRiskMatrix" id="fieldset-risk-matrix" :label="riskAssessmentTitle">
         <div class="risk-matrix-inline">
           <div class="risk-matrix-field">
             <label class="risk-matrix-label" for="riskMatrixImpact">
@@ -129,7 +137,7 @@
         </b-form-group>
       </b-form-group>
       <b-form-group
-        v-if="customMatrix && customMatrix.enabled"
+        v-if="showRiskMatrix"
         id="fieldset-residual-risk"
         :label="residualRiskTitle"
       >
@@ -362,39 +370,8 @@ import common from '@/shared/common';
 import BootstrapToggle from 'vue-bootstrap-toggle';
 import permissionsMixin from '@/mixins/permissionsMixin';
 import { contrastTextColor } from '@/shared/colorUtils';
-
-const RISK_MATRIX_TABLE = {
-  VIRTUALLY_IMPOSSIBLE: {
-    LOW: { rating: 'very_low', action: 'accept', color: '#4CAF50' },
-    MEDIUM: { rating: 'very_low', action: 'accept', color: '#4CAF50' },
-    HIGH: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-    CRITICAL: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-  },
-  UNLIKELY: {
-    LOW: { rating: 'very_low', action: 'accept', color: '#4CAF50' },
-    MEDIUM: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-    HIGH: { rating: 'medium', action: 'monitor_plan', color: '#FF9800' },
-    CRITICAL: { rating: 'high', action: 'mitigate', color: '#f44336' },
-  },
-  POSSIBLE: {
-    LOW: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-    MEDIUM: { rating: 'medium', action: 'monitor_plan', color: '#FF9800' },
-    HIGH: { rating: 'high', action: 'mitigate', color: '#f44336' },
-    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
-  },
-  LIKELY: {
-    LOW: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-    MEDIUM: { rating: 'high', action: 'mitigate', color: '#f44336' },
-    HIGH: { rating: 'high', action: 'mitigate', color: '#f44336' },
-    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
-  },
-  ALMOST_CERTAIN: {
-    LOW: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-    MEDIUM: { rating: 'high', action: 'mitigate', color: '#f44336' },
-    HIGH: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
-    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
-  },
-};
+// [CUSTOM: INTERNAL-RISK-BADGE] RISK_MATRIX_TABLE moved to shared util for reuse in findings table
+import { RISK_MATRIX_TABLE } from '@/shared/riskMatrixUtils';
 
 export default {
   props: {
@@ -578,6 +555,18 @@ export default {
     },
     canEditRiskMatrix() {
       return this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS);
+    },
+    showRiskMatrix() {
+      return this.customMatrix?.loadState === 'loaded' && this.customMatrix.enabled === true;
+    },
+    showRiskMatrixLoadWarning() {
+      return this.customMatrix?.loadState === 'load_failed'
+        && this.finding?.vulnerability?.source === 'INTERNAL';
+    },
+    riskMatrixLoadWarningMessage() {
+      const baseMessage = this.$t('riskMatrix.loadFailedWarning');
+      const status = this.customMatrix?.loadError?.status;
+      return status ? `${baseMessage} (${status})` : baseMessage;
     },
     axisImpactLabel() {
       return (this.customMatrix && this.customMatrix.enabled && this.customMatrix.axisLabels && this.customMatrix.axisLabels.impact)
@@ -961,8 +950,8 @@ export default {
     // - if cache was invalidated (admin just saved) it reloads from backend
     if (this.$customization && this.$customization.preloadRiskMatrixConfig) {
       this.$customization.preloadRiskMatrixConfig().then((matrixConfig) => {
-        if (matrixConfig && matrixConfig.enabled) {
-          this.customMatrix = matrixConfig;
+        this.customMatrix = matrixConfig;
+        if (matrixConfig?.loadState === 'loaded' && matrixConfig.enabled) {
           this.riskImpactChoices = matrixConfig.impactValues
             .slice()
             .sort((a, b) => a.sortOrder - b.sortOrder)

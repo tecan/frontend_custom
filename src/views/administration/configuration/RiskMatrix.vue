@@ -922,6 +922,17 @@ export default {
         this.$toastr.w(this.$t('condition.unsuccessful_action'));
         return;
       }
+      let reloadedConfig = null;
+      if (this.$customization && this.$customization.preloadRiskMatrixConfig) {
+        reloadedConfig = await this.$customization.preloadRiskMatrixConfig();
+      }
+      if (reloadedConfig?.loadState === 'load_failed') {
+        this.draft = this.normalizeDraft(payload);
+        this.isDirty = false;
+        this.$toastr.w(this.$t('riskMatrix.reloadFailedWarning'));
+        return;
+      }
+      this.draft = this.normalizeDraft(reloadedConfig || payload);
       this.isDirty = false;
       this.$toastr.s(this.$t('admin.configuration_saved'));
     },
