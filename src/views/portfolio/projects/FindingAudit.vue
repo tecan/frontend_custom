@@ -122,7 +122,7 @@
           <b-form-textarea
             id="riskMatrixJustification"
             v-model="riskJustification"
-            rows="3"
+            rows="6"
             :placeholder="auditTextPlaceholders.riskJustificationPlaceholder"
             :disabled="!canEditRiskMatrix"
           />
@@ -185,7 +185,7 @@
           <b-form-textarea
             id="residualRiskJustification"
             v-model="residualRiskJustification"
-            rows="3"
+            rows="6"
             :placeholder="auditTextPlaceholders.residualRiskPlaceholder"
             :disabled="!canEditRiskMatrix"
           />

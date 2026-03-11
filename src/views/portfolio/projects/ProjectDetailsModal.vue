@@ -59,6 +59,18 @@
                 "
               />
             </b-col>
+            <!-- [CUSTOM: REQF012] Product in Market toggle -->
+            <b-col cols="auto">
+              <b-input-group-form-switch
+                id="project-details-in-market"
+                :label="$t('message.in_market')"
+                v-model="project.inMarket"
+                :show-placeholder-label="true"
+                :readonly="
+                  this.isNotPermitted(PERMISSIONS.PORTFOLIO_MANAGEMENT)
+                "
+              />
+            </b-col>
           </b-row>
           <b-input-group-form-select
             id="v-classifier-input"
@@ -733,6 +745,7 @@ export default {
           tags: tagsNode,
           active: this.project.active,
           isLatest: this.project.isLatest,
+          inMarket: this.project.inMarket, // [CUSTOM: REQF012]
           externalReferences: this.project.externalReferences,
         })
         .then((response) => {
