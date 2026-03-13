@@ -305,7 +305,13 @@ export default {
           // TO REVERT: replace this arrow function with: formatter(value, row, index) { if (typeof value !== 'undefined') { return common.formatSeverityLabel(value); } }
           class: 'finding-severity-cell',
           formatter: (value, row, index) => {
-            if (row.vulnerability.source === 'INTERNAL' && row.analysis) {
+            // [CUSTOM: INTERNAL-RISK-BADGE] Only show risk matrix badge when risk matrix is enabled
+            if (
+              row.vulnerability.source === 'INTERNAL' &&
+              row.analysis &&
+              this.customMatrix?.loadState === 'loaded' &&
+              this.customMatrix.enabled === true
+            ) {
               // Prefer residual risk when set, same priority as updateVulnerabilitySeverity()
               const likelihood = row.analysis.residualRiskLikelihood || row.analysis.riskLikelihood;
               const impact = row.analysis.residualRiskImpact || row.analysis.riskImpact;
@@ -329,6 +335,7 @@ export default {
                 }
               }
             }
+            // Fallback: standard CVSS severity (NVD vulns, or risk matrix disabled/not loaded)
             if (typeof value !== 'undefined') {
               return common.formatSeverityLabel(value);
             }
@@ -422,10 +429,13 @@ export default {
               propsData: {
                 finding: row,
                 projectUuid: this.uuid,
-                onSeverityUpdated: () => {
-                  // Update the severity badge in the table row immediately without refreshing
-                  // (a full refresh would close the panel). Defer the full refresh to when panel closes.
+                onSeverityUpdated: (updatedAnalysis) => {
+                  // [CUSTOM: INTERNAL-RISK-BADGE] Update stale row data so formatter uses new values immediately
+                  if (updatedAnalysis && row.analysis) {
+                    Object.assign(row.analysis, updatedAnalysis);
+                  }
                   this.pendingTableRefresh = true;
+                  // Re-render just the severity cell — panel stays open
                   if (this.expandedRowIndex !== null) {
                     const tableEl = this.$refs.table.$el;
                     const tr = tableEl.querySelector(`tr[data-index="${this.expandedRowIndex}"]`);

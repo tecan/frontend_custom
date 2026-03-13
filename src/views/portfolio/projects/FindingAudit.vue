@@ -888,7 +888,13 @@ export default {
         .then(() => {
           this.finding.vulnerability.severity = severity;
           if (this.onSeverityUpdated) {
-            this.onSeverityUpdated();
+            // [CUSTOM: INTERNAL-RISK-BADGE] Pass updated risk values so badge updates immediately
+            this.onSeverityUpdated({
+              riskLikelihood: this.selectedLikelihood,
+              riskImpact: this.selectedImpact,
+              residualRiskLikelihood: this.residualLikelihood,
+              residualRiskImpact: this.residualImpact,
+            });
           }
         })
         .catch((error) => {
