@@ -102,6 +102,10 @@ function createVueApp() {
       if (Vue.prototype.$customization && Vue.prototype.$customization.preloadRiskMatrixConfig) {
         Vue.prototype.$customization.preloadRiskMatrixConfig();
       }
+      // Preload vulnerability source options for dropdowns
+      if (Vue.prototype.$customization && Vue.prototype.$customization.preloadVulnSourceConfig) {
+        Vue.prototype.$customization.preloadVulnSourceConfig();
+      }
     });
 
   Vue.prototype.$version = version;

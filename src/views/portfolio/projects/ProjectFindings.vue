@@ -109,6 +109,8 @@ import bootstrapTableMixin from '@/mixins/bootstrapTableMixin';
 import permissionsMixin from '@/mixins/permissionsMixin';
 import FindingAudit from './FindingAudit';
 import ProjectUploadVexModal from './ProjectUploadVexModal';
+// [CUSTOM: INTERNAL-RISK-BADGE] Import risk matrix lookup for INTERNAL vulnerability severity display
+import { lookupRiskEntry } from '@/shared/riskMatrixUtils';
 
 export default {
   props: {
@@ -144,6 +146,9 @@ export default {
       showSuppressedFindings: this.showSuppressedFindings,
       isDownloadingVex: false,
       isDownloadingVdr: false,
+      customMatrix: null, // [CUSTOM: INTERNAL-RISK-BADGE] loaded in created()
+      expandedRowIndex: null,
+      pendingTableRefresh: false,
       labelIcon: {
         dataOn: '\u2713',
         dataOff: '\u2715',
@@ -295,7 +300,42 @@ export default {
           field: 'vulnerability.severity',
           sortName: 'vulnerability.severityRank',
           sortable: true,
-          formatter(value, row, index) {
+          // [CUSTOM: INTERNAL-RISK-BADGE] Show calculated risk badge for INTERNAL vulns with a risk assessment.
+          // For all other sources (NVD, OSV, etc.) fall back to standard CVSS severity label.
+          // TO REVERT: replace this arrow function with: formatter(value, row, index) { if (typeof value !== 'undefined') { return common.formatSeverityLabel(value); } }
+          class: 'finding-severity-cell',
+          formatter: (value, row, index) => {
+            // [CUSTOM: INTERNAL-RISK-BADGE] Only show risk matrix badge when risk matrix is enabled
+            if (
+              row.vulnerability.source === 'INTERNAL' &&
+              row.analysis &&
+              this.customMatrix?.loadState === 'loaded' &&
+              this.customMatrix.enabled === true
+            ) {
+              // Prefer residual risk when set, same priority as updateVulnerabilitySeverity()
+              const likelihood = row.analysis.residualRiskLikelihood || row.analysis.riskLikelihood;
+              const impact = row.analysis.residualRiskImpact || row.analysis.riskImpact;
+              if (likelihood && impact) {
+                const entry = lookupRiskEntry(
+                  likelihood,
+                  impact,
+                  this.customMatrix,
+                  this.$t.bind(this),
+                );
+                if (entry) {
+                  return `
+                    <div style="height:24px;margin:-4px;">
+                      <div class="text-center pull-left" style="width:24px; height:24px; background-color:${entry.color}; color:${entry.textColor};">
+                        <i class="fa fa-bug" style="font-size:12px; padding:6px" aria-hidden="true"></i>
+                      </div>
+                      <div class="text-center pull-left" style="height:24px;">
+                        <div style="font-size:12px; padding:4px"><span class="severity-value">${entry.ratingText}</span></div>
+                      </div>
+                    </div>`;
+                }
+              }
+            }
+            // Fallback: standard CVSS severity (NVD vulns, or risk matrix disabled/not loaded)
             if (typeof value !== 'undefined') {
               return common.formatSeverityLabel(value);
             }
@@ -389,15 +429,47 @@ export default {
               propsData: {
                 finding: row,
                 projectUuid: this.uuid,
-                onSeverityUpdated: () => {
-                  this.refreshTable();
+                onSeverityUpdated: (updatedAnalysis) => {
+                  // [CUSTOM: INTERNAL-RISK-BADGE] Update stale row data so formatter uses new values immediately
+                  if (updatedAnalysis) {
+                    if (row.analysis) {
+                      Object.assign(row.analysis, updatedAnalysis);
+                    } else {
+                      row.analysis = { ...updatedAnalysis };
+                    }
+                  }
+                  this.pendingTableRefresh = true;
+                  // Re-render just the severity cell — panel stays open
+                  if (this.expandedRowIndex !== null) {
+                    const tableEl = this.$refs.table.$el;
+                    const tr = tableEl.querySelector(`tr[data-index="${this.expandedRowIndex}"]`);
+                    const td = tr && tr.querySelector('td.finding-severity-cell');
+                    if (td) {
+                      const col = this.$refs.table.columns.find(c => c.field === 'vulnerability.severity');
+                      if (col && col.formatter) {
+                        td.innerHTML = col.formatter(row.vulnerability.severity, row, index) || '';
+                      }
+                    }
+                  }
                 },
               },
               ...FindingAudit,
             })
           );
         },
-        onExpandRow: this.vueFormatterInit,
+        onExpandRow: (index, row, detail) => {
+          this.expandedRowIndex = index;
+          this.vueFormatterInit(index, row, detail);
+        },
+        onCollapseRow: (index) => {
+          if (this.expandedRowIndex === index) {
+            this.expandedRowIndex = null;
+          }
+          if (this.pendingTableRefresh) {
+            this.pendingTableRefresh = false;
+            this.refreshTable();
+          }
+        },
         responseHandler: function (res, xhr) {
           res.total = xhr.getResponseHeader('X-Total-Count');
           return res;
@@ -424,6 +496,15 @@ export default {
         },
       },
     };
+  },
+  // [CUSTOM: INTERNAL-RISK-BADGE] Load risk matrix config so the severity formatter can use it.
+  // TO REVERT: delete this created() hook entirely.
+  created() {
+    if (this.$customization && this.$customization.preloadRiskMatrixConfig) {
+      this.$customization.preloadRiskMatrixConfig().then((matrixConfig) => {
+        this.customMatrix = matrixConfig;
+      });
+    }
   },
   methods: {
     apiUrl: function () {
@@ -526,7 +607,6 @@ export default {
     refreshTable: function () {
       this.$refs.table.refresh({
         url: this.apiUrl(),
-        pageNumber: 1,
         silent: true,
       });
     },

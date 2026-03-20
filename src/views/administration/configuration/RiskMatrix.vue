@@ -358,7 +358,7 @@
 
     <b-modal
       id="riskMatrixLevelModal"
-      :title="levelModalMode === 'create' ? $t('riskMatrix.addLevel') : $t('message.update')"
+      :title="levelModalMode === 'create' ? $t('riskMatrix.addLevel') : $t('riskMatrix.editLevel')"
       @hide="resetLevelModal"
     >
       <b-form-group :label="$t('admin.severity_level_label')">
@@ -373,6 +373,12 @@
           />
           <span class="ml-2">{{ levelModal.color }}</span>
         </div>
+      </b-form-group>
+      <b-form-group :label="$t('riskMatrix.owaspSeverityMapping')" :description="$t('riskMatrix.owaspSeverityMappingDesc')">
+        <b-form-select v-model="levelModal.owaspSeverityMapping" :options="owaspSeverityOptions" />
+      </b-form-group>
+      <b-form-group :label="$t('riskMatrix.levelAction')">
+        <b-form-input v-model="levelModal.action" :placeholder="$t('riskMatrix.levelActionPlaceholder')" />
       </b-form-group>
       <template v-slot:modal-footer="{ cancel }">
         <b-button size="sm" variant="secondary" @click="cancel()">{{ $t('message.cancel') }}</b-button>
@@ -528,7 +534,7 @@ export default {
       valueModalType: 'impact',
       valueModal: { originalKey: null, key: '', label: '' },
       levelModalMode: 'create',
-      levelModal: { originalKey: null, key: '', label: '', color: '#32c766' },
+      levelModal: { originalKey: null, key: '', label: '', color: '#32c766', owaspSeverityMapping: 'UNASSIGNED', action: '' },
       cellModal: {
         likelihoodKey: null,
         likelihoodLabel: '',
@@ -570,6 +576,16 @@ export default {
       return this.draft.levels
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map((level) => ({ value: level.key, text: level.label }));
+    },
+    owaspSeverityOptions() {
+      return [
+        { value: 'CRITICAL',   text: this.$t('severity.critical') },
+        { value: 'HIGH',       text: this.$t('severity.high') },
+        { value: 'MEDIUM',     text: this.$t('severity.medium') },
+        { value: 'LOW',        text: this.$t('severity.low') },
+        { value: 'INFO',       text: this.$t('severity.info') },
+        { value: 'UNASSIGNED', text: this.$t('severity.unassigned') },
+      ];
     },
     levelMap() {
       return this.draft.levels.reduce((acc, level) => {
@@ -842,13 +858,20 @@ export default {
       }
       this.levelModalMode = level ? 'edit' : 'create';
       this.levelModal = level
-        ? { originalKey: level.key, key: level.key, label: level.label, color: level.color }
-        : { originalKey: null, key: '', label: '', color: '#32c766' };
+        ? {
+            originalKey: level.key,
+            key: level.key,
+            label: level.label,
+            color: level.color,
+            owaspSeverityMapping: level.owaspSeverityMapping || 'UNASSIGNED',
+            action: level.action || '',
+          }
+        : { originalKey: null, key: '', label: '', color: '#32c766', owaspSeverityMapping: 'UNASSIGNED', action: '' };
       this.$root.$emit('bv::show::modal', 'riskMatrixLevelModal');
     },
     resetLevelModal() {
       this.levelModalMode = 'create';
-      this.levelModal = { originalKey: null, key: '', label: '', color: '#32c766' };
+      this.levelModal = { originalKey: null, key: '', label: '', color: '#32c766', owaspSeverityMapping: 'UNASSIGNED', action: '' };
     },
     saveLevelModal() {
       if (!this.draft.enabled) {
@@ -857,6 +880,8 @@ export default {
       const key = String(this.levelModal.key || '').trim().toUpperCase();
       const label = String(this.levelModal.label || '').trim();
       const color = String(this.levelModal.color || '').trim() || '#32c766';
+      const owaspSeverityMapping = this.levelModal.owaspSeverityMapping || 'UNASSIGNED';
+      const action = String(this.levelModal.action || '').trim();
       if (!key || !label) {
         this.$toastr.w(this.$t('message.required_fields'));
         return;
@@ -871,6 +896,8 @@ export default {
           key,
           label,
           color,
+          owaspSeverityMapping,
+          action,
           sortOrder: this.draft.levels.length + 1,
         });
       } else {
@@ -878,6 +905,8 @@ export default {
         if (existing) {
           existing.label = label;
           existing.color = color;
+          existing.owaspSeverityMapping = owaspSeverityMapping;
+          existing.action = action;
         }
       }
       this.isDirty = true;
@@ -922,6 +951,17 @@ export default {
         this.$toastr.w(this.$t('condition.unsuccessful_action'));
         return;
       }
+      let reloadedConfig = null;
+      if (this.$customization && this.$customization.preloadRiskMatrixConfig) {
+        reloadedConfig = await this.$customization.preloadRiskMatrixConfig();
+      }
+      if (reloadedConfig?.loadState === 'load_failed') {
+        this.draft = this.normalizeDraft(payload);
+        this.isDirty = false;
+        this.$toastr.w(this.$t('riskMatrix.reloadFailedWarning'));
+        return;
+      }
+      this.draft = this.normalizeDraft(reloadedConfig || payload);
       this.isDirty = false;
       this.$toastr.s(this.$t('admin.configuration_saved'));
     },

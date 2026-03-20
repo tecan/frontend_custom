@@ -38,6 +38,33 @@ export default {
     let cachedRiskMatrixConfig = null;
     let riskMatrixLoaded = false;
     let riskMatrixLoadingPromise = null;
+    // Cache for vulnerability source options - loaded once at startup
+    let cachedVulnSourceConfig = null;
+    let vulnSourceLoaded = false;
+    let vulnSourceLoadingPromise = null;
+
+    const buildDisabledRiskMatrixState = (config = {}) => ({
+      ...config,
+      enabled: config.enabled === true,
+      loadState: 'disabled_by_config',
+      loadError: null,
+    });
+
+    const buildLoadedRiskMatrixState = (config = {}) => ({
+      ...config,
+      enabled: true,
+      loadState: 'loaded',
+      loadError: null,
+    });
+
+    const buildFailedRiskMatrixState = (error) => ({
+      enabled: false,
+      loadState: 'load_failed',
+      loadError: {
+        status: error?.response?.status || null,
+        message: error?.message || null,
+      },
+    });
 
     // Initialize customization API service
     const customizationService = {
@@ -187,10 +214,14 @@ export default {
        * @returns {Promise} Response containing orgCode, template, resetPolicy, sequencePadding
        */
       getVulnerabilityIdSettings() {
+        const token = sessionStorage.getItem('token');
         return axios.get(vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/vulnerability-id',
           {
             withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
-            headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
+            headers: {
+              'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON,
+              ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+            },
           }
         );
       },
@@ -258,7 +289,7 @@ export default {
        * @returns {Object} Cached risk matrix configuration
        */
       getCachedRiskMatrixConfig() {
-        return cachedRiskMatrixConfig || { enabled: false };
+        return cachedRiskMatrixConfig || buildDisabledRiskMatrixState();
       },
 
       /**
@@ -272,16 +303,18 @@ export default {
         riskMatrixLoadingPromise = this.getRiskMatrixSettings()
           .then((response) => {
             if (response && response.data && response.data.enabled !== undefined) {
-              cachedRiskMatrixConfig = response.data;
+              cachedRiskMatrixConfig = response.data.enabled === true
+                ? buildLoadedRiskMatrixState(response.data)
+                : buildDisabledRiskMatrixState(response.data);
             } else {
-              cachedRiskMatrixConfig = { enabled: false };
+              cachedRiskMatrixConfig = buildDisabledRiskMatrixState();
             }
             riskMatrixLoaded = true;
             return cachedRiskMatrixConfig;
           })
-          .catch(() => {
-            cachedRiskMatrixConfig = { enabled: false };
-            riskMatrixLoaded = true;
+          .catch((error) => {
+            cachedRiskMatrixConfig = buildFailedRiskMatrixState(error);
+            riskMatrixLoaded = false; // don't permanently cache failures — allow retry after login
             return cachedRiskMatrixConfig;
           })
           .finally(() => {
@@ -296,6 +329,7 @@ export default {
       invalidateRiskMatrixCache() {
         cachedRiskMatrixConfig = null;
         riskMatrixLoaded = false;
+        riskMatrixLoadingPromise = null;
       },
 
       /**
@@ -303,9 +337,13 @@ export default {
        * @returns {Promise} Response containing risk matrix model
        */
       async getRiskMatrixSettings() {
+        const token = sessionStorage.getItem('token');
         const options = {
           withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
-          headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
+          headers: {
+            'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON,
+            ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+          },
         };
         const baseUrl = vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/risk-matrix';
         try {
@@ -341,6 +379,102 @@ export default {
           }
           throw error;
         }
+      },
+
+      /**
+       * Get cached vulnerability source options (instant access)
+       * @returns {Object} Cached config with enabled flag and sources array
+       */
+      getCachedVulnSourceConfig() {
+        if (cachedVulnSourceConfig) {
+          return cachedVulnSourceConfig;
+        }
+        return {
+          enabled: true,
+          values: [
+            { key: 'customer', label: 'Customer' },
+            { key: 'pen-test', label: 'Pen-Test' },
+            { key: 'sonarqube', label: 'SonarQube' },
+            { key: 'internal-research', label: 'Internal Research' },
+            { key: 'vendor-advisory', label: 'Vendor Advisory' },
+            { key: 'other', label: 'Other' },
+          ],
+        };
+      },
+
+      /**
+       * Preload vulnerability source config (call at app startup)
+       * @returns {Promise} Resolves when config is loaded
+       */
+      async preloadVulnSourceConfig() {
+        if (vulnSourceLoaded) return cachedVulnSourceConfig;
+        if (vulnSourceLoadingPromise) return vulnSourceLoadingPromise;
+        vulnSourceLoadingPromise = this.getVulnSourceSettings()
+          .then((response) => {
+            if (response && response.data) {
+              cachedVulnSourceConfig = response.data;
+              vulnSourceLoaded = true;
+            }
+            return cachedVulnSourceConfig;
+          })
+          .catch((error) => {
+            console.warn('Failed to preload vulnerability source config, using defaults:', error);
+            cachedVulnSourceConfig = this.getCachedVulnSourceConfig();
+            vulnSourceLoaded = true;
+            return cachedVulnSourceConfig;
+          })
+          .finally(() => {
+            vulnSourceLoadingPromise = null;
+          });
+        return vulnSourceLoadingPromise;
+      },
+
+      /**
+       * Invalidate vulnerability source cache
+       */
+      invalidateVulnSourceCache() {
+        cachedVulnSourceConfig = null;
+        vulnSourceLoaded = false;
+        vulnSourceLoadingPromise = null;
+      },
+
+      /**
+       * Get vulnerability source configuration
+       * @returns {Promise} Response containing enabled flag and sources array
+       */
+      getVulnSourceSettings() {
+        const token = sessionStorage.getItem('token');
+        return axios.get(
+          vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/vulnerability-source',
+          {
+            withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
+            headers: {
+              'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON,
+              ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+            },
+          }
+        );
+      },
+
+      /**
+       * Update vulnerability source configuration
+       * @param {Object} settings - Config with enabled flag and sources array
+       * @returns {Promise} Response from update operation
+       */
+      updateVulnSourceSettings(settings) {
+        this.invalidateVulnSourceCache();
+        return axios.put(
+          vueApp.prototype.$api.BASE_URL + '/' + vueApp.prototype.$api.URL_CUSTOMIZATION + '/vulnerability-source',
+          settings,
+          {
+            withCredentials: vueApp.prototype.$api.WITH_CREDENTIALS,
+            headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
+          }
+        ).then((response) => {
+          cachedVulnSourceConfig = settings;
+          vulnSourceLoaded = true;
+          return response;
+        });
       },
     };
 

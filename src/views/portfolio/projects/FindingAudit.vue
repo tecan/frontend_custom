@@ -69,7 +69,15 @@
           trim
         />
       </b-form-group>
-      <b-form-group v-if="customMatrix && customMatrix.enabled" id="fieldset-risk-matrix" :label="riskAssessmentTitle">
+      <b-alert
+        v-if="showRiskMatrixLoadWarning"
+        variant="warning"
+        show
+        class="mb-3"
+      >
+        {{ riskMatrixLoadWarningMessage }}
+      </b-alert>
+      <b-form-group v-if="showRiskMatrix" id="fieldset-risk-matrix" :label="riskAssessmentTitle">
         <div class="risk-matrix-inline">
           <div class="risk-matrix-field">
             <label class="risk-matrix-label" for="riskMatrixImpact">
@@ -122,14 +130,14 @@
           <b-form-textarea
             id="riskMatrixJustification"
             v-model="riskJustification"
-            rows="3"
+            rows="6"
             :placeholder="auditTextPlaceholders.riskJustificationPlaceholder"
             :disabled="!canEditRiskMatrix"
           />
         </b-form-group>
       </b-form-group>
       <b-form-group
-        v-if="customMatrix && customMatrix.enabled"
+        v-if="showRiskMatrix"
         id="fieldset-residual-risk"
         :label="residualRiskTitle"
       >
@@ -185,7 +193,7 @@
           <b-form-textarea
             id="residualRiskJustification"
             v-model="residualRiskJustification"
-            rows="3"
+            rows="6"
             :placeholder="auditTextPlaceholders.residualRiskPlaceholder"
             :disabled="!canEditRiskMatrix"
           />
@@ -325,6 +333,29 @@
           </b-form-group>
         </b-col>
       </b-row>
+      <b-row v-if="this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)">
+        <b-col sm="6">
+          <b-form-group
+            id="fieldset-source-of-discovery"
+            :label="$t('admin.source_of_discovery')"
+            label-for="input-source-of-discovery"
+          >
+            <b-input-group id="input-source-of-discovery">
+              <b-form-select
+                v-model="analysisSourceOfDiscovery"
+                :options="sourceOfDiscoveryOptions"
+                @change="makeAnalysis"
+                v-b-tooltip.hover
+                :title="$t('admin.source_of_discovery')"
+              >
+                <template #first>
+                  <b-form-select-option :value="null">{{ $t('admin.source_of_discovery_placeholder') }}</b-form-select-option>
+                </template>
+              </b-form-select>
+            </b-input-group>
+          </b-form-group>
+        </b-col>
+      </b-row>
       <b-form-group
         id="fieldset-12"
         v-if="this.isPermitted(this.PERMISSIONS.VIEW_VULNERABILITY)"
@@ -362,39 +393,8 @@ import common from '@/shared/common';
 import BootstrapToggle from 'vue-bootstrap-toggle';
 import permissionsMixin from '@/mixins/permissionsMixin';
 import { contrastTextColor } from '@/shared/colorUtils';
-
-const RISK_MATRIX_TABLE = {
-  VIRTUALLY_IMPOSSIBLE: {
-    LOW: { rating: 'very_low', action: 'accept', color: '#4CAF50' },
-    MEDIUM: { rating: 'very_low', action: 'accept', color: '#4CAF50' },
-    HIGH: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-    CRITICAL: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-  },
-  UNLIKELY: {
-    LOW: { rating: 'very_low', action: 'accept', color: '#4CAF50' },
-    MEDIUM: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-    HIGH: { rating: 'medium', action: 'monitor_plan', color: '#FF9800' },
-    CRITICAL: { rating: 'high', action: 'mitigate', color: '#f44336' },
-  },
-  POSSIBLE: {
-    LOW: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-    MEDIUM: { rating: 'medium', action: 'monitor_plan', color: '#FF9800' },
-    HIGH: { rating: 'high', action: 'mitigate', color: '#f44336' },
-    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
-  },
-  LIKELY: {
-    LOW: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-    MEDIUM: { rating: 'high', action: 'mitigate', color: '#f44336' },
-    HIGH: { rating: 'high', action: 'mitigate', color: '#f44336' },
-    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
-  },
-  ALMOST_CERTAIN: {
-    LOW: { rating: 'low', action: 'monitor', color: '#8BC34A' },
-    MEDIUM: { rating: 'high', action: 'mitigate', color: '#f44336' },
-    HIGH: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
-    CRITICAL: { rating: 'critical', action: 'mitigate_immediately', color: '#D32F2F' },
-  },
-};
+// [CUSTOM: INTERNAL-RISK-BADGE] RISK_MATRIX_TABLE moved to shared util for reuse in findings table
+import { RISK_MATRIX_TABLE } from '@/shared/riskMatrixUtils';
 
 export default {
   props: {
@@ -468,6 +468,7 @@ export default {
       analysisState: null,
       analysisJustification: null,
       analysisResponse: null,
+      analysisSourceOfDiscovery: null,
       analysisDetails: null,
       localAnalysisDetails: null,
       detailsWasEmptyOnLoad: false,
@@ -532,6 +533,13 @@ export default {
     },
   },
   computed: {
+    sourceOfDiscoveryOptions() {
+      const config = this.$customization ? this.$customization.getCachedVulnSourceConfig() : null;
+      if (config && config.enabled && Array.isArray(config.values)) {
+        return config.values.map((s) => ({ value: s.key, text: s.label }));
+      }
+      return [];
+    },
     calculatedRisk() {
       return this.lookupRiskEntry(
         this.selectedLikelihood,
@@ -578,6 +586,18 @@ export default {
     },
     canEditRiskMatrix() {
       return this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS);
+    },
+    showRiskMatrix() {
+      return this.customMatrix?.loadState === 'loaded' && this.customMatrix.enabled === true;
+    },
+    showRiskMatrixLoadWarning() {
+      return this.customMatrix?.loadState === 'load_failed'
+        && this.finding?.vulnerability?.source === 'INTERNAL';
+    },
+    riskMatrixLoadWarningMessage() {
+      const baseMessage = this.$t('riskMatrix.loadFailedWarning');
+      const status = this.customMatrix?.loadError?.status;
+      return status ? `${baseMessage} (${status})` : baseMessage;
     },
     axisImpactLabel() {
       return (this.customMatrix && this.customMatrix.enabled && this.customMatrix.axisLabels && this.customMatrix.axisLabels.impact)
@@ -735,6 +755,9 @@ export default {
       if (Object.prototype.hasOwnProperty.call(analysis, 'analysisResponse')) {
         this.analysisResponse = analysis.analysisResponse;
       }
+      if (Object.prototype.hasOwnProperty.call(analysis, 'sourceOfDiscovery')) {
+        this.analysisSourceOfDiscovery = analysis.sourceOfDiscovery;
+      }
       if (Object.prototype.hasOwnProperty.call(analysis, 'riskImpact')) {
         this.selectedImpact = analysis.riskImpact;
       }
@@ -859,21 +882,21 @@ export default {
       this.comment = null;
     },
     severityFromRiskLevel(rating) {
-      const VALID_SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'];
-      const POSITION_MAP = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+      // [CUSTOM: RISK-MATRIX-SEVERITY-MAPPING]
+      // Use admin-configured owaspSeverityMapping if available — no more positional guessing
+      const VALID_SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO', 'UNASSIGNED'];
       if (!rating) return 'UNASSIGNED';
       const key = rating.toUpperCase();
-      if (VALID_SEVERITIES.includes(key)) return key;
-      if (key === 'VERY_LOW') return 'LOW';
       if (this.customMatrix?.levels) {
-        const sorted = [...this.customMatrix.levels].sort((a, b) => a.sortOrder - b.sortOrder);
-        const idx = sorted.findIndex((l) => l.key === key);
-        if (idx !== -1) {
-          const pos = Math.floor((idx / sorted.length) * POSITION_MAP.length);
-          return POSITION_MAP[Math.min(pos, POSITION_MAP.length - 1)];
+        const level = this.customMatrix.levels.find((l) => l.key === key);
+        if (level?.owaspSeverityMapping && VALID_SEVERITIES.includes(level.owaspSeverityMapping.toUpperCase())) {
+          return level.owaspSeverityMapping.toUpperCase();
         }
       }
-      return 'LOW';
+      // Fallback: direct key match for standard names
+      if (VALID_SEVERITIES.includes(key)) return key;
+      if (key === 'VERY_LOW') return 'LOW';
+      return 'UNASSIGNED';
     },
     updateVulnerabilitySeverity() {
       if (!this.customMatrix?.enabled || this.finding.vulnerability.source !== 'INTERNAL') return;
@@ -899,7 +922,13 @@ export default {
         .then(() => {
           this.finding.vulnerability.severity = severity;
           if (this.onSeverityUpdated) {
-            this.onSeverityUpdated();
+            // [CUSTOM: INTERNAL-RISK-BADGE] Pass updated risk values so badge updates immediately
+            this.onSeverityUpdated({
+              riskLikelihood: this.selectedLikelihood,
+              riskImpact: this.selectedImpact,
+              residualRiskLikelihood: this.residualLikelihood,
+              residualRiskImpact: this.residualImpact,
+            });
           }
         })
         .catch((error) => {
@@ -929,6 +958,7 @@ export default {
           analysisJustification: analysisJustification,
           analysisResponse: analysisResponse,
           analysisDetails: analysisDetails,
+          sourceOfDiscovery: this.analysisSourceOfDiscovery,
           // risk matrix fields
           riskImpact: this.selectedImpact,
           riskLikelihood: this.selectedLikelihood,
@@ -943,6 +973,15 @@ export default {
           this.$toastr.s(this.$t('message.updated'));
           this.updateAnalysisData(response.data);
           this.updateVulnerabilitySeverity();
+          // [CUSTOM: INTERNAL-RISK-BADGE] Notify badge immediately regardless of severity update outcome
+          if (this.onSeverityUpdated) {
+            this.onSeverityUpdated({
+              riskLikelihood: this.selectedLikelihood,
+              riskImpact: this.selectedImpact,
+              residualRiskLikelihood: this.residualLikelihood,
+              residualRiskImpact: this.residualImpact,
+            });
+          }
         })
         .catch(() => {
           this.$toastr.w(this.$t('condition.unsuccessful_action'));
@@ -961,8 +1000,8 @@ export default {
     // - if cache was invalidated (admin just saved) it reloads from backend
     if (this.$customization && this.$customization.preloadRiskMatrixConfig) {
       this.$customization.preloadRiskMatrixConfig().then((matrixConfig) => {
-        if (matrixConfig && matrixConfig.enabled) {
-          this.customMatrix = matrixConfig;
+        this.customMatrix = matrixConfig;
+        if (matrixConfig?.loadState === 'loaded' && matrixConfig.enabled) {
           this.riskImpactChoices = matrixConfig.impactValues
             .slice()
             .sort((a, b) => a.sortOrder - b.sortOrder)
