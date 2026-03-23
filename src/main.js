@@ -94,14 +94,6 @@ function createVueApp() {
     .get(`${Vue.prototype.$api.BASE_URL}/${Vue.prototype.$api.URL_ABOUT}`)
     .then((result) => {
       Vue.prototype.$dtrack = result.data;
-      // Preload customization settings for instant vulnerability ID generation
-      if (Vue.prototype.$customization && Vue.prototype.$customization.preloadVulnIdSettings) {
-        Vue.prototype.$customization.preloadVulnIdSettings();
-      }
-      // Preload risk matrix config so the audit form has it available instantly
-      if (Vue.prototype.$customization && Vue.prototype.$customization.preloadRiskMatrixConfig) {
-        Vue.prototype.$customization.preloadRiskMatrixConfig();
-      }
     });
 
   Vue.prototype.$version = version;

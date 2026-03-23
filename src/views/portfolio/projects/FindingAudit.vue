@@ -126,11 +126,15 @@
             </div>
           </div>
         </div>
-        <b-form-group class="mt-2 mb-0" :label="$t('riskMatrix.justificationLabel')">
+        <b-form-group class="mt-2 mb-0">
+          <template #label>
+            {{ $t('riskMatrix.justificationLabel') }} <span v-if="(customMatrix && customMatrix.requireRiskAssessment) || (selectedImpact && selectedLikelihood)" class="text-danger">*</span>
+          </template>
           <b-form-textarea
             id="riskMatrixJustification"
             v-model="riskJustification"
-            rows="6"
+            rows="8"
+            class="details-aligned-textarea"
             :placeholder="auditTextPlaceholders.riskJustificationPlaceholder"
             :disabled="!canEditRiskMatrix"
           />
@@ -189,11 +193,15 @@
             </div>
           </div>
         </div>
-        <b-form-group class="mt-2 mb-0" :label="$t('riskMatrix.justificationLabel')">
+        <b-form-group class="mt-2 mb-0">
+          <template #label>
+            {{ $t('riskMatrix.justificationLabel') }} <span v-if="(customMatrix && customMatrix.requireResidualRiskAssessment) || (residualImpact && residualLikelihood)" class="text-danger">*</span>
+          </template>
           <b-form-textarea
             id="residualRiskJustification"
             v-model="residualRiskJustification"
-            rows="6"
+            rows="8"
+            class="details-aligned-textarea"
             :placeholder="auditTextPlaceholders.residualRiskPlaceholder"
             :disabled="!canEditRiskMatrix"
           />
@@ -343,7 +351,7 @@
           id="analysisDetailsField"
           v-model="localAnalysisDetails"
           rows="7"
-          :class="['form-control', { 'text-muted': detailsWasEmptyOnLoad && localAnalysisDetails === analysisDetailsInstructionText }]"
+          :class="['form-control', 'details-aligned-textarea', { 'text-muted': detailsWasEmptyOnLoad && localAnalysisDetails === analysisDetailsInstructionText }]"
           :disabled="!this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
           v-b-tooltip.hover
           :title="this.$t('message.analysis_details_tooltip')"
@@ -848,21 +856,21 @@ export default {
       this.comment = null;
     },
     severityFromRiskLevel(rating) {
-      const VALID_SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'];
-      const POSITION_MAP = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+      // [CUSTOM: RISK-MATRIX-SEVERITY-MAPPING]
+      // Use admin-configured owaspSeverityMapping if available — no more positional guessing
+      const VALID_SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO', 'UNASSIGNED'];
       if (!rating) return 'UNASSIGNED';
       const key = rating.toUpperCase();
-      if (VALID_SEVERITIES.includes(key)) return key;
-      if (key === 'VERY_LOW') return 'LOW';
       if (this.customMatrix?.levels) {
-        const sorted = [...this.customMatrix.levels].sort((a, b) => a.sortOrder - b.sortOrder);
-        const idx = sorted.findIndex((l) => l.key === key);
-        if (idx !== -1) {
-          const pos = Math.floor((idx / sorted.length) * POSITION_MAP.length);
-          return POSITION_MAP[Math.min(pos, POSITION_MAP.length - 1)];
+        const level = this.customMatrix.levels.find((l) => l.key === key);
+        if (level?.owaspSeverityMapping && VALID_SEVERITIES.includes(level.owaspSeverityMapping.toUpperCase())) {
+          return level.owaspSeverityMapping.toUpperCase();
         }
       }
-      return 'LOW';
+      // Fallback: direct key match for standard names
+      if (VALID_SEVERITIES.includes(key)) return key;
+      if (key === 'VERY_LOW') return 'LOW';
+      return 'UNASSIGNED';
     },
     updateVulnerabilitySeverity() {
       if (!this.customMatrix?.enabled || this.finding.vulnerability.source !== 'INTERNAL') return;
@@ -938,6 +946,15 @@ export default {
           this.$toastr.s(this.$t('message.updated'));
           this.updateAnalysisData(response.data);
           this.updateVulnerabilitySeverity();
+          // [CUSTOM: INTERNAL-RISK-BADGE] Notify badge immediately regardless of severity update outcome
+          if (this.onSeverityUpdated) {
+            this.onSeverityUpdated({
+              riskLikelihood: this.selectedLikelihood,
+              riskImpact: this.selectedImpact,
+              residualRiskLikelihood: this.residualLikelihood,
+              residualRiskImpact: this.residualImpact,
+            });
+          }
         })
         .catch(() => {
           this.$toastr.w(this.$t('condition.unsuccessful_action'));
@@ -985,6 +1002,10 @@ export default {
 </script>
 
 <style scoped>
+.details-aligned-textarea {
+  min-height: 12rem;
+}
+
 .calculated-risk-field {
   min-height: 38px;
   border: 1px solid #495057;

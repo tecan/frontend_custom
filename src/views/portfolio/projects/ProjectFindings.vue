@@ -431,8 +431,12 @@ export default {
                 projectUuid: this.uuid,
                 onSeverityUpdated: (updatedAnalysis) => {
                   // [CUSTOM: INTERNAL-RISK-BADGE] Update stale row data so formatter uses new values immediately
-                  if (updatedAnalysis && row.analysis) {
-                    Object.assign(row.analysis, updatedAnalysis);
+                  if (updatedAnalysis) {
+                    if (row.analysis) {
+                      Object.assign(row.analysis, updatedAnalysis);
+                    } else {
+                      row.analysis = { ...updatedAnalysis };
+                    }
                   }
                   this.pendingTableRefresh = true;
                   // Re-render just the severity cell — panel stays open

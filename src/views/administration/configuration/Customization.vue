@@ -104,8 +104,8 @@
         </b-card>
 
         <div class="text-right">
-          <b-button variant="primary" @click="saveVulnIdConfig">
-            {{ $t('message.save_changes') }}
+          <b-button variant="outline-primary" class="px-4" @click="saveVulnIdConfig">
+            {{ $t('message.update') }}
           </b-button>
         </div>
       </b-tab>
@@ -185,8 +185,8 @@
         </b-card>
 
         <div class="text-right">
-          <b-button variant="primary" @click="saveTextConfig">
-            {{ $t('message.save_changes') }}
+          <b-button variant="outline-primary" class="px-4" @click="saveTextConfig">
+            {{ $t('message.update') }}
           </b-button>
         </div>
       </b-tab>
@@ -195,6 +195,11 @@
       <b-tab :title="$t('admin.risk_matrix')">
         <risk-matrix />
       </b-tab>
+
+      <!-- Vulnerability Sources Tab -->
+      <b-tab :title="$t('admin.vulnerability_sources')">
+        <vulnerability-source />
+      </b-tab>
     </b-tabs>
   </div>
 </template>
@@ -202,12 +207,14 @@
 <script>
 import permissionsMixin from '../../../mixins/permissionsMixin';
 import RiskMatrix from './RiskMatrix.vue';
+import VulnerabilitySource from './VulnerabilitySource.vue';
 
 export default {
   name: 'Customization',
   mixins: [permissionsMixin],
   components: {
     RiskMatrix,
+    VulnerabilitySource,
   },
   data() {
     return {
@@ -272,8 +279,9 @@ export default {
         '#vulnerability-ids': 0,
         '#text-placeholders': 1,
         '#risk-matrix': 2,
+        '#vulnerability-sources': 3,
       };
-      const maxTabIndex = 2;
+      const maxTabIndex = 3;
       if (hash && tabMap[hash] !== undefined) {
         this.activeTab = tabMap[hash];
       } else {
@@ -292,7 +300,7 @@ export default {
     },
     onTabChange(tabIndex) {
       localStorage.setItem('customization-active-tab', tabIndex);
-      const hashMap = ['#vulnerability-ids', '#text-placeholders', '#risk-matrix'];
+      const hashMap = ['#vulnerability-ids', '#text-placeholders', '#risk-matrix', '#vulnerability-sources'];
       if (this.$route.hash !== hashMap[tabIndex]) {
         this.$router.replace({ hash: hashMap[tabIndex] }).catch(() => {});
       }
