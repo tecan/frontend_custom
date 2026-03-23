@@ -66,29 +66,6 @@ export default {
       },
     });
 
-    const buildDisabledRiskMatrixState = (config = {}) => ({
-      ...config,
-      enabled: config.enabled === true,
-      loadState: 'disabled_by_config',
-      loadError: null,
-    });
-
-    const buildLoadedRiskMatrixState = (config = {}) => ({
-      ...config,
-      enabled: true,
-      loadState: 'loaded',
-      loadError: null,
-    });
-
-    const buildFailedRiskMatrixState = (error) => ({
-      enabled: false,
-      loadState: 'load_failed',
-      loadError: {
-        status: error?.response?.status || null,
-        message: error?.message || null,
-      },
-    });
-
     // Initialize customization API service
     const customizationService = {
       /**
