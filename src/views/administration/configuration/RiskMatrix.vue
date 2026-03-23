@@ -313,8 +313,8 @@
     </b-card>
 
     <div class="matrix-footer text-right">
-      <b-button variant="primary" @click="saveSettings">
-        {{ $t('message.save_changes') }}
+      <b-button variant="outline-primary" class="px-4" @click="saveSettings">
+        {{ $t('message.update') }}
       </b-button>
     </div>
 

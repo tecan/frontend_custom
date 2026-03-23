@@ -126,11 +126,15 @@
             </div>
           </div>
         </div>
-        <b-form-group class="mt-2 mb-0" :label="$t('riskMatrix.justificationLabel')">
+        <b-form-group class="mt-2 mb-0">
+          <template #label>
+            {{ $t('riskMatrix.justificationLabel') }} <span v-if="(customMatrix && customMatrix.requireRiskAssessment) || (selectedImpact && selectedLikelihood)" class="text-danger">*</span>
+          </template>
           <b-form-textarea
             id="riskMatrixJustification"
             v-model="riskJustification"
-            rows="6"
+            rows="8"
+            class="details-aligned-textarea"
             :placeholder="auditTextPlaceholders.riskJustificationPlaceholder"
             :disabled="!canEditRiskMatrix"
           />
@@ -189,11 +193,15 @@
             </div>
           </div>
         </div>
-        <b-form-group class="mt-2 mb-0" :label="$t('riskMatrix.justificationLabel')">
+        <b-form-group class="mt-2 mb-0">
+          <template #label>
+            {{ $t('riskMatrix.justificationLabel') }} <span v-if="(customMatrix && customMatrix.requireResidualRiskAssessment) || (residualImpact && residualLikelihood)" class="text-danger">*</span>
+          </template>
           <b-form-textarea
             id="residualRiskJustification"
             v-model="residualRiskJustification"
-            rows="6"
+            rows="8"
+            class="details-aligned-textarea"
             :placeholder="auditTextPlaceholders.residualRiskPlaceholder"
             :disabled="!canEditRiskMatrix"
           />
@@ -333,29 +341,6 @@
           </b-form-group>
         </b-col>
       </b-row>
-      <b-row v-if="this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)">
-        <b-col sm="6">
-          <b-form-group
-            id="fieldset-source-of-discovery"
-            :label="$t('admin.source_of_discovery')"
-            label-for="input-source-of-discovery"
-          >
-            <b-input-group id="input-source-of-discovery">
-              <b-form-select
-                v-model="analysisSourceOfDiscovery"
-                :options="sourceOfDiscoveryOptions"
-                @change="makeAnalysis"
-                v-b-tooltip.hover
-                :title="$t('admin.source_of_discovery')"
-              >
-                <template #first>
-                  <b-form-select-option :value="null">{{ $t('admin.source_of_discovery_placeholder') }}</b-form-select-option>
-                </template>
-              </b-form-select>
-            </b-input-group>
-          </b-form-group>
-        </b-col>
-      </b-row>
       <b-form-group
         id="fieldset-12"
         v-if="this.isPermitted(this.PERMISSIONS.VIEW_VULNERABILITY)"
@@ -366,7 +351,7 @@
           id="analysisDetailsField"
           v-model="localAnalysisDetails"
           rows="7"
-          :class="['form-control', { 'text-muted': detailsWasEmptyOnLoad && localAnalysisDetails === analysisDetailsInstructionText }]"
+          :class="['form-control', 'details-aligned-textarea', { 'text-muted': detailsWasEmptyOnLoad && localAnalysisDetails === analysisDetailsInstructionText }]"
           :disabled="!this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
           v-b-tooltip.hover
           :title="this.$t('message.analysis_details_tooltip')"
@@ -468,7 +453,6 @@ export default {
       analysisState: null,
       analysisJustification: null,
       analysisResponse: null,
-      analysisSourceOfDiscovery: null,
       analysisDetails: null,
       localAnalysisDetails: null,
       detailsWasEmptyOnLoad: false,
@@ -533,13 +517,6 @@ export default {
     },
   },
   computed: {
-    sourceOfDiscoveryOptions() {
-      const config = this.$customization ? this.$customization.getCachedVulnSourceConfig() : null;
-      if (config && config.enabled && Array.isArray(config.values)) {
-        return config.values.map((s) => ({ value: s.key, text: s.label }));
-      }
-      return [];
-    },
     calculatedRisk() {
       return this.lookupRiskEntry(
         this.selectedLikelihood,
@@ -755,9 +732,6 @@ export default {
       if (Object.prototype.hasOwnProperty.call(analysis, 'analysisResponse')) {
         this.analysisResponse = analysis.analysisResponse;
       }
-      if (Object.prototype.hasOwnProperty.call(analysis, 'sourceOfDiscovery')) {
-        this.analysisSourceOfDiscovery = analysis.sourceOfDiscovery;
-      }
       if (Object.prototype.hasOwnProperty.call(analysis, 'riskImpact')) {
         this.selectedImpact = analysis.riskImpact;
       }
@@ -958,7 +932,6 @@ export default {
           analysisJustification: analysisJustification,
           analysisResponse: analysisResponse,
           analysisDetails: analysisDetails,
-          sourceOfDiscovery: this.analysisSourceOfDiscovery,
           // risk matrix fields
           riskImpact: this.selectedImpact,
           riskLikelihood: this.selectedLikelihood,
@@ -1029,6 +1002,10 @@ export default {
 </script>
 
 <style scoped>
+.details-aligned-textarea {
+  min-height: 12rem;
+}
+
 .calculated-risk-field {
   min-height: 38px;
   border: 1px solid #495057;

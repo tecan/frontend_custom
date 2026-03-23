@@ -104,8 +104,8 @@
         </b-card>
 
         <div class="text-right">
-          <b-button variant="primary" @click="saveVulnIdConfig">
-            {{ $t('message.save_changes') }}
+          <b-button variant="outline-primary" class="px-4" @click="saveVulnIdConfig">
+            {{ $t('message.update') }}
           </b-button>
         </div>
       </b-tab>
@@ -185,8 +185,8 @@
         </b-card>
 
         <div class="text-right">
-          <b-button variant="primary" @click="saveTextConfig">
-            {{ $t('message.save_changes') }}
+          <b-button variant="outline-primary" class="px-4" @click="saveTextConfig">
+            {{ $t('message.update') }}
           </b-button>
         </div>
       </b-tab>

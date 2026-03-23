@@ -164,6 +164,15 @@ export default {
       });
   },
   methods: {
+    preloadCustomizationSettings() {
+      if (
+        this.$customization &&
+        typeof this.$customization.preloadAll === 'function'
+      ) {
+        return this.$customization.preloadAll();
+      }
+      return Promise.resolve();
+    },
     login() {
       const url = this.$api.BASE_URL + '/' + this.$api.URL_LOGIN;
       const requestBody = {
@@ -182,9 +191,11 @@ export default {
         .then((result) => {
           if (result.status === 200) {
             EventBus.$emit('authenticated', result.data);
-            redirectTo
-              ? this.$router.replace(redirectTo)
-              : this.$router.replace({ name: 'Dashboard' });
+            this.preloadCustomizationSettings().finally(() => {
+              redirectTo
+                ? this.$router.replace(redirectTo)
+                : this.$router.replace({ name: 'Dashboard' });
+            });
           }
         })
         .catch((err) => {
@@ -288,11 +299,13 @@ export default {
             .then((result) => {
               if (result.status === 200) {
                 EventBus.$emit('authenticated', result.data);
-                // redirect to url from query param but only if it is save for redirection
-                const redirectTo = getRedirectUrl(this.$router);
-                redirectTo
-                  ? this.$router.replace(redirectTo)
-                  : this.$router.replace({ name: 'Dashboard' });
+                this.preloadCustomizationSettings().finally(() => {
+                  // redirect to url from query param but only if it is save for redirection
+                  const redirectTo = getRedirectUrl(this.$router);
+                  redirectTo
+                    ? this.$router.replace(redirectTo)
+                    : this.$router.replace({ name: 'Dashboard' });
+                });
               }
             })
             .catch((err) => {

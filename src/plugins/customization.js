@@ -194,6 +194,20 @@ export default {
       },
 
       /**
+       * Preload all customization settings after authentication succeeds.
+       * Uses allSettled so one failing endpoint does not block the rest.
+       * @returns {Promise<void>}
+       */
+      async preloadAll() {
+        await Promise.allSettled([
+          this.preloadVulnIdSettings(),
+          this.preloadTextPlaceholderSettings(),
+          this.preloadRiskMatrixConfig(),
+          this.preloadVulnSourceConfig(),
+        ]);
+      },
+
+      /**
        * Invalidate cache (call when admin updates settings)
        */
       invalidateCache() {
