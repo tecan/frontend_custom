@@ -114,7 +114,6 @@
                 </b-button>
               </template>
             </div>
-            <b-badge variant="secondary">{{ $t('riskMatrix.columns') }}</b-badge>
           </div>
           <div class="matrix-card-body">
             <div
@@ -168,7 +167,6 @@
                 </b-button>
               </template>
             </div>
-            <b-badge variant="secondary">{{ $t('riskMatrix.rows') }}</b-badge>
           </div>
           <div class="matrix-card-body">
             <div
@@ -222,7 +220,7 @@
                 </b-button>
               </template>
             </div>
-            <b-badge variant="secondary" class="ml-2 text-nowrap">
+            <b-badge variant="light" class="ml-2 text-nowrap text-muted border">
               {{ $t('riskMatrix.owaspSeverityMapping') }}
             </b-badge>
           </div>
@@ -234,7 +232,7 @@
             >
               <span class="color-dot" :style="{ backgroundColor: level.color }"></span>
               <span class="flex-grow-1">{{ level.label }}</span>
-              <b-badge variant="secondary" class="mr-2">
+              <b-badge class="mr-2" :style="severityBadgeStyle(level)">
                 {{ mappedSeverityLabel(level) }}
               </b-badge>
               <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="openLevelModal(level)">
@@ -771,6 +769,14 @@ export default {
         default:
           return this.$t('severity.unassigned');
       }
+    },
+    severityBadgeStyle(level) {
+      const bg = level.color || '#6c757d';
+      return {
+        backgroundColor: bg,
+        color: contrastTextColor(bg),
+        border: 'none',
+      };
     },
     getCellBackgroundStyle(likelihoodKey, impactKey) {
       const display = this.getCellDisplay(likelihoodKey, impactKey);
