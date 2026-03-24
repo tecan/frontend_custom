@@ -222,6 +222,9 @@
                 </b-button>
               </template>
             </div>
+            <b-badge variant="secondary" class="ml-2 text-nowrap">
+              {{ $t('riskMatrix.owaspSeverityMapping') }}
+            </b-badge>
           </div>
           <div class="matrix-card-body">
             <div
@@ -231,8 +234,8 @@
             >
               <span class="color-dot" :style="{ backgroundColor: level.color }"></span>
               <span class="flex-grow-1">{{ level.label }}</span>
-              <b-badge v-if="usedLevelKeys.has(level.key)" variant="info" class="mr-2">
-                {{ $t('riskMatrix.inUse') }}
+              <b-badge variant="secondary" class="mr-2">
+                {{ mappedSeverityLabel(level) }}
               </b-badge>
               <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="openLevelModal(level)">
                 <i class="fa fa-pencil"></i>
@@ -480,11 +483,11 @@ function createDefaultDraft() {
     { key: 'ALMOST_CERTAIN', label: 'Almost Certain', sortOrder: 5 },
   ];
   const levels = [
-    { key: 'VERY_LOW', label: 'Very Low', color: '#4CAF50', sortOrder: 1 },
-    { key: 'LOW', label: 'Low', color: '#8BC34A', sortOrder: 2 },
-    { key: 'MEDIUM', label: 'Medium', color: '#FF9800', sortOrder: 3 },
-    { key: 'HIGH', label: 'High', color: '#f44336', sortOrder: 4 },
-    { key: 'CRITICAL', label: 'Critical', color: '#D32F2F', sortOrder: 5 },
+    { key: 'VERY_LOW', label: 'Very Low', color: '#4CAF50', owaspSeverityMapping: 'LOW', action: 'Accept', sortOrder: 1 },
+    { key: 'LOW', label: 'Low', color: '#8BC34A', owaspSeverityMapping: 'LOW', action: 'Monitor', sortOrder: 2 },
+    { key: 'MEDIUM', label: 'Medium', color: '#FF9800', owaspSeverityMapping: 'MEDIUM', action: 'Monitor & Plan', sortOrder: 3 },
+    { key: 'HIGH', label: 'High', color: '#f44336', owaspSeverityMapping: 'HIGH', action: 'Mitigate', sortOrder: 4 },
+    { key: 'CRITICAL', label: 'Critical', color: '#D32F2F', owaspSeverityMapping: 'CRITICAL', action: 'Mitigate Immediately', sortOrder: 5 },
   ];
 
   const cells = {};
@@ -664,6 +667,11 @@ export default {
         normalized.axisLabels.likelihood = fallback.axisLabels.likelihood;
       }
 
+      const fallbackLevelsByKey = fallback.levels.reduce((acc, level) => {
+        acc[level.key] = level;
+        return acc;
+      }, {});
+
       normalized.impactValues = normalized.impactValues
         .map((item, idx) => ({
           key: String(item.key || '').toUpperCase(),
@@ -681,12 +689,18 @@ export default {
         .filter((item) => item.key);
 
       normalized.levels = normalized.levels
-        .map((item, idx) => ({
-          key: String(item.key || '').toUpperCase(),
-          label: item.label || item.key,
-          color: item.color || '#32c766',
-          sortOrder: Number.isFinite(item.sortOrder) ? item.sortOrder : idx + 1,
-        }))
+        .map((item, idx) => {
+          const key = String(item.key || '').toUpperCase();
+          const fallbackLevel = fallbackLevelsByKey[key] || {};
+          return {
+            key,
+            label: item.label || item.key,
+            color: item.color || '#32c766',
+            owaspSeverityMapping: String(item.owaspSeverityMapping || fallbackLevel.owaspSeverityMapping || 'UNASSIGNED').toUpperCase(),
+            action: normalizeActionText(item.action ?? fallbackLevel.action, key),
+            sortOrder: Number.isFinite(item.sortOrder) ? item.sortOrder : idx + 1,
+          };
+        })
         .filter((item) => item.key);
 
       const validLevelKeys = new Set(normalized.levels.map((level) => level.key));
@@ -740,6 +754,23 @@ export default {
         levelColor: level.color,
         actionLabel: String(cell.action || '').trim() || defaultAction(level.key),
       };
+    },
+    mappedSeverityLabel(level) {
+      const mapping = String(level?.owaspSeverityMapping || 'UNASSIGNED').toUpperCase();
+      switch (mapping) {
+        case 'CRITICAL':
+          return this.$t('severity.critical');
+        case 'HIGH':
+          return this.$t('severity.high');
+        case 'MEDIUM':
+          return this.$t('severity.medium');
+        case 'LOW':
+          return this.$t('severity.low');
+        case 'INFO':
+          return this.$t('severity.info');
+        default:
+          return this.$t('severity.unassigned');
+      }
     },
     getCellBackgroundStyle(likelihoodKey, impactKey) {
       const display = this.getCellDisplay(likelihoodKey, impactKey);

@@ -1043,7 +1043,7 @@
     "addLevel": "Add Level",
     "editLevel": "Edit Risk Level",
     "owaspSeverityMapping": "OWASP Severity Mapping",
-    "owaspSeverityMappingDesc": "Maps this risk level to an official severity for VDR export and severity write-back.",
+    "owaspSeverityMappingDesc": "Maps this custom risk level to a standard OWASP severity used for VDR export and for writing back severity on internal vulnerabilities.",
     "levelAction": "Action",
     "levelActionPlaceholder": "e.g. Accept, Monitor, Mitigate Immediately",
     "columns": "Columns",
