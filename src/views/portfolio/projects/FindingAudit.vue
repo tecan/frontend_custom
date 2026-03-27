@@ -63,7 +63,22 @@
         <b-form-textarea
           id="input-3"
           :value="finding.vulnerability.description"
-          rows="7"
+          rows="4"
+          class="form-control disabled"
+          readonly
+          trim
+        />
+      </b-form-group>
+      <b-form-group
+        v-if="finding.vulnerability.recommendation"
+        id="fieldset-4"
+        :label="this.$t('message.recommendation')"
+        label-for="input-4"
+      >
+        <b-form-textarea
+          id="input-4"
+          :value="finding.vulnerability.recommendation"
+          rows="4"
           class="form-control disabled"
           readonly
           trim
@@ -133,8 +148,7 @@
           <b-form-textarea
             id="riskMatrixJustification"
             v-model="riskJustification"
-            rows="8"
-            class="details-aligned-textarea"
+            rows="4"
             :placeholder="auditTextPlaceholders.riskJustificationPlaceholder"
             :disabled="!canEditRiskMatrix"
           />
@@ -200,28 +214,11 @@
           <b-form-textarea
             id="residualRiskJustification"
             v-model="residualRiskJustification"
-            rows="8"
-            class="details-aligned-textarea"
+            rows="4"
             :placeholder="auditTextPlaceholders.residualRiskPlaceholder"
             :disabled="!canEditRiskMatrix"
           />
         </b-form-group>
-      </b-form-group>
-      <b-form-group
-        v-if="finding.vulnerability.recommendation"
-        id="fieldset-4"
-        :label="this.$t('message.recommendation')"
-        label-for="input-4"
-      >
-        <b-form-textarea
-          id="input-4"
-          :value="finding.vulnerability.recommendation"
-          rows="7"
-
-
-
-          trim
-        />
       </b-form-group>
       <b-form-group
         v-if="finding.vulnerability.cvssV3Vector"
@@ -254,32 +251,13 @@
         />
       </b-form-group>
       <b-form-group
-        id="fieldset-8"
-        v-if="this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
-        :label="this.$t('message.comment')"
-        label-for="input-8"
-      >
-        <b-form-textarea
-          id="input-8"
-          v-model="comment"
-          :placeholder="auditTextPlaceholders.commentPlaceholder"
-          rows="4"
-          class="form-control"
-          trim
-        />
-        <div class="pull-right">
-          <b-button size="sm" variant="outline-primary" @click="addComment"
-            ><span class="fa fa-comment-o"></span>
-            {{ this.$t('message.add_comment') }}</b-button
-          >
-        </div>
-      </b-form-group>
-      <b-form-group
         id="fieldset-9"
         v-if="this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
-        :label="this.$t('message.analysis')"
         label-for="input-9"
       >
+        <template #label>
+          {{ $t('message.analysis') }}
+        </template>
         <b-input-group id="input-9">
           <b-form-select
             v-model="analysisState"
@@ -300,6 +278,29 @@
             :disabled="analysisState === null"
           />
         </b-input-group>
+      </b-form-group>
+      <b-form-group
+        id="fieldset-8"
+        v-if="this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
+        label-for="input-8"
+      >
+        <template #label>
+          {{ $t('message.comment') }}
+        </template>
+        <b-form-textarea
+          id="input-8"
+          v-model="comment"
+          :placeholder="auditTextPlaceholders.commentPlaceholder"
+          rows="4"
+          class="form-control"
+          trim
+        />
+        <div class="pull-right">
+          <b-button size="sm" variant="outline-primary" @click="addComment"
+            ><span class="fa fa-comment-o"></span>
+            {{ this.$t('message.add_comment') }}</b-button
+          >
+        </div>
       </b-form-group>
       <b-row v-if="this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)">
         <b-col sm="6">
@@ -344,9 +345,11 @@
       <b-form-group
         id="fieldset-12"
         v-if="this.isPermitted(this.PERMISSIONS.VIEW_VULNERABILITY)"
-        :label="this.$t('message.details')"
         label-for="analysisDetailsField"
       >
+        <template #label>
+          {{ $t('message.details') }}
+        </template>
         <b-form-textarea
           id="analysisDetailsField"
           v-model="localAnalysisDetails"
@@ -779,7 +782,10 @@ export default {
         likelihood: this.axisLikelihoodLabel,
       };
 
-      if (this.customMatrix?.requireRiskAssessment) {
+      // [CUSTOM: RISK-MATRIX-ENFORCEMENT] Only require risk assessment for conclusive states, not for
+      // In Triage / comments / suppress — those do not represent a final decision on the finding.
+      const CLOSING_STATES = ['EXPLOITABLE', 'FALSE_POSITIVE', 'NOT_AFFECTED', 'RESOLVED'];
+      if (this.customMatrix?.requireRiskAssessment && CLOSING_STATES.includes(this.analysisState)) {
         if (!this.selectedImpact || !this.selectedLikelihood) {
           this.$toastr.w(this.$t('riskMatrix.riskAssessmentRequired', { ...i18nParams, section: this.riskAssessmentTitle }));
           return;
@@ -945,7 +951,10 @@ export default {
         .then((response) => {
           this.$toastr.s(this.$t('message.updated'));
           this.updateAnalysisData(response.data);
-          this.updateVulnerabilitySeverity();
+          // [CUSTOM: RISK-MATRIX-SEVERITY-WRITEBACK] Only update severity when risk matrix is actually set
+          if (this.selectedImpact || this.selectedLikelihood || this.residualImpact || this.residualLikelihood) {
+            this.updateVulnerabilitySeverity();
+          }
           // [CUSTOM: INTERNAL-RISK-BADGE] Notify badge immediately regardless of severity update outcome
           if (this.onSeverityUpdated) {
             this.onSeverityUpdated({
