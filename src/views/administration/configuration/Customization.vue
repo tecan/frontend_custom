@@ -19,7 +19,7 @@
                 <b-form-input
                   v-model="vulnIdConfig.orgCode"
                   :placeholder="$t('admin.organization_code_placeholder')"
-                  maxlength="20"
+                  maxlength="50"
                 />
                 <b-form-text>{{ $t('admin.organization_code_help') }}</b-form-text>
               </b-form-group>
@@ -29,7 +29,7 @@
                 <b-form-input
                   v-model="vulnIdConfig.projectCode"
                   :placeholder="$t('admin.project_code_placeholder')"
-                  maxlength="20"
+                  maxlength="50"
                 />
                 <b-form-text>{{ $t('admin.project_code_help') }}</b-form-text>
               </b-form-group>
@@ -318,6 +318,14 @@ export default {
       };
     },
     async saveVulnIdConfig() {
+      if (!this.vulnIdConfig.orgCode || !this.vulnIdConfig.orgCode.trim()) {
+        this.$toastr.w(this.$t('admin.organization_code_required'));
+        return;
+      }
+      if (!this.vulnIdConfig.projectCode || !this.vulnIdConfig.projectCode.trim()) {
+        this.$toastr.w(this.$t('admin.project_code_required'));
+        return;
+      }
       try {
         this.isLoading = true;
         const payload = {
