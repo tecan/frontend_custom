@@ -879,46 +879,20 @@ export default {
       return 'UNASSIGNED';
     },
     updateVulnerabilitySeverity() {
+      // [CUSTOM: PCS-251 FIX] Do NOT write calculated risk back to global Vulnerability.severity.
+      // Risk assessment is per-project — writing to the global field contaminates all other projects
+      // sharing the same vulnerability. The findings list badge (ProjectFindings.vue) already reads
+      // severity from Analysis.riskImpact/riskLikelihood directly, so no API call is needed here.
       if (!this.customMatrix?.enabled || this.finding.vulnerability.source !== 'INTERNAL') return;
-      let severity;
-      if (this.residualImpact && this.residualLikelihood && this.residualCalculatedRisk) {
-        severity = this.severityFromRiskLevel(this.residualCalculatedRisk.rating);
-      } else if (this.selectedImpact && this.selectedLikelihood && this.calculatedRisk) {
-        severity = this.severityFromRiskLevel(this.calculatedRisk.rating);
-      } else {
-        severity = 'UNASSIGNED';
-      }
-      const vuln = this.finding.vulnerability;
-      const getUrl = `${this.$api.BASE_URL}/${this.$api.URL_VULNERABILITY}/${vuln.uuid}`;
-      const postUrl = `${this.$api.BASE_URL}/${this.$api.URL_VULNERABILITY}`;
-      // Fetch the full vulnerability first so we don't accidentally clear fields
-      // (created, published, updated, detail, references) that are absent from the Finding response.
-      this.axios
-        .get(getUrl)
-        .then((response) => {
-          const { normalizedCvssV2Vector, affectedProjectCount, affectedActiveProjectCount, affectedInactiveProjectCount, findingAttribution, ...vulnData } = response.data;
-          return this.axios.post(postUrl, { ...vulnData, severity });
-        })
-        .then(() => {
-          this.finding.vulnerability.severity = severity;
-          if (this.onSeverityUpdated) {
-            // [CUSTOM: INTERNAL-RISK-BADGE] Pass updated risk values so badge updates immediately
-            this.onSeverityUpdated({
-              riskLikelihood: this.selectedLikelihood,
-              riskImpact: this.selectedImpact,
-              residualRiskLikelihood: this.residualLikelihood,
-              residualRiskImpact: this.residualImpact,
-            });
-          }
-        })
-        .catch((error) => {
-          const status = error?.response?.status;
-          if (status === 401 || status === 403) {
-            // User doesn't have VULNERABILITY_MANAGEMENT permission — silently skip
-            return;
-          }
-          this.$toastr.w(this.$t('condition.unsuccessful_action') + (status ? ` (${status})` : ''));
+      if (this.onSeverityUpdated) {
+        // [CUSTOM: INTERNAL-RISK-BADGE] Notify the findings list to refresh the badge immediately
+        this.onSeverityUpdated({
+          riskLikelihood: this.selectedLikelihood,
+          riskImpact: this.selectedImpact,
+          residualRiskLikelihood: this.residualLikelihood,
+          residualRiskImpact: this.residualImpact,
         });
+      }
     },
     callRestEndpoint: function (
       analysisState,
@@ -951,8 +925,8 @@ export default {
         .then((response) => {
           this.$toastr.s(this.$t('message.updated'));
           this.updateAnalysisData(response.data);
-          // [CUSTOM: RISK-MATRIX-SEVERITY-WRITEBACK] Only update severity when risk matrix is actually set
-          if (this.selectedImpact || this.selectedLikelihood || this.residualImpact || this.residualLikelihood) {
+          // [CUSTOM: INTERNAL-RISK-BADGE] Refresh findings badge after analysis save
+          if (this.customMatrix?.enabled && this.finding.vulnerability.source === 'INTERNAL') {
             this.updateVulnerabilitySeverity();
           }
           // [CUSTOM: INTERNAL-RISK-BADGE] Notify badge immediately regardless of severity update outcome

@@ -312,7 +312,7 @@ export default {
               this.customMatrix?.loadState === 'loaded' &&
               this.customMatrix.enabled === true
             ) {
-              // Prefer residual risk when set, same priority as updateVulnerabilitySeverity()
+              // Prefer residual risk when set (residual takes priority over initial risk)
               const likelihood = row.analysis.residualRiskLikelihood || row.analysis.riskLikelihood;
               const impact = row.analysis.residualRiskImpact || row.analysis.riskImpact;
               if (likelihood && impact) {

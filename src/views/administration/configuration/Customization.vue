@@ -252,11 +252,12 @@ export default {
       const month = String(new Date().getMonth() + 1).padStart(2, '0');
       const day = String(new Date().getDate()).padStart(2, '0');
       const seq = '1'.padStart(this.vulnIdConfig.sequencePadding, '0');
+      const sanitizedProjectCode = this.sanitizeProjectCode(this.vulnIdConfig.projectCode || 'myproject');
 
       let id = this.vulnIdConfig.template || '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}';
       id = id.replace(/{ORG_CODE}/g, this.vulnIdConfig.orgCode || 'TECAN');
-      id = id.replace(/{PROJECT_NAME}/g, this.vulnIdConfig.projectCode || 'myproject');
-      id = id.replace(/{PROJECT_CODE}/g, this.vulnIdConfig.projectCode || 'myproject');
+      id = id.replace(/{PROJECT_NAME}/g, sanitizedProjectCode);
+      id = id.replace(/{PROJECT_CODE}/g, sanitizedProjectCode);
       id = id.replace(/{YYYY}/g, year);
       id = id.replace(/{MM}/g, month);
       id = id.replace(/{DD}/g, day);
@@ -274,6 +275,23 @@ export default {
     },
   },
   methods: {
+    sanitizeProjectCode(projectCode) {
+      if (!projectCode || !projectCode.trim()) {
+        return 'project';
+      }
+
+      let sanitized = projectCode.trim()
+        .replace(/[^a-zA-Z0-9-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+      if (!sanitized) {
+        sanitized = 'project';
+      }
+
+      return sanitized.toLowerCase();
+    },
     setTabFromHash(hash) {
       const tabMap = {
         '#vulnerability-ids': 0,
