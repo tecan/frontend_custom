@@ -381,7 +381,6 @@ import common from '@/shared/common';
 import BootstrapToggle from 'vue-bootstrap-toggle';
 import permissionsMixin from '@/mixins/permissionsMixin';
 import { contrastTextColor } from '@/shared/colorUtils';
-// [CUSTOM: INTERNAL-RISK-BADGE] RISK_MATRIX_TABLE moved to shared util for reuse in findings table
 import { RISK_MATRIX_TABLE } from '@/shared/riskMatrixUtils';
 
 export default {
@@ -782,8 +781,6 @@ export default {
         likelihood: this.axisLikelihoodLabel,
       };
 
-      // [CUSTOM: RISK-MATRIX-ENFORCEMENT] Only require risk assessment for conclusive states, not for
-      // In Triage / comments / suppress — those do not represent a final decision on the finding.
       const CLOSING_STATES = ['EXPLOITABLE', 'FALSE_POSITIVE', 'NOT_AFFECTED', 'RESOLVED'];
       if (this.customMatrix?.requireRiskAssessment && CLOSING_STATES.includes(this.analysisState)) {
         if (!this.selectedImpact || !this.selectedLikelihood) {
@@ -862,8 +859,6 @@ export default {
       this.comment = null;
     },
     severityFromRiskLevel(rating) {
-      // [CUSTOM: RISK-MATRIX-SEVERITY-MAPPING]
-      // Use admin-configured owaspSeverityMapping if available — no more positional guessing
       const VALID_SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO', 'UNASSIGNED'];
       if (!rating) return 'UNASSIGNED';
       const key = rating.toUpperCase();
@@ -879,13 +874,8 @@ export default {
       return 'UNASSIGNED';
     },
     updateVulnerabilitySeverity() {
-      // [CUSTOM: PCS-251 FIX] Do NOT write calculated risk back to global Vulnerability.severity.
-      // Risk assessment is per-project — writing to the global field contaminates all other projects
-      // sharing the same vulnerability. The findings list badge (ProjectFindings.vue) already reads
-      // severity from Analysis.riskImpact/riskLikelihood directly, so no API call is needed here.
       if (!this.customMatrix?.enabled || this.finding.vulnerability.source !== 'INTERNAL') return;
       if (this.onSeverityUpdated) {
-        // [CUSTOM: INTERNAL-RISK-BADGE] Notify the findings list to refresh the badge immediately
         this.onSeverityUpdated({
           riskLikelihood: this.selectedLikelihood,
           riskImpact: this.selectedImpact,
@@ -925,11 +915,9 @@ export default {
         .then((response) => {
           this.$toastr.s(this.$t('message.updated'));
           this.updateAnalysisData(response.data);
-          // [CUSTOM: INTERNAL-RISK-BADGE] Refresh findings badge after analysis save
           if (this.customMatrix?.enabled && this.finding.vulnerability.source === 'INTERNAL') {
             this.updateVulnerabilitySeverity();
           }
-          // [CUSTOM: INTERNAL-RISK-BADGE] Notify badge immediately regardless of severity update outcome
           if (this.onSeverityUpdated) {
             this.onSeverityUpdated({
               riskLikelihood: this.selectedLikelihood,

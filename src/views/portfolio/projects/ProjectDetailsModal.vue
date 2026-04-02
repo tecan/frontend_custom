@@ -59,7 +59,6 @@
                 "
               />
             </b-col>
-            <!-- [CUSTOM: REQF012] Product in Market toggle -->
             <b-col cols="auto">
               <b-input-group-form-switch
                 id="project-details-in-market"
@@ -745,7 +744,7 @@ export default {
           tags: tagsNode,
           active: this.project.active,
           isLatest: this.project.isLatest,
-          inMarket: this.project.inMarket, // [CUSTOM: REQF012]
+          inMarket: this.project.inMarket,
           externalReferences: this.project.externalReferences,
         })
         .then((response) => {

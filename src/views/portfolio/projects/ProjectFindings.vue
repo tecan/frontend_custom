@@ -109,7 +109,6 @@ import bootstrapTableMixin from '@/mixins/bootstrapTableMixin';
 import permissionsMixin from '@/mixins/permissionsMixin';
 import FindingAudit from './FindingAudit';
 import ProjectUploadVexModal from './ProjectUploadVexModal';
-// [CUSTOM: INTERNAL-RISK-BADGE] Import risk matrix lookup for INTERNAL vulnerability severity display
 import { lookupRiskEntry } from '@/shared/riskMatrixUtils';
 
 export default {
@@ -146,7 +145,7 @@ export default {
       showSuppressedFindings: this.showSuppressedFindings,
       isDownloadingVex: false,
       isDownloadingVdr: false,
-      customMatrix: null, // [CUSTOM: INTERNAL-RISK-BADGE] loaded in created()
+      customMatrix: null,
       expandedRowIndex: null,
       pendingTableRefresh: false,
       labelIcon: {
@@ -300,12 +299,8 @@ export default {
           field: 'vulnerability.severity',
           sortName: 'vulnerability.severityRank',
           sortable: true,
-          // [CUSTOM: INTERNAL-RISK-BADGE] Show calculated risk badge for INTERNAL vulns with a risk assessment.
-          // For all other sources (NVD, OSV, etc.) fall back to standard CVSS severity label.
-          // TO REVERT: replace this arrow function with: formatter(value, row, index) { if (typeof value !== 'undefined') { return common.formatSeverityLabel(value); } }
           class: 'finding-severity-cell',
           formatter: (value, row, index) => {
-            // [CUSTOM: INTERNAL-RISK-BADGE] Only show risk matrix badge when risk matrix is enabled
             if (
               row.vulnerability.source === 'INTERNAL' &&
               row.analysis &&
@@ -430,7 +425,6 @@ export default {
                 finding: row,
                 projectUuid: this.uuid,
                 onSeverityUpdated: (updatedAnalysis) => {
-                  // [CUSTOM: INTERNAL-RISK-BADGE] Update stale row data so formatter uses new values immediately
                   if (updatedAnalysis) {
                     if (row.analysis) {
                       Object.assign(row.analysis, updatedAnalysis);
@@ -497,8 +491,6 @@ export default {
       },
     };
   },
-  // [CUSTOM: INTERNAL-RISK-BADGE] Load risk matrix config so the severity formatter can use it.
-  // TO REVERT: delete this created() hook entirely.
   created() {
     if (this.$customization && this.$customization.preloadRiskMatrixConfig) {
       this.$customization.preloadRiskMatrixConfig().then((matrixConfig) => {

@@ -1,10 +1,5 @@
 /**
- * [CUSTOM: INTERNAL-RISK-BADGE]
  * Shared risk matrix lookup utility.
- * Extracted from FindingAudit.vue to allow reuse in the findings table.
- *
- * TO REVERT: delete this file, restore RISK_MATRIX_TABLE in FindingAudit.vue,
- * and revert ProjectFindings.vue changes (see [CUSTOM: INTERNAL-RISK-BADGE] comments).
  */
 import { contrastTextColor } from './colorUtils';
 
