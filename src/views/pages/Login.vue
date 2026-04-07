@@ -111,6 +111,8 @@ import EventBus from '../../shared/eventbus';
 import { getRedirectUrl, getContextPath } from '../../shared/utils';
 const qs = require('querystring');
 import common from '../../shared/common';
+import DOMPurify from 'dompurify';
+import * as permissions from '../../shared/permissions';
 
 export default {
   name: 'Login',
@@ -156,8 +158,8 @@ export default {
         if (this.isWelcomeMessage) {
           let message_url = `${this.$api.BASE_URL}/${this.$api.URL_CONFIG_PROPERTY}/public/general/welcome.message.html`;
           axios.get(message_url).then((response) => {
-            this.welcomeMessage = decodeURIComponent(
-              response.data.propertyValue,
+            this.welcomeMessage = DOMPurify.sanitize(
+              decodeURIComponent(response.data.propertyValue),
             );
           });
         }
@@ -190,12 +192,23 @@ export default {
         .post(url, qs.stringify(requestBody), config)
         .then((result) => {
           if (result.status === 200) {
-            EventBus.$emit('authenticated', result.data);
-            this.preloadCustomizationSettings().finally(() => {
-              redirectTo
-                ? this.$router.replace(redirectTo)
-                : this.$router.replace({ name: 'Dashboard' });
-            });
+            let decodedToken = permissions.decodeToken(result.data);
+            if (
+              permissions.hasPermission(
+                permissions.VIEW_PORTFOLIO,
+                decodedToken,
+              )
+            ) {
+              EventBus.$emit('authenticated', result.data);
+              this.preloadCustomizationSettings().finally(() => {
+                redirectTo
+                  ? this.$router.replace(redirectTo)
+                  : this.$router.replace({ name: 'Dashboard' });
+              });
+            } else {
+              this.$bvModal.show('modal-informational');
+              this.loginError = this.$t('message.login_permission_required');
+            }
           }
         })
         .catch((err) => {
@@ -299,13 +312,11 @@ export default {
             .then((result) => {
               if (result.status === 200) {
                 EventBus.$emit('authenticated', result.data);
-                this.preloadCustomizationSettings().finally(() => {
-                  // redirect to url from query param but only if it is save for redirection
-                  const redirectTo = getRedirectUrl(this.$router);
-                  redirectTo
-                    ? this.$router.replace(redirectTo)
-                    : this.$router.replace({ name: 'Dashboard' });
-                });
+                // redirect to url from query param but only if it is save for redirection
+                const redirectTo = getRedirectUrl(this.$router);
+                redirectTo
+                  ? this.$router.replace(redirectTo)
+                  : this.$router.replace({ name: 'Dashboard' });
               }
             })
             .catch((err) => {
