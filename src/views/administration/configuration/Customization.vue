@@ -255,7 +255,7 @@ export default {
       const sanitizedProjectCode = this.sanitizeProjectCode(this.vulnIdConfig.projectCode || 'myproject');
 
       let id = this.vulnIdConfig.template || '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}';
-      id = id.replace(/{ORG_CODE}/g, this.vulnIdConfig.orgCode || 'TECAN');
+      id = id.replace(/{ORG_CODE}/g, this.vulnIdConfig.orgCode || 'ORG');
       id = id.replace(/{PROJECT_NAME}/g, sanitizedProjectCode);
       id = id.replace(/{PROJECT_CODE}/g, sanitizedProjectCode);
       id = id.replace(/{YYYY}/g, year);

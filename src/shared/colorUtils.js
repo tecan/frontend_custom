@@ -27,7 +27,7 @@ export function relativeLuminance(hex) {
 export function contrastTextColor(bgHex) {
   if (!bgHex || typeof bgHex !== 'string') return '#ffffff';
   try {
-    return relativeLuminance(bgHex) > 0.179 ? '#000000' : '#ffffff';
+    return relativeLuminance(bgHex) > 0.65 ? '#000000' : '#ffffff';
   } catch (e) {
     return '#ffffff';
   }
