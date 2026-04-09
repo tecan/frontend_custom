@@ -110,6 +110,7 @@ import permissionsMixin from '@/mixins/permissionsMixin';
 import FindingAudit from './FindingAudit';
 import ProjectUploadVexModal from './ProjectUploadVexModal';
 import { lookupRiskEntry } from '@/shared/riskMatrixUtils';
+import { contrastTextColor } from '@/shared/colorUtils';
 
 export default {
   props: {
@@ -307,17 +308,37 @@ export default {
               this.customMatrix?.loadState === 'loaded' &&
               this.customMatrix.enabled === true
             ) {
-              // Prefer residual risk when set (residual takes priority over initial risk)
-              const likelihood = row.analysis.residualRiskLikelihood || row.analysis.riskLikelihood;
-              const impact = row.analysis.residualRiskImpact || row.analysis.riskImpact;
-              if (likelihood && impact) {
-                const entry = lookupRiskEntry(
-                  likelihood,
-                  impact,
-                  this.customMatrix,
-                  this.$t.bind(this),
-                );
-                if (entry) {
+              // Prefer stored calculated risk level (captured at assessment time).
+              // Fall back to live calculation for findings saved before riskCalculated was introduced.
+              const storedLevel = row.analysis.residualRiskCalculated || row.analysis.riskCalculated;
+              let entry = null;
+              if (storedLevel) {
+                // Find the matching level from the matrix config by key
+                const level = this.customMatrix.levels
+                  ? this.customMatrix.levels.find((l) => l.label === storedLevel)
+                  : null;
+                if (level) {
+                  entry = {
+                    ratingText: level.label,
+                    color: level.color,
+                    textColor: contrastTextColor(level.color),
+                  };
+                }
+              }
+              if (!entry) {
+                // Fallback: recalculate from impact + likelihood (legacy findings)
+                const likelihood = row.analysis.residualRiskLikelihood || row.analysis.riskLikelihood;
+                const impact = row.analysis.residualRiskImpact || row.analysis.riskImpact;
+                if (likelihood && impact) {
+                  entry = lookupRiskEntry(
+                    likelihood,
+                    impact,
+                    this.customMatrix,
+                    this.$t.bind(this),
+                  );
+                }
+              }
+              if (entry) {
                   return `
                     <div style="height:24px;margin:-4px;">
                       <div class="text-center pull-left" style="width:24px; height:24px; background-color:${entry.color}; color:${entry.textColor};">
@@ -327,7 +348,6 @@ export default {
                         <div style="font-size:12px; padding:4px"><span class="severity-value">${entry.ratingText}</span></div>
                       </div>
                     </div>`;
-                }
               }
             }
             // Fallback: standard CVSS severity (NVD vulns, or risk matrix disabled/not loaded)
