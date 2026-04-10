@@ -20,7 +20,6 @@
                   :placeholder="$t('admin.organization_code_placeholder')"
                   maxlength="50"
                 />
-                <b-form-text>{{ $t('admin.organization_code_help') }}</b-form-text>
               </b-form-group>
             </b-col>
             <b-col md="6">
@@ -30,7 +29,6 @@
                   :placeholder="$t('admin.project_code_placeholder')"
                   maxlength="50"
                 />
-                <b-form-text>{{ $t('admin.project_code_help') }}</b-form-text>
               </b-form-group>
             </b-col>
           </b-row>
@@ -226,8 +224,8 @@ export default {
         { value: 'DAILY', text: this.$t('admin.reset_policy_daily') },
       ],
       vulnIdConfig: {
-        orgCode: 'DT',
-        projectCode: 'project',
+        orgCode: 'Org_Name',
+        projectCode: 'Project Name',
         template: '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
         sequencePadding: 5,
         resetPolicy: 'YEARLY',
@@ -251,10 +249,10 @@ export default {
       const month = String(new Date().getMonth() + 1).padStart(2, '0');
       const day = String(new Date().getDate()).padStart(2, '0');
       const seq = '1'.padStart(this.vulnIdConfig.sequencePadding, '0');
-      const sanitizedProjectCode = this.sanitizeProjectCode(this.vulnIdConfig.projectCode || 'myproject');
+      const sanitizedProjectCode = this.sanitizeProjectCode(this.vulnIdConfig.projectCode || 'Project Name');
 
       let id = this.vulnIdConfig.template || '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}';
-      id = id.replace(/{ORG_CODE}/g, this.vulnIdConfig.orgCode || 'ORG');
+      id = id.replace(/{ORG_CODE}/g, this.vulnIdConfig.orgCode || 'Org_Name');
       id = id.replace(/{PROJECT_NAME}/g, sanitizedProjectCode);
       id = id.replace(/{PROJECT_CODE}/g, sanitizedProjectCode);
       id = id.replace(/{YYYY}/g, year);
@@ -276,7 +274,7 @@ export default {
   methods: {
     sanitizeProjectCode(projectCode) {
       if (!projectCode || !projectCode.trim()) {
-        return 'project';
+        return 'project-name';
       }
 
       let sanitized = projectCode.trim()
@@ -286,7 +284,7 @@ export default {
         .replace(/^-+|-+$/g, '');
 
       if (!sanitized) {
-        sanitized = 'project';
+        sanitized = 'project-name';
       }
 
       return sanitized.toLowerCase();
@@ -327,8 +325,8 @@ export default {
     },
     resetVulnIdDefaults() {
       this.vulnIdConfig = {
-        orgCode: 'DT',
-        projectCode: 'project',
+        orgCode: 'Org_Name',
+        projectCode: 'Project Name',
         template: '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
         sequencePadding: 5,
         resetPolicy: 'YEARLY',
@@ -405,8 +403,12 @@ export default {
         if (vulnIdResponse && vulnIdResponse.data) {
           // Load from API
           this.vulnIdConfig = {
-            orgCode: vulnIdResponse.data.orgCode || 'DT',
-            projectCode: vulnIdResponse.data.projectCode || 'project',
+            orgCode: !vulnIdResponse.data.orgCode || vulnIdResponse.data.orgCode === 'DT'
+              ? 'Org_Name'
+              : vulnIdResponse.data.orgCode,
+            projectCode: !vulnIdResponse.data.projectCode || vulnIdResponse.data.projectCode === 'project'
+              ? 'Project Name'
+              : vulnIdResponse.data.projectCode,
             template: vulnIdResponse.data.template || '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
             sequencePadding: vulnIdResponse.data.sequencePadding || 5,
             resetPolicy: vulnIdResponse.data.resetPolicy || 'YEARLY',

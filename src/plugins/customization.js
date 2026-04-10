@@ -79,8 +79,8 @@ export default {
         }
         // Return defaults if not loaded yet
         return {
-          orgCode: 'DT',
-          projectCode: 'project',
+          orgCode: 'Org_Name',
+          projectCode: 'Project Name',
           template: '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
           resetPolicy: 'YEARLY',
           sequencePadding: 5
@@ -147,8 +147,8 @@ export default {
           .catch((error) => {
             console.warn('Failed to preload vulnerability ID settings, using defaults:', error);
             cachedVulnIdSettings = {
-              orgCode: 'DT',
-              projectCode: 'project',
+              orgCode: 'Org_Name',
+              projectCode: 'Project Name',
               template: '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
               resetPolicy: 'YEARLY',
               sequencePadding: 5
