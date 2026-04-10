@@ -368,13 +368,12 @@
           id="analysisDetailsField"
           v-model="localAnalysisDetails"
           rows="7"
-          :class="['form-control', 'details-aligned-textarea', { 'text-muted': detailsWasEmptyOnLoad && localAnalysisDetails === analysisDetailsInstructionText }]"
+          :class="['form-control', 'details-aligned-textarea']"
+          :placeholder="analysisDetailsInstructionText"
           :disabled="!this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
           v-b-tooltip.hover
           :title="this.$t('message.analysis_details_tooltip')"
-          aria-describedby="analysisDetailsInstruction"
         />
-        <small id="analysisDetailsInstruction" class="sr-only">{{ analysisDetailsInstructionText }}</small>
         <div class="pull-right">
           <b-button
             v-if="this.isPermitted(this.PERMISSIONS.VULNERABILITY_ANALYSIS)"
@@ -471,7 +470,6 @@ export default {
       analysisResponse: null,
       analysisDetails: null,
       localAnalysisDetails: null,
-      detailsWasEmptyOnLoad: false,
       customMatrix: null,
       selectedImpact: null,
       selectedLikelihood: null,
@@ -644,10 +642,6 @@ export default {
       if (this.$customization.preloadTextPlaceholderSettings) {
         this.$customization.preloadTextPlaceholderSettings().then((settings) => {
           this.applyAuditTextPlaceholderSettings(settings);
-          if (this.detailsWasEmptyOnLoad &&
-            (!this.localAnalysisDetails || this.localAnalysisDetails.trim() === '' || this.localAnalysisDetails === this.$t('audit.details_instruction'))) {
-            this.localAnalysisDetails = this.analysisDetailsInstructionText;
-          }
         }).catch(() => {
           // Keep fallback placeholders if loading customization fails.
         });
@@ -776,18 +770,21 @@ export default {
       if (Object.prototype.hasOwnProperty.call(analysis, 'analysisDetails')) {
         this.analysisDetails = analysis.analysisDetails;
       }
-      // Use a boolean sentinel to track whether details were empty on load
-      this.detailsWasEmptyOnLoad = !this.analysisDetails || this.analysisDetails === '';
-      if (this.detailsWasEmptyOnLoad) {
-        this.localAnalysisDetails = this.analysisDetailsInstructionText;
-      } else {
-        this.localAnalysisDetails = this.analysisDetails;
-      }
+      this.localAnalysisDetails = this.analysisDetails;
       if (Object.prototype.hasOwnProperty.call(analysis, 'isSuppressed')) {
         this.isSuppressed = analysis.isSuppressed;
       } else {
         this.isSuppressed = false;
       }
+    },
+    getAnalysisDetailsToSend() {
+      if (typeof this.localAnalysisDetails !== 'string') {
+        return null;
+      }
+
+      return this.localAnalysisDetails.trim() === ''
+        ? null
+        : this.localAnalysisDetails;
     },
     makeAnalysis: function () {
       const i18nParams = {
@@ -822,50 +819,22 @@ export default {
           return;
         }
       }
-      // Determine what to send for details
-      let detailsToSend = null;
-
-      // Case 1: User has edited the instruction or provided new content
-      if (this.localAnalysisDetails &&
-          this.localAnalysisDetails.trim() !== '' &&
-          this.localAnalysisDetails !== this.analysisDetailsInstructionText) {
-        // User wrote something different from the instruction = send it
-        detailsToSend = this.localAnalysisDetails;
-      }
-      // Case 2: Details were NOT empty on load (preserve existing saved content)
-      else if (!this.detailsWasEmptyOnLoad && this.localAnalysisDetails) {
-        // There was already saved content = preserve it
-        detailsToSend = this.localAnalysisDetails;
-      }
-      // Case 3: Instruction text is unchanged = send null (don't persist instruction)
-
       this.callRestEndpoint(
         this.analysisState,
         this.analysisJustification,
         this.analysisResponse,
-        detailsToSend,
+        this.getAnalysisDetailsToSend(),
         null,
         null,
       );
     },
     addComment: function () {
       if (this.comment != null) {
-        // When adding a comment, use the same logic to determine what details to send
-        let detailsToSendForComment = null;
-
-        if (this.localAnalysisDetails &&
-            this.localAnalysisDetails.trim() !== '' &&
-            this.localAnalysisDetails !== this.analysisDetailsInstructionText) {
-          detailsToSendForComment = this.localAnalysisDetails;
-        } else if (!this.detailsWasEmptyOnLoad && this.localAnalysisDetails) {
-          detailsToSendForComment = this.localAnalysisDetails;
-        }
-
         this.callRestEndpoint(
           this.analysisState,
           this.analysisJustification,
           this.analysisResponse,
-          detailsToSendForComment,
+          this.getAnalysisDetailsToSend(),
           this.comment,
           null,
         );
@@ -970,14 +939,6 @@ export default {
             .map((v) => ({ value: v.key, text: v.label }));
         }
       });
-    }
-    // Fallback: ensure localAnalysisDetails contains the instruction so the UI shows guidance
-    if (!this.localAnalysisDetails) {
-      try {
-        this.localAnalysisDetails = this.analysisDetailsInstructionText;
-      } catch (e) {
-        // ignore i18n errors in environments where $t may not be available yet
-      }
     }
   },
   components: {
