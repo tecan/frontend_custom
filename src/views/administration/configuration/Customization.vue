@@ -10,7 +10,6 @@
         <b-card class="mb-4">
           <h5 class="mb-3">
             {{ $t('admin.vulnerability_id_generation') }}
-            <b-badge variant="secondary" class="ml-2">{{ $t('admin.preview') }}</b-badge>
           </h5>
 
           <b-row>
