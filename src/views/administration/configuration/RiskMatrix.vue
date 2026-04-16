@@ -784,7 +784,7 @@ export default {
       return {
         backgroundColor: bg,
         borderColor: 'rgba(255,255,255,0.35)',
-        color: contrastTextColor(bg),
+        color: '#ffffff',
       };
     },
     openCellModal(likelihood, impact) {
@@ -1149,12 +1149,18 @@ export default {
   margin-top: 0.15rem;
   font-weight: 800;
   line-height: 1.1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  backface-visibility: hidden;
 }
 
 .matrix-action-label {
   margin-top: 0.35rem;
   font-size: 80%;
   font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  backface-visibility: hidden;
 }
 
 .matrix-footer {
