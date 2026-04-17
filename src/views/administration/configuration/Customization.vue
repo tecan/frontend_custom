@@ -278,10 +278,9 @@ export default {
       }
 
       let sanitized = projectCode.trim()
-        .replace(/ /g, '_')
-        .replace(/[^a-zA-Z0-9_-]/g, '')
-        .replace(/[-_]{2,}/g, '_')
-        .replace(/^[-_]+|[-_]+$/g, '');
+        .replace(/[^a-zA-Z0-9 _-]/g, '')
+        .replace(/[ _-]{2,}/g, match => match[0])
+        .replace(/^[ _-]+|[ _-]+$/g, '');
 
       if (!sanitized) {
         sanitized = 'project-name';
