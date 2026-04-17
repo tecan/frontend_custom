@@ -767,9 +767,7 @@ export default {
       if (Object.prototype.hasOwnProperty.call(analysis, 'residualRiskJustification')) {
         this.residualRiskJustification = analysis.residualRiskJustification;
       }
-      if (Object.prototype.hasOwnProperty.call(analysis, 'analysisDetails')) {
-        this.analysisDetails = analysis.analysisDetails;
-      }
+      this.analysisDetails = analysis.analysisDetails ?? null;
       this.localAnalysisDetails = this.analysisDetails;
       if (Object.prototype.hasOwnProperty.call(analysis, 'isSuppressed')) {
         this.isSuppressed = analysis.isSuppressed;
