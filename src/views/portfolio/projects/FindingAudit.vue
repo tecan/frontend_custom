@@ -781,7 +781,7 @@ export default {
       }
 
       return this.localAnalysisDetails.trim() === ''
-        ? null
+        ? ''
         : this.localAnalysisDetails;
     },
     makeAnalysis: function () {
