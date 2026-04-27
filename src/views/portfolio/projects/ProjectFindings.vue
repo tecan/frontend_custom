@@ -319,6 +319,7 @@ export default {
                   : null;
                 if (level) {
                   entry = {
+                    rating: level.key,
                     ratingText: level.label,
                     color: level.color,
                     textColor: contrastTextColor(level.color),
@@ -339,7 +340,24 @@ export default {
                 }
               }
               if (entry) {
-                  return `
+                if (this.customMatrix.calculateToRiskEnabled) {
+                  // OWASP mapping enabled: resolve severity from the level's owaspSeverityMapping
+                  const VALID_SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO', 'UNASSIGNED'];
+                  const levelKey = entry.rating || entry.ratingText;
+                  const level = this.customMatrix.levels
+                    ? this.customMatrix.levels.find((l) => l.key === levelKey || l.label === levelKey)
+                    : null;
+                  let owaspSeverity = null;
+                  if (level?.owaspSeverityMapping && VALID_SEVERITIES.includes(level.owaspSeverityMapping.toUpperCase())) {
+                    owaspSeverity = level.owaspSeverityMapping.toUpperCase();
+                  } else if (levelKey && VALID_SEVERITIES.includes(levelKey.toUpperCase())) {
+                    owaspSeverity = levelKey.toUpperCase();
+                  }
+                  if (owaspSeverity) {
+                    return common.formatSeverityLabel(owaspSeverity);
+                  }
+                }
+                return `
                     <div style="height:24px;margin:-4px;">
                       <div class="text-center pull-left" style="width:24px; height:24px; background-color:${entry.color}; color:${entry.textColor};">
                         <i class="fa fa-bug" style="font-size:12px; padding:6px" aria-hidden="true"></i>

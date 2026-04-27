@@ -553,6 +553,10 @@ export default {
         borderColor: this.calculatedRisk.textColor,
       };
     },
+    owaspMappedSeverity() {
+      if (!this.customMatrix?.calculateToRiskEnabled || !this.calculatedRisk) return null;
+      return this.severityFromRiskLevel(this.calculatedRisk.rating);
+    },
     residualCalculatedRisk() {
       return this.lookupRiskEntry(
         this.residualLikelihood,
@@ -623,6 +627,15 @@ export default {
   methods: {
     applyAuditTextPlaceholderSettings(settings) {
       if (!settings) {
+        return;
+      }
+      if (settings.enabled === false) {
+        this.auditTextPlaceholders = {
+          riskJustificationPlaceholder: '',
+          residualRiskPlaceholder: '',
+          commentPlaceholder: '',
+          analysisDetailsInstruction: '',
+        };
         return;
       }
       this.auditTextPlaceholders = {
@@ -843,7 +856,7 @@ export default {
       const VALID_SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO', 'UNASSIGNED'];
       if (!rating) return 'UNASSIGNED';
       const key = rating.toUpperCase();
-      if (this.customMatrix?.levels) {
+      if (this.customMatrix?.calculateToRiskEnabled && this.customMatrix?.levels) {
         const level = this.customMatrix.levels.find((l) => l.key === key);
         if (level?.owaspSeverityMapping && VALID_SEVERITIES.includes(level.owaspSeverityMapping.toUpperCase())) {
           return level.owaspSeverityMapping.toUpperCase();
@@ -890,6 +903,7 @@ export default {
           residualRiskLikelihood: this.residualLikelihood,
           riskJustification: this.riskJustification,
           residualRiskJustification: this.residualRiskJustification,
+          severity: this.owaspMappedSeverity || undefined,
           comment: comment,
           isSuppressed: isSuppressed,
         })

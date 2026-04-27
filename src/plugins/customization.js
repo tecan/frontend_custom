@@ -66,6 +66,41 @@ export default {
       },
     });
 
+    const buildDefaultTextPlaceholderSettings = (enabled = true) => ({
+      enabled,
+      descriptionPlaceholder: '<Add detail description about the vulnerability>',
+      detailPlaceholder: '<Add additional details>',
+      recommendationPlaceholder: '<Add any recommendation from external companies / partners or internal security team>',
+      referencesPlaceholder: '<Add any references if available, example: CPE / CVE references>',
+      riskJustificationPlaceholder: 'Explain why this risk is acceptable...',
+      residualRiskPlaceholder: 'Describe any remaining risk after mitigation...',
+      commentPlaceholder: '<Add all participants for the review/assessment>',
+      analysisDetailsInstruction: '1.  Affected Software Items: Identify which software items are impacted. Assess whether third-party code within supported software is affected. If third-party or open source components are involved, determine in the next step whether the issue should be disclosed to the vendor or published on the appropriate platform.\n2.  Security Context: What is the security context in which the vulnerability was discovered? Consider the intended environment of use and any defense-in-depth strategies in place.\n3.  Risk Assessment: Perform a security risk assessment in accordance with the scoring defined in the SOP Product Security Risk Management.\n4.  Root Cause Analysis: What is the root cause of vulnerability? Is it consistent across different products or does it vary?\n5.  Threat Model Coverage: Is the vulnerability addressed by existing threat models?\n6.  Related Security Issues: Is there other related security issues present in the same product?\n7.  Product Safety Impact: Does vulnerability impact product safety? If yes, review and update the safety risk assessment as necessary.\n8.  Only for vulnerability with risk critical and high: define the Customer Communication strategy (PM with input from RA)'
+    });
+
+    const buildDisabledTextPlaceholderSettings = () => ({
+      enabled: false,
+      descriptionPlaceholder: '',
+      detailPlaceholder: '',
+      recommendationPlaceholder: '',
+      referencesPlaceholder: '',
+      riskJustificationPlaceholder: '',
+      residualRiskPlaceholder: '',
+      commentPlaceholder: '',
+      analysisDetailsInstruction: '',
+    });
+
+    const buildEffectiveTextPlaceholderSettings = (settings = {}) => {
+      if (settings.enabled === false) {
+        return buildDisabledTextPlaceholderSettings();
+      }
+      return {
+        ...buildDefaultTextPlaceholderSettings(true),
+        ...settings,
+        enabled: true,
+      };
+    };
+
     // Initialize customization API service
     const customizationService = {
       /**
@@ -96,16 +131,7 @@ export default {
         if (cachedTextPlaceholderSettings) {
           return cachedTextPlaceholderSettings;
         }
-        return {
-          descriptionPlaceholder: '<Add detail description about the vulnerability>',
-          detailPlaceholder: '<Add additional details>',
-          recommendationPlaceholder: '<Add any recommendation from external companies / partners or internal security team>',
-          referencesPlaceholder: '<Add any references if available, example: CPE / CVE references>',
-          riskJustificationPlaceholder: 'Explain why this risk is acceptable...',
-          residualRiskPlaceholder: 'Describe any remaining risk after mitigation...',
-          commentPlaceholder: '<Add all participants for the review/assessment>',
-          analysisDetailsInstruction: '1.  Affected Software Items: Identify which software items are impacted. Assess whether third-party code within supported software is affected. If third-party or open source components are involved, determine in the next step whether the issue should be disclosed to the vendor or published on the appropriate platform.\n2.  Security Context: What is the security context in which the vulnerability was discovered? Consider the intended environment of use and any defense-in-depth strategies in place.\n3.  Risk Assessment: Perform a security risk assessment in accordance with the scoring defined in the SOP Product Security Risk Management.\n4.  Root Cause Analysis: What is the root cause of vulnerability? Is it consistent across different products or does it vary?\n5.  Threat Model Coverage: Is the vulnerability addressed by existing threat models?\n6.  Related Security Issues: Is there other related security issues present in the same product?\n7.  Product Safety Impact: Does vulnerability impact product safety? If yes, review and update the safety risk assessment as necessary.\n8.  Only for vulnerability with risk critical and high: define the Customer Communication strategy (PM with input from RA)'
-        };
+        return buildDefaultTextPlaceholderSettings();
       },
 
       /**
@@ -176,7 +202,7 @@ export default {
         textLoadingPromise = this.getTextPlaceholderSettings()
           .then((response) => {
             if (response && response.data) {
-              cachedTextPlaceholderSettings = response.data;
+              cachedTextPlaceholderSettings = buildEffectiveTextPlaceholderSettings(response.data);
               textSettingsLoaded = true;
             }
             return cachedTextPlaceholderSettings;
@@ -291,7 +317,7 @@ export default {
             headers: { 'Content-Type': vueApp.prototype.$api.CONTENT_TYPE_JSON },
           }
         ).then((response) => {
-          cachedTextPlaceholderSettings = settings;
+          cachedTextPlaceholderSettings = buildEffectiveTextPlaceholderSettings(settings);
           textSettingsLoaded = true;
           return response;
         });

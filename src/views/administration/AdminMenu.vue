@@ -107,11 +107,6 @@ export default {
               route: 'configuration/internalComponents',
             },
             {
-              component: 'Customization',
-              name: this.$t('admin.customization'),
-              route: 'configuration/customization',
-            },
-            {
               component: 'TaskScheduler',
               name: this.$t('admin.task_scheduler'),
               route: 'configuration/taskScheduler',
@@ -125,6 +120,11 @@ export default {
               component: 'Search',
               name: this.$t('message.search'),
               route: 'configuration/search',
+            },
+            {
+              component: 'Customization',
+              name: this.$t('admin.customization'),
+              route: 'configuration/customization',
             },
             {
               component: 'Experimental',

@@ -1,9 +1,5 @@
 <template>
   <div>
-    <p class="text-muted mb-4">
-      {{ $t('admin.customization_desc') }}
-    </p>
-
     <b-tabs v-model="activeTab" content-class="mt-3" @input="onTabChange">
       <!-- Vulnerability IDs Tab -->
       <b-tab :title="$t('admin.vulnerability_ids')">
@@ -12,6 +8,19 @@
             {{ $t('admin.vulnerability_id_generation') }}
           </h5>
 
+          <b-form-group class="mb-4">
+            <c-switch
+              color="primary"
+              v-model="vulnIdConfig.useCustomId"
+              label
+              v-bind="labelIcon"
+            />{{ $t('admin.use_custom_id_generator') }}
+            <b-form-text class="mt-1">
+              {{ vulnIdConfig.useCustomId ? $t('admin.use_custom_id_generator_on_help') : $t('admin.use_custom_id_generator_off_help') }}
+            </b-form-text>
+          </b-form-group>
+
+          <b-collapse :visible="vulnIdConfig.useCustomId">
           <b-row>
             <b-col md="6">
               <b-form-group :label="$t('admin.organization_code')">
@@ -38,7 +47,7 @@
               <b-form-group :label="$t('admin.vulnerability_id_template')">
                 <b-form-input
                   v-model="vulnIdConfig.template"
-                  placeholder="{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}"
+                  placeholder="{ORG_NAME}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}"
                 />
                 <div class="mt-2">
                   <b-badge
@@ -76,6 +85,8 @@
             </b-col>
           </b-row>
 
+          </b-collapse>
+
           <!-- Preview -->
           <div class="preview-box mt-4 p-3 rounded">
             <div class="d-flex align-items-center">
@@ -109,6 +120,16 @@
 
       <!-- Text & Placeholders Tab -->
       <b-tab :title="$t('admin.text_and_placeholders')">
+        <b-form-group class="mb-4">
+          <c-switch
+            color="primary"
+            v-model="textConfig.enabled"
+            label
+            v-bind="labelIcon"
+          />{{ $t('admin.enabled') }}
+        </b-form-group>
+
+        <b-collapse :visible="textConfig.enabled">
         <b-card class="mb-4">
           <h5 class="mb-3">{{ $t('admin.create_vulnerability_texts') }}</h5>
 
@@ -180,6 +201,7 @@
             />
           </b-form-group>
         </b-card>
+        </b-collapse>
 
         <div class="text-right">
           <b-button variant="outline-primary" class="px-4" @click="saveTextConfig">
@@ -202,21 +224,24 @@
 </template>
 
 <script>
+import { Switch as cSwitch } from '@coreui/vue';
 import permissionsMixin from '../../../mixins/permissionsMixin';
+import configPropertyMixin from '../mixins/configPropertyMixin';
 import RiskMatrix from './RiskMatrix.vue';
 import VulnerabilitySource from './VulnerabilitySource.vue';
 
 export default {
   name: 'Customization',
-  mixins: [permissionsMixin],
+  mixins: [permissionsMixin, configPropertyMixin],
   components: {
+    cSwitch,
     RiskMatrix,
     VulnerabilitySource,
   },
   data() {
     return {
       activeTab: 0,
-      availablePlaceholders: ['{ORG_CODE}', '{PROJECT_NAME}', '{PROJECT_CODE}', '{YYYY}', '{MM}', '{DD}', '{SEQUENCE}'],
+      availablePlaceholders: ['{ORG_NAME}', '{PROJECT_NAME}', '{YYYY}', '{MM}', '{DD}', '{SEQUENCE}'],
       resetPolicyOptions: [
         { value: 'NEVER', text: this.$t('admin.reset_policy_never') },
         { value: 'YEARLY', text: this.$t('admin.reset_policy_yearly') },
@@ -224,13 +249,15 @@ export default {
         { value: 'DAILY', text: this.$t('admin.reset_policy_daily') },
       ],
       vulnIdConfig: {
+        useCustomId: true,
         orgCode: 'Org_Name',
-        projectCode: 'Project Name',
-        template: '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
+        projectCode: 'project_name',
+        template: '{ORG_NAME}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
         sequencePadding: 5,
         resetPolicy: 'YEARLY',
       },
       textConfig: {
+        enabled: true,
         descriptionPlaceholder: '',
         detailPlaceholder: '',
         recommendationPlaceholder: '',
@@ -245,13 +272,17 @@ export default {
   },
   computed: {
     generatedPreviewId() {
+      if (!this.vulnIdConfig.useCustomId) {
+        return 'INT-xxxx-xxxx-xxxx';
+      }
       const year = new Date().getFullYear();
       const month = String(new Date().getMonth() + 1).padStart(2, '0');
       const day = String(new Date().getDate()).padStart(2, '0');
       const seq = '1'.padStart(this.vulnIdConfig.sequencePadding, '0');
       const sanitizedProjectCode = this.sanitizeProjectCode(this.vulnIdConfig.projectCode || 'Project Name');
 
-      let id = this.vulnIdConfig.template || '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}';
+      let id = this.vulnIdConfig.template || '{ORG_NAME}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}';
+      id = id.replace(/{ORG_NAME}/g, this.vulnIdConfig.orgCode || 'Org_Name');
       id = id.replace(/{ORG_CODE}/g, this.vulnIdConfig.orgCode || 'Org_Name');
       id = id.replace(/{PROJECT_NAME}/g, sanitizedProjectCode);
       id = id.replace(/{PROJECT_CODE}/g, sanitizedProjectCode);
@@ -324,25 +355,29 @@ export default {
     },
     resetVulnIdDefaults() {
       this.vulnIdConfig = {
+        useCustomId: true,
         orgCode: 'Org_Name',
-        projectCode: 'Project Name',
-        template: '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
+        projectCode: 'project_name',
+        template: '{ORG_NAME}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
         sequencePadding: 5,
         resetPolicy: 'YEARLY',
       };
     },
     async saveVulnIdConfig() {
-      if (!this.vulnIdConfig.orgCode || !this.vulnIdConfig.orgCode.trim()) {
-        this.$toastr.w(this.$t('admin.organization_code_required'));
-        return;
-      }
-      if (!this.vulnIdConfig.projectCode || !this.vulnIdConfig.projectCode.trim()) {
-        this.$toastr.w(this.$t('admin.project_code_required'));
-        return;
+      if (this.vulnIdConfig.useCustomId) {
+        if (!this.vulnIdConfig.orgCode || !this.vulnIdConfig.orgCode.trim()) {
+          this.$toastr.w(this.$t('admin.organization_code_required'));
+          return;
+        }
+        if (!this.vulnIdConfig.projectCode || !this.vulnIdConfig.projectCode.trim()) {
+          this.$toastr.w(this.$t('admin.project_code_required'));
+          return;
+        }
       }
       try {
         this.isLoading = true;
         const payload = {
+          useCustomId: this.vulnIdConfig.useCustomId,
           orgCode: this.vulnIdConfig.orgCode,
           projectCode: this.vulnIdConfig.projectCode,
           template: this.vulnIdConfig.template,
@@ -365,6 +400,7 @@ export default {
       try {
         this.isLoading = true;
         const payload = {
+          enabled: this.textConfig.enabled,
           descriptionPlaceholder: this.textConfig.descriptionPlaceholder,
           detailPlaceholder: this.textConfig.detailPlaceholder,
           recommendationPlaceholder: this.textConfig.recommendationPlaceholder,
@@ -402,13 +438,14 @@ export default {
         if (vulnIdResponse && vulnIdResponse.data) {
           // Load from API
           this.vulnIdConfig = {
+            useCustomId: vulnIdResponse.data.useCustomId !== undefined ? vulnIdResponse.data.useCustomId : true,
             orgCode: !vulnIdResponse.data.orgCode || vulnIdResponse.data.orgCode === 'DT'
               ? 'Org_Name'
               : vulnIdResponse.data.orgCode,
             projectCode: !vulnIdResponse.data.projectCode || vulnIdResponse.data.projectCode === 'project'
-              ? 'Project Name'
+              ? 'project_name'
               : vulnIdResponse.data.projectCode,
-            template: vulnIdResponse.data.template || '{ORG_CODE}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
+            template: vulnIdResponse.data.template || '{ORG_NAME}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
             sequencePadding: vulnIdResponse.data.sequencePadding || 5,
             resetPolicy: vulnIdResponse.data.resetPolicy || 'YEARLY',
           };
@@ -416,6 +453,7 @@ export default {
 
         if (textResponse && textResponse.data) {
           this.textConfig = {
+            enabled: textResponse.data.enabled !== false,
             descriptionPlaceholder: textResponse.data.descriptionPlaceholder || '',
             detailPlaceholder: textResponse.data.detailPlaceholder || '',
             recommendationPlaceholder: textResponse.data.recommendationPlaceholder || '',

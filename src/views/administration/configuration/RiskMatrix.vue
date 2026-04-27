@@ -1,14 +1,20 @@
 <template>
   <div class="risk-matrix-admin">
     <b-form-group class="mb-3">
-      <b-form-checkbox v-model="draft.enabled" @change="onToggleCustomMatrix">
-        {{ $t('riskMatrix.enableCustom') }}
-      </b-form-checkbox>
+      <c-switch
+        color="primary"
+        v-model="draft.enabled"
+        label
+        v-bind="labelIcon"
+        @change="onToggleCustomMatrix"
+      />{{ $t('riskMatrix.enableCustom') }}
       <small class="text-muted d-block mt-1">{{ $t('riskMatrix.enableCustomHelp') }}</small>
     </b-form-group>
 
     <b-card class="mb-3" no-body>
-      <div class="matrix-card-header">{{ $t('riskMatrix.sectionLabelsTitle') }}</div>
+      <div class="matrix-card-header px-3 py-2">
+        <span class="font-weight-bold">{{ $t('riskMatrix.sectionLabelsTitle') }}</span>
+      </div>
       <div class="matrix-card-body">
         <b-row>
           <b-col sm="6" class="d-flex align-items-center mb-2 mb-sm-0">
@@ -70,14 +76,24 @@
         </b-row>
         <b-row class="mt-3">
           <b-col sm="6">
-            <b-form-checkbox v-model="draft.requireRiskAssessment" :disabled="!draft.enabled" @change="isDirty = true">
-              {{ $t('riskMatrix.requireRiskAssessment') }}
-            </b-form-checkbox>
+            <c-switch
+              color="primary"
+              v-model="draft.requireRiskAssessment"
+              label
+              v-bind="labelIcon"
+              :disabled="!draft.enabled"
+              @change="isDirty = true"
+            />{{ $t('riskMatrix.requireRiskAssessment') }}
           </b-col>
           <b-col sm="6">
-            <b-form-checkbox v-model="draft.requireResidualRiskAssessment" :disabled="!draft.enabled" @change="isDirty = true">
-              {{ $t('riskMatrix.requireResidualRiskAssessment') }}
-            </b-form-checkbox>
+            <c-switch
+              color="primary"
+              v-model="draft.requireResidualRiskAssessment"
+              label
+              v-bind="labelIcon"
+              :disabled="!draft.enabled"
+              @change="isDirty = true"
+            />{{ $t('riskMatrix.requireResidualRiskAssessment') }}
           </b-col>
         </b-row>
       </div>
@@ -86,7 +102,7 @@
     <b-row>
       <b-col lg="4" class="mb-3">
         <b-card class="h-100" no-body>
-          <div class="matrix-card-header d-flex justify-content-between align-items-center">
+          <div class="matrix-card-header d-flex justify-content-between align-items-center px-3 py-2">
             <div class="d-flex align-items-center flex-grow-1 mr-2" style="min-width:0">
               <template v-if="editingImpactLabel">
                 <b-form-input
@@ -102,7 +118,7 @@
                 />
               </template>
               <template v-else>
-                <span class="mr-1">{{ axisImpactLabel }}</span>
+                <span class="font-weight-bold mr-1">{{ axisImpactLabel }}</span>
                 <b-button
                   v-if="draft.enabled"
                   size="sm"
@@ -116,19 +132,22 @@
             </div>
           </div>
           <div class="matrix-card-body">
-            <div
-              v-for="item in draft.impactValues"
-              :key="item.key"
-              class="matrix-list-row d-flex align-items-center"
-            >
-              <span class="row-index">{{ item.sortOrder }}</span>
-              <span class="flex-grow-1">{{ item.label }}</span>
-              <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="openValueModal('impact', item)">
-                <i class="fa fa-pencil"></i>
-              </b-button>
-              <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="removeValue('impact', item.key)">
-                <i class="fa fa-trash"></i>
-              </b-button>
+            <small class="text-muted d-block mb-3">{{ $t('riskMatrix.impactHelp') }}</small>
+            <div class="flex-grow-1">
+              <div
+                v-for="item in draft.impactValues"
+                :key="item.key"
+                class="matrix-list-row d-flex align-items-center"
+              >
+                <span class="row-index">{{ item.sortOrder }}</span>
+                <span class="flex-grow-1">{{ item.label }}</span>
+                <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="openValueModal('impact', item)">
+                  <i class="fa fa-pencil"></i>
+                </b-button>
+                <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="removeValue('impact', item.key)">
+                  <i class="fa fa-trash"></i>
+                </b-button>
+              </div>
             </div>
             <b-button size="sm" variant="outline-primary" class="mt-2" :disabled="!draft.enabled" @click="openValueModal('impact')">
               <i class="fa fa-plus"></i> {{ $t('riskMatrix.addItem') }}
@@ -139,7 +158,7 @@
 
       <b-col lg="4" class="mb-3">
         <b-card class="h-100" no-body>
-          <div class="matrix-card-header d-flex justify-content-between align-items-center">
+          <div class="matrix-card-header d-flex justify-content-between align-items-center px-3 py-2">
             <div class="d-flex align-items-center flex-grow-1 mr-2" style="min-width:0">
               <template v-if="editingLikelihoodLabel">
                 <b-form-input
@@ -155,7 +174,7 @@
                 />
               </template>
               <template v-else>
-                <span class="mr-1">{{ axisLikelihoodLabel }}</span>
+                <span class="font-weight-bold mr-1">{{ axisLikelihoodLabel }}</span>
                 <b-button
                   v-if="draft.enabled"
                   size="sm"
@@ -169,19 +188,22 @@
             </div>
           </div>
           <div class="matrix-card-body">
-            <div
-              v-for="item in draft.likelihoodValues"
-              :key="item.key"
-              class="matrix-list-row d-flex align-items-center"
-            >
-              <span class="row-index">{{ item.sortOrder }}</span>
-              <span class="flex-grow-1">{{ item.label }}</span>
-              <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="openValueModal('likelihood', item)">
-                <i class="fa fa-pencil"></i>
-              </b-button>
-              <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="removeValue('likelihood', item.key)">
-                <i class="fa fa-trash"></i>
-              </b-button>
+            <small class="text-muted d-block mb-3">{{ $t('riskMatrix.likelihoodHelp') }}</small>
+            <div class="flex-grow-1">
+              <div
+                v-for="item in draft.likelihoodValues"
+                :key="item.key"
+                class="matrix-list-row d-flex align-items-center"
+              >
+                <span class="row-index">{{ item.sortOrder }}</span>
+                <span class="flex-grow-1">{{ item.label }}</span>
+                <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="openValueModal('likelihood', item)">
+                  <i class="fa fa-pencil"></i>
+                </b-button>
+                <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="removeValue('likelihood', item.key)">
+                  <i class="fa fa-trash"></i>
+                </b-button>
+              </div>
             </div>
             <b-button size="sm" variant="outline-primary" class="mt-2" :disabled="!draft.enabled" @click="openValueModal('likelihood')">
               <i class="fa fa-plus"></i> {{ $t('riskMatrix.addItem') }}
@@ -192,60 +214,67 @@
 
       <b-col lg="4" class="mb-3">
         <b-card class="h-100" no-body>
-          <div class="matrix-card-header d-flex justify-content-between align-items-center">
+          <div class="matrix-card-header d-flex justify-content-between align-items-center px-3 py-2">
             <div class="d-flex align-items-center flex-grow-1 mr-2" style="min-width:0">
-              <template v-if="editingLevelLabel">
+              <template v-if="editingOwaspLabel">
                 <b-form-input
-                  ref="levelLabelInput"
-                  v-model="draft.levelDefinitionsLabel"
+                  ref="owaspLabelInput"
+                  v-model="draft.owaspCardLabel"
                   size="sm"
                   class="inline-label-input"
-                  :placeholder="$t('riskMatrix.levelDefinitions')"
-                  maxlength="40"
-                  @blur="editingLevelLabel = false; isDirty = true"
-                  @keyup.enter="editingLevelLabel = false; isDirty = true"
-                  @keyup.esc="editingLevelLabel = false"
+                  :placeholder="$t('riskMatrix.resultLabel')"
+                  maxlength="60"
+                  @blur="editingOwaspLabel = false; isDirty = true"
+                  @keyup.enter="editingOwaspLabel = false; isDirty = true"
+                  @keyup.esc="editingOwaspLabel = false"
                 />
               </template>
               <template v-else>
-                <span class="mr-1">{{ levelLabel }}</span>
+                <span class="font-weight-bold mr-1">{{ owaspCardLabelDisplay }}</span>
                 <b-button
                   v-if="draft.enabled"
                   size="sm"
                   variant="link"
                   class="p-0 inline-edit-btn"
-                  @click="editingLevelLabel = true; $nextTick(() => $refs.levelLabelInput && $refs.levelLabelInput.focus())"
+                  @click="editingOwaspLabel = true; $nextTick(() => $refs.owaspLabelInput && $refs.owaspLabelInput.focus())"
                 >
                   <i class="fa fa-pencil fa-sm"></i>
                 </b-button>
               </template>
             </div>
-            <b-badge variant="light" class="ml-2 text-nowrap text-muted border">
-              {{ $t('riskMatrix.owaspSeverityMapping') }}
-            </b-badge>
+            <div class="matrix-card-actions ml-2">
+              <c-switch
+                color="primary"
+                v-model="draft.calculateToRiskEnabled"
+                label
+                size="sm"
+                v-bind="labelIcon"
+                :disabled="!draft.enabled"
+                @change="isDirty = true"
+                class="mb-0"
+              />
+            </div>
           </div>
           <div class="matrix-card-body">
-            <div
-              v-for="level in draft.levels"
-              :key="level.key"
-              class="matrix-list-row d-flex align-items-center"
-            >
-              <span class="color-dot" :style="{ backgroundColor: level.color }"></span>
-              <span class="flex-grow-1">{{ level.label }}</span>
-              <b-badge class="mr-2" :style="severityBadgeStyle(level)">
-                {{ mappedSeverityLabel(level) }}
-              </b-badge>
-              <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="openLevelModal(level)">
-                <i class="fa fa-pencil"></i>
-              </b-button>
-              <b-button
-                size="sm"
-                variant="link"
-                :disabled="!draft.enabled || usedLevelKeys.has(level.key)"
-                @click="removeLevel(level.key)"
+            <small class="text-muted d-block mb-3">{{ $t('riskMatrix.calculateToRiskEnabledHelp') }}</small>
+            <div class="flex-grow-1">
+              <div
+                v-for="level in draft.levels.slice().sort((a, b) => a.sortOrder - b.sortOrder)"
+                :key="level.key"
+                class="matrix-list-row d-flex align-items-center"
               >
-                <i class="fa fa-trash"></i>
-              </b-button>
+                <span class="row-index">{{ level.sortOrder }}</span>
+                <span class="flex-grow-1">{{ level.label }}</span>
+                <span :class="'owasp-badge severity-' + (level.owaspSeverityMapping || 'unassigned').toLowerCase() + '-bg'">
+                  {{ mappedSeverityLabel(level) }}
+                </span>
+                <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="openLevelModal(level)">
+                  <i class="fa fa-pencil"></i>
+                </b-button>
+                <b-button size="sm" variant="link" :disabled="!draft.enabled" @click="removeLevel(level.key)">
+                  <i class="fa fa-trash"></i>
+                </b-button>
+              </div>
             </div>
             <b-button size="sm" variant="outline-primary" class="mt-2" :disabled="!draft.enabled" @click="openLevelModal()">
               <i class="fa fa-plus"></i> {{ $t('riskMatrix.addLevel') }}
@@ -256,8 +285,8 @@
     </b-row>
 
     <b-card class="mb-3 risk-mapping-card" no-body>
-      <div class="matrix-card-header d-flex justify-content-between align-items-center">
-        <span>{{ $t('riskMatrix.mappingTitle') }}</span>
+      <div class="matrix-card-header d-flex justify-content-between align-items-center px-3 py-2">
+        <span class="font-weight-bold">{{ $t('riskMatrix.mappingTitle') }}</span>
         <b-badge variant="secondary">{{ $t('riskMatrix.grid') }}</b-badge>
       </div>
       <div class="matrix-card-body">
@@ -327,7 +356,7 @@
       <p class="text-muted mb-2">
         {{ cellModal.likelihoodLabel }} x {{ cellModal.impactLabel }}
       </p>
-      <b-form-group :label="$t('riskMatrix.levelDefinitions')">
+      <b-form-group :label="$t('riskMatrix.severityLevel')">
         <b-form-select v-model="cellModal.levelKey" :options="levelOptions" />
       </b-form-group>
       <b-form-group :label="$t('riskMatrix.actionLabel')">
@@ -390,22 +419,33 @@
 </template>
 
 <script>
+import { Switch as cSwitch } from '@coreui/vue';
 import { contrastTextColor } from '@/shared/colorUtils';
 
 const DEFAULT_ACTION_BY_LEVEL = {
-  VERY_LOW: 'Accept',
-  LOW: 'Monitor',
-  MEDIUM: 'Monitor & Plan',
-  HIGH: 'Mitigate',
-  CRITICAL: 'Mitigate Immediately',
+  VERY_LOW: 'accept',
+  LOW: 'monitor',
+  MEDIUM: 'monitor_plan',
+  HIGH: 'mitigate',
+  CRITICAL: 'mitigate_immediately',
 };
 
-const LEGACY_ACTION_TO_TEXT = {
-  ACCEPT: 'Accept',
-  MONITOR: 'Monitor',
-  MONITOR_PLAN: 'Monitor & Plan',
-  MITIGATE: 'Mitigate',
-  MITIGATE_IMMEDIATELY: 'Mitigate Immediately',
+const ACTION_TEXT_BY_KEY = {
+  accept: 'Accept',
+  monitor: 'Monitor',
+  monitor_plan: 'Monitor & Plan',
+  mitigate: 'Mitigate',
+  mitigate_immediately: 'Mitigate Immediately',
+};
+
+const LEGACY_ACTION_TO_KEY = {
+  ACCEPT: 'accept',
+  MONITOR: 'monitor',
+  MONITOR_PLAN: 'monitor_plan',
+  'MONITOR & PLAN': 'monitor_plan',
+  MITIGATE: 'mitigate',
+  MITIGATE_IMMEDIATELY: 'mitigate_immediately',
+  'MITIGATE IMMEDIATELY': 'mitigate_immediately',
 };
 
 const LEVEL_COLOR_MAP = {
@@ -418,34 +458,34 @@ const LEVEL_COLOR_MAP = {
 
 const DEFAULT_MATRIX = {
   VIRTUALLY_IMPOSSIBLE: {
-    LOW: { levelKey: 'VERY_LOW', action: 'Accept' },
-    MEDIUM: { levelKey: 'VERY_LOW', action: 'Accept' },
-    HIGH: { levelKey: 'LOW', action: 'Monitor' },
-    CRITICAL: { levelKey: 'LOW', action: 'Monitor' },
+    LOW: { levelKey: 'VERY_LOW', action: 'accept' },
+    MEDIUM: { levelKey: 'VERY_LOW', action: 'accept' },
+    HIGH: { levelKey: 'LOW', action: 'monitor' },
+    CRITICAL: { levelKey: 'LOW', action: 'monitor' },
   },
   UNLIKELY: {
-    LOW: { levelKey: 'VERY_LOW', action: 'Accept' },
-    MEDIUM: { levelKey: 'LOW', action: 'Monitor' },
-    HIGH: { levelKey: 'MEDIUM', action: 'Monitor & Plan' },
-    CRITICAL: { levelKey: 'HIGH', action: 'Mitigate' },
+    LOW: { levelKey: 'VERY_LOW', action: 'accept' },
+    MEDIUM: { levelKey: 'LOW', action: 'monitor' },
+    HIGH: { levelKey: 'MEDIUM', action: 'monitor_plan' },
+    CRITICAL: { levelKey: 'HIGH', action: 'mitigate' },
   },
   POSSIBLE: {
-    LOW: { levelKey: 'LOW', action: 'Monitor' },
-    MEDIUM: { levelKey: 'MEDIUM', action: 'Monitor & Plan' },
-    HIGH: { levelKey: 'HIGH', action: 'Mitigate' },
-    CRITICAL: { levelKey: 'CRITICAL', action: 'Mitigate Immediately' },
+    LOW: { levelKey: 'LOW', action: 'monitor' },
+    MEDIUM: { levelKey: 'MEDIUM', action: 'monitor_plan' },
+    HIGH: { levelKey: 'HIGH', action: 'mitigate' },
+    CRITICAL: { levelKey: 'CRITICAL', action: 'mitigate_immediately' },
   },
   LIKELY: {
-    LOW: { levelKey: 'LOW', action: 'Monitor' },
-    MEDIUM: { levelKey: 'HIGH', action: 'Mitigate' },
-    HIGH: { levelKey: 'HIGH', action: 'Mitigate' },
-    CRITICAL: { levelKey: 'CRITICAL', action: 'Mitigate Immediately' },
+    LOW: { levelKey: 'LOW', action: 'monitor' },
+    MEDIUM: { levelKey: 'HIGH', action: 'mitigate' },
+    HIGH: { levelKey: 'HIGH', action: 'mitigate' },
+    CRITICAL: { levelKey: 'CRITICAL', action: 'mitigate_immediately' },
   },
   ALMOST_CERTAIN: {
-    LOW: { levelKey: 'LOW', action: 'Monitor' },
-    MEDIUM: { levelKey: 'HIGH', action: 'Mitigate' },
-    HIGH: { levelKey: 'CRITICAL', action: 'Mitigate Immediately' },
-    CRITICAL: { levelKey: 'CRITICAL', action: 'Mitigate Immediately' },
+    LOW: { levelKey: 'LOW', action: 'monitor' },
+    MEDIUM: { levelKey: 'HIGH', action: 'mitigate' },
+    HIGH: { levelKey: 'CRITICAL', action: 'mitigate_immediately' },
+    CRITICAL: { levelKey: 'CRITICAL', action: 'mitigate_immediately' },
   },
 };
 
@@ -453,40 +493,121 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-function defaultAction(levelKey) {
-  return DEFAULT_ACTION_BY_LEVEL[levelKey] || 'Monitor';
+function translateOrFallback(t, key, fallback) {
+  return typeof t === 'function' ? t(key) : fallback;
 }
 
-function normalizeActionText(action, levelKey) {
+function translateAction(actionKey, t) {
+  return translateOrFallback(t, `riskMatrix.actions.${actionKey}`, ACTION_TEXT_BY_KEY[actionKey] || ACTION_TEXT_BY_KEY.monitor);
+}
+
+function translateImpactLabel(impactKey, t) {
+  switch (impactKey) {
+    case 'LOW':
+      return translateOrFallback(t, 'severity.low', 'Low');
+    case 'MEDIUM':
+      return translateOrFallback(t, 'severity.medium', 'Medium');
+    case 'HIGH':
+      return translateOrFallback(t, 'severity.high', 'High');
+    case 'CRITICAL':
+      return translateOrFallback(t, 'severity.critical', 'Critical');
+    default:
+      return impactKey;
+  }
+}
+
+function translateLikelihoodLabel(likelihoodKey, t) {
+  switch (likelihoodKey) {
+    case 'VIRTUALLY_IMPOSSIBLE':
+      return translateOrFallback(t, 'riskMatrix.likelihoods.virtually_impossible', 'Virtually Impossible');
+    case 'UNLIKELY':
+      return translateOrFallback(t, 'riskMatrix.likelihoods.unlikely', 'Unlikely');
+    case 'POSSIBLE':
+      return translateOrFallback(t, 'riskMatrix.likelihoods.possible', 'Possible');
+    case 'LIKELY':
+      return translateOrFallback(t, 'riskMatrix.likelihoods.likely', 'Likely');
+    case 'ALMOST_CERTAIN':
+      return translateOrFallback(t, 'riskMatrix.likelihoods.almost_certain', 'Almost Certain');
+    default:
+      return likelihoodKey;
+  }
+}
+
+function translateLevelLabel(levelKey, t) {
+  switch (levelKey) {
+    case 'VERY_LOW':
+      return translateOrFallback(t, 'riskMatrix.ratings.very_low', 'Very Low');
+    case 'LOW':
+      return translateOrFallback(t, 'riskMatrix.ratings.low', 'Low');
+    case 'MEDIUM':
+      return translateOrFallback(t, 'riskMatrix.ratings.medium', 'Medium');
+    case 'HIGH':
+      return translateOrFallback(t, 'riskMatrix.ratings.high', 'High');
+    case 'CRITICAL':
+      return translateOrFallback(t, 'riskMatrix.ratings.critical', 'Critical');
+    default:
+      return levelKey;
+  }
+}
+
+function defaultAction(levelKey, t) {
+  return translateAction(DEFAULT_ACTION_BY_LEVEL[levelKey] || 'monitor', t);
+}
+
+function normalizeActionText(action, levelKey, t) {
   const text = String(action || '').trim();
   if (!text) {
-    return defaultAction(levelKey);
+    return defaultAction(levelKey, t);
   }
-  const legacyText = LEGACY_ACTION_TO_TEXT[text.toUpperCase()];
-  return legacyText || text;
+  const actionKey = LEGACY_ACTION_TO_KEY[text.toUpperCase()];
+  return actionKey ? translateAction(actionKey, t) : text;
 }
 
-function createDefaultDraft() {
+function mapLabelsByKey(items) {
+  return items.reduce((acc, item) => {
+    acc[item.key] = item.label;
+    return acc;
+  }, {});
+}
+
+function localizeDefaultText(value, localizedDefault, englishDefault) {
+  const text = String(value || '').trim();
+  if (!text || text === localizedDefault || text === englishDefault) {
+    return localizedDefault;
+  }
+  return text;
+}
+
+function localizeDefaultLabel(value, key, localizedDefaults, englishDefaults) {
+  const text = String(value || '').trim();
+  if (!text || text === key || text === localizedDefaults[key] || text === englishDefaults[key]) {
+    return localizedDefaults[key] || text || key;
+  }
+  return text;
+}
+
+function createDefaultDraft(t) {
   const impactValues = [
-    { key: 'LOW', label: 'Low', sortOrder: 1 },
-    { key: 'MEDIUM', label: 'Medium', sortOrder: 2 },
-    { key: 'HIGH', label: 'High', sortOrder: 3 },
-    { key: 'CRITICAL', label: 'Critical', sortOrder: 4 },
+    { key: 'LOW', label: translateImpactLabel('LOW', t), sortOrder: 1 },
+    { key: 'MEDIUM', label: translateImpactLabel('MEDIUM', t), sortOrder: 2 },
+    { key: 'HIGH', label: translateImpactLabel('HIGH', t), sortOrder: 3 },
+    { key: 'CRITICAL', label: translateImpactLabel('CRITICAL', t), sortOrder: 4 },
   ];
   const likelihoodValues = [
-    { key: 'VIRTUALLY_IMPOSSIBLE', label: 'Virtually Impossible', sortOrder: 1 },
-    { key: 'UNLIKELY', label: 'Unlikely', sortOrder: 2 },
-    { key: 'POSSIBLE', label: 'Possible', sortOrder: 3 },
-    { key: 'LIKELY', label: 'Likely', sortOrder: 4 },
-    { key: 'ALMOST_CERTAIN', label: 'Almost Certain', sortOrder: 5 },
+    { key: 'VIRTUALLY_IMPOSSIBLE', label: translateLikelihoodLabel('VIRTUALLY_IMPOSSIBLE', t), sortOrder: 1 },
+    { key: 'UNLIKELY', label: translateLikelihoodLabel('UNLIKELY', t), sortOrder: 2 },
+    { key: 'POSSIBLE', label: translateLikelihoodLabel('POSSIBLE', t), sortOrder: 3 },
+    { key: 'LIKELY', label: translateLikelihoodLabel('LIKELY', t), sortOrder: 4 },
+    { key: 'ALMOST_CERTAIN', label: translateLikelihoodLabel('ALMOST_CERTAIN', t), sortOrder: 5 },
   ];
   const levels = [
-    { key: 'VERY_LOW', label: 'Very Low', color: '#4CAF50', owaspSeverityMapping: 'LOW', action: 'Accept', sortOrder: 1 },
-    { key: 'LOW', label: 'Low', color: '#8BC34A', owaspSeverityMapping: 'LOW', action: 'Monitor', sortOrder: 2 },
-    { key: 'MEDIUM', label: 'Medium', color: '#FF9800', owaspSeverityMapping: 'MEDIUM', action: 'Monitor & Plan', sortOrder: 3 },
-    { key: 'HIGH', label: 'High', color: '#f44336', owaspSeverityMapping: 'HIGH', action: 'Mitigate', sortOrder: 4 },
-    { key: 'CRITICAL', label: 'Critical', color: '#D32F2F', owaspSeverityMapping: 'CRITICAL', action: 'Mitigate Immediately', sortOrder: 5 },
+    { key: 'VERY_LOW', label: translateLevelLabel('VERY_LOW', t), color: '#4CAF50', owaspSeverityMapping: 'LOW', action: defaultAction('VERY_LOW', t), sortOrder: 1 },
+    { key: 'LOW', label: translateLevelLabel('LOW', t), color: '#8BC34A', owaspSeverityMapping: 'LOW', action: defaultAction('LOW', t), sortOrder: 2 },
+    { key: 'MEDIUM', label: translateLevelLabel('MEDIUM', t), color: '#FF9800', owaspSeverityMapping: 'MEDIUM', action: defaultAction('MEDIUM', t), sortOrder: 3 },
+    { key: 'HIGH', label: translateLevelLabel('HIGH', t), color: '#f44336', owaspSeverityMapping: 'HIGH', action: defaultAction('HIGH', t), sortOrder: 4 },
+    { key: 'CRITICAL', label: translateLevelLabel('CRITICAL', t), color: '#D32F2F', owaspSeverityMapping: 'CRITICAL', action: defaultAction('CRITICAL', t), sortOrder: 5 },
   ];
+  const calculateToRiskEnabled = false;
 
   const cells = {};
   likelihoodValues.forEach((likelihood) => {
@@ -495,24 +616,26 @@ function createDefaultDraft() {
       const defaultCell = DEFAULT_MATRIX[likelihood.key][impact.key];
       cells[key] = {
         levelKey: defaultCell.levelKey,
-        action: defaultCell.action,
+        action: translateAction(defaultCell.action, t),
       };
     });
   });
 
   return {
     enabled: false,
+    calculateToRiskEnabled,
     axisLabels: {
-      impact: 'Impact',
-      likelihood: 'Likelihood',
+      impact: translateOrFallback(t, 'riskMatrix.impact', 'Impact'),
+      likelihood: translateOrFallback(t, 'riskMatrix.likelihood', 'Likelihood'),
     },
-    levelDefinitionsLabel: 'Calculated Risk',
+    levelDefinitionsLabel: translateOrFallback(t, 'riskMatrix.resultLabel', 'Calculated Risk'),
     sectionLabels: {
-      riskAssessment: 'Risk Assessment',
-      residualRisk: 'Residual Risk Assessment',
+      riskAssessment: translateOrFallback(t, 'riskMatrix.title', 'Risk Assessment'),
+      residualRisk: translateOrFallback(t, 'riskMatrix.residualTitle', 'Residual Risk Assessment'),
     },
     requireRiskAssessment: false,
     requireResidualRiskAssessment: false,
+    owaspCardLabel: '',
     impactValues,
     likelihoodValues,
     levels,
@@ -522,12 +645,17 @@ function createDefaultDraft() {
 
 export default {
   name: 'RiskMatrix',
+  components: {
+    cSwitch,
+  },
   data() {
     return {
-      draft: createDefaultDraft(),
+      labelIcon: { dataOn: '✓', dataOff: '✕' },
+      draft: createDefaultDraft(this.$t.bind(this)),
       isDirty: false,
       editingImpactLabel: false,
       editingLikelihoodLabel: false,
+      editingOwaspLabel: false,
       editingLevelLabel: false,
       editingRiskAssessmentLabel: false,
       editingResidualRiskLabel: false,
@@ -560,6 +688,10 @@ export default {
     axisLikelihoodLabel() {
       const label = String(this.draft?.axisLabels?.likelihood || '').trim();
       return label || this.$t('riskMatrix.likelihood');
+    },
+    owaspCardLabelDisplay() {
+      const label = String(this.draft?.owaspCardLabel || '').trim();
+      return label || this.$t('riskMatrix.resultLabel');
     },
     levelLabel() {
       const label = String(this.draft?.levelDefinitionsLabel || '').trim();
@@ -631,27 +763,37 @@ export default {
       }
 
       if (!loaded) {
-        loaded = createDefaultDraft();
+        loaded = createDefaultDraft(this.$t.bind(this));
       }
 
       this.draft = this.normalizeDraft(loaded);
       this.isDirty = false;
     },
     normalizeDraft(input) {
-      const fallback = createDefaultDraft();
+      const translate = this.$t.bind(this);
+      const fallback = createDefaultDraft(translate);
+      const englishFallback = createDefaultDraft();
+      const fallbackImpactLabels = mapLabelsByKey(fallback.impactValues);
+      const englishImpactLabels = mapLabelsByKey(englishFallback.impactValues);
+      const fallbackLikelihoodLabels = mapLabelsByKey(fallback.likelihoodValues);
+      const englishLikelihoodLabels = mapLabelsByKey(englishFallback.likelihoodValues);
+      const fallbackLevelLabels = mapLabelsByKey(fallback.levels);
+      const englishLevelLabels = mapLabelsByKey(englishFallback.levels);
       const normalized = {
         enabled: input?.enabled === true,
+        calculateToRiskEnabled: input?.calculateToRiskEnabled === true,
         axisLabels: {
-          impact: String(input?.axisLabels?.impact || fallback.axisLabels.impact || '').trim(),
-          likelihood: String(input?.axisLabels?.likelihood || fallback.axisLabels.likelihood || '').trim(),
+          impact: localizeDefaultText(input?.axisLabels?.impact, fallback.axisLabels.impact, englishFallback.axisLabels.impact),
+          likelihood: localizeDefaultText(input?.axisLabels?.likelihood, fallback.axisLabels.likelihood, englishFallback.axisLabels.likelihood),
         },
-        levelDefinitionsLabel: String(input?.levelDefinitionsLabel || fallback.levelDefinitionsLabel || '').trim(),
+        levelDefinitionsLabel: localizeDefaultText(input?.levelDefinitionsLabel, fallback.levelDefinitionsLabel, englishFallback.levelDefinitionsLabel),
         sectionLabels: {
-          riskAssessment: String(input?.sectionLabels?.riskAssessment || fallback.sectionLabels.riskAssessment || '').trim(),
-          residualRisk: String(input?.sectionLabels?.residualRisk || fallback.sectionLabels.residualRisk || '').trim(),
+          riskAssessment: localizeDefaultText(input?.sectionLabels?.riskAssessment, fallback.sectionLabels.riskAssessment, englishFallback.sectionLabels.riskAssessment),
+          residualRisk: localizeDefaultText(input?.sectionLabels?.residualRisk, fallback.sectionLabels.residualRisk, englishFallback.sectionLabels.residualRisk),
         },
         requireRiskAssessment: input?.requireRiskAssessment === true,
         requireResidualRiskAssessment: input?.requireResidualRiskAssessment === true,
+        owaspCardLabel: String(input?.owaspCardLabel || '').trim(),
         impactValues: Array.isArray(input?.impactValues) && input.impactValues.length > 0 ? input.impactValues : fallback.impactValues,
         likelihoodValues: Array.isArray(input?.likelihoodValues) && input.likelihoodValues.length > 0 ? input.likelihoodValues : fallback.likelihoodValues,
         levels: Array.isArray(input?.levels) && input.levels.length > 0 ? input.levels : fallback.levels,
@@ -673,7 +815,7 @@ export default {
       normalized.impactValues = normalized.impactValues
         .map((item, idx) => ({
           key: String(item.key || '').toUpperCase(),
-          label: item.label || item.key,
+          label: localizeDefaultLabel(item.label || item.key, String(item.key || '').toUpperCase(), fallbackImpactLabels, englishImpactLabels),
           sortOrder: Number.isFinite(item.sortOrder) ? item.sortOrder : idx + 1,
         }))
         .filter((item) => item.key);
@@ -681,7 +823,7 @@ export default {
       normalized.likelihoodValues = normalized.likelihoodValues
         .map((item, idx) => ({
           key: String(item.key || '').toUpperCase(),
-          label: item.label || item.key,
+          label: localizeDefaultLabel(item.label || item.key, String(item.key || '').toUpperCase(), fallbackLikelihoodLabels, englishLikelihoodLabels),
           sortOrder: Number.isFinite(item.sortOrder) ? item.sortOrder : idx + 1,
         }))
         .filter((item) => item.key);
@@ -692,10 +834,10 @@ export default {
           const fallbackLevel = fallbackLevelsByKey[key] || {};
           return {
             key,
-            label: item.label || item.key,
+            label: localizeDefaultLabel(item.label || item.key, key, fallbackLevelLabels, englishLevelLabels),
             color: item.color || '#32c766',
             owaspSeverityMapping: String(item.owaspSeverityMapping || fallbackLevel.owaspSeverityMapping || 'UNASSIGNED').toUpperCase(),
-            action: normalizeActionText(item.action ?? fallbackLevel.action, key),
+            action: normalizeActionText(item.action ?? fallbackLevel.action, key, translate),
             sortOrder: Number.isFinite(item.sortOrder) ? item.sortOrder : idx + 1,
           };
         })
@@ -714,7 +856,7 @@ export default {
             : (defaultCell?.levelKey && validLevelKeys.has(defaultCell.levelKey) ? defaultCell.levelKey : defaultLevelKey);
           normalized.cells[cellKey] = {
             levelKey,
-            action: normalizeActionText(existingCell?.action ?? defaultCell?.action, levelKey),
+            action: normalizeActionText(existingCell?.action ?? defaultCell?.action, levelKey, translate),
           };
         });
       });
@@ -725,7 +867,7 @@ export default {
       const cellKey = `${likelihoodKey}::${impactKey}`;
       if (!this.draft.cells[cellKey]) {
         const defaultLevelKey = this.draft.levels[0]?.key || 'LOW';
-        this.$set(this.draft.cells, cellKey, { levelKey: defaultLevelKey, action: defaultAction(defaultLevelKey) });
+        this.$set(this.draft.cells, cellKey, { levelKey: defaultLevelKey, action: defaultAction(defaultLevelKey, this.$t.bind(this)) });
       }
       return this.draft.cells[cellKey];
     },
@@ -733,24 +875,24 @@ export default {
       const cell = this.getCell(likelihoodKey, impactKey);
       cell.levelKey = levelKey;
       if (!cell.action || cell.action === '') {
-        cell.action = defaultAction(levelKey);
+        cell.action = defaultAction(levelKey, this.$t.bind(this));
       }
       this.isDirty = true;
     },
     setCellAction(likelihoodKey, impactKey, action) {
       const cell = this.getCell(likelihoodKey, impactKey);
       const normalizedAction = String(action || '').trim();
-      cell.action = normalizedAction || defaultAction(cell.levelKey);
+      cell.action = normalizedAction || defaultAction(cell.levelKey, this.$t.bind(this));
       this.isDirty = true;
     },
     getCellDisplay(likelihoodKey, impactKey) {
       const cell = this.getCell(likelihoodKey, impactKey);
-      const level = this.levelMap[cell.levelKey] || { key: 'LOW', label: 'Low', color: '#8dd819' };
+      const level = this.levelMap[cell.levelKey] || { key: 'LOW', label: translateLevelLabel('LOW', this.$t.bind(this)), color: '#8dd819' };
       return {
         levelKey: level.key,
         levelLabel: level.label,
         levelColor: level.color,
-        actionLabel: String(cell.action || '').trim() || defaultAction(level.key),
+        actionLabel: String(cell.action || '').trim() || defaultAction(level.key, this.$t.bind(this)),
       };
     },
     mappedSeverityLabel(level) {
@@ -768,6 +910,16 @@ export default {
           return this.$t('severity.info');
         default:
           return this.$t('severity.unassigned');
+      }
+    },
+    severityColor(mapping) {
+      switch (String(mapping || '').toUpperCase()) {
+        case 'CRITICAL': return '#D32F2F';
+        case 'HIGH':     return '#f44336';
+        case 'MEDIUM':   return '#FF9800';
+        case 'LOW':      return '#8BC34A';
+        case 'INFO':     return '#4CAF50';
+        default:         return '#6c757d';
       }
     },
     severityBadgeStyle(level) {
@@ -828,7 +980,7 @@ export default {
       if (!this.draft.enabled) {
         return;
       }
-      const defaultDraft = createDefaultDraft();
+      const defaultDraft = createDefaultDraft(this.$t.bind(this));
       this.draft.cells = clone(defaultDraft.cells);
       this.isDirty = true;
     },
@@ -968,7 +1120,7 @@ export default {
           const cellKey = `${likelihood.key}::${impact.key}`;
           newCells[cellKey] = this.draft.cells[cellKey] || {
             levelKey: this.draft.levels[0]?.key || 'LOW',
-            action: defaultAction(this.draft.levels[0]?.key),
+            action: defaultAction(this.draft.levels[0]?.key, this.$t.bind(this)),
           };
         });
       });
@@ -1011,13 +1163,25 @@ export default {
 
 <style scoped>
 .matrix-card-header {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.matrix-card-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.matrix-card-actions >>> .c-switch {
+  margin-bottom: 0;
 }
 
 .matrix-card-body {
   padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .matrix-list-row {
@@ -1038,6 +1202,19 @@ export default {
   font-size: 80%;
   margin-right: 0.5rem;
   background: rgba(255, 255, 255, 0.08);
+}
+
+.owasp-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 0.55rem;
+  border-radius: 0.25rem;
+  font-size: 75%;
+  font-weight: 600;
+  color: #fff;
+  margin-right: 0.25rem;
+  white-space: nowrap;
 }
 
 .color-dot {
@@ -1080,17 +1257,18 @@ export default {
 .matrix-corner {
   min-width: 11rem;
   padding: 0.85rem 0.9rem;
+  text-align: center;
 }
 
 .matrix-axis-title {
-  font-size: 80%;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--table-head-color);
-  line-height: 1.25;
+  line-height: 1.1;
 }
 
 .matrix-col-header {
-  text-align: left;
+  text-align: center;
   min-width: 10rem;
   padding: 0.75rem 1rem;
 }
@@ -1111,6 +1289,7 @@ export default {
   padding: 0.65rem 0.7rem;
   min-width: 11rem;
   color: var(--table-head-color);
+  text-align: center;
 }
 
 .matrix-row-index {
@@ -1165,6 +1344,42 @@ export default {
 
 .matrix-footer {
   margin-top: 1rem;
+}
+
+.calculate-to-risk-table {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.35rem;
+  overflow: hidden;
+}
+
+.ctr-table-header {
+  background: var(--table-head-bg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.85rem;
+  color: var(--table-head-color);
+}
+
+.ctr-table-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--table-head-color);
+}
+
+.ctr-table-row:last-child {
+  border-bottom: none;
+}
+
+.ctr-mapped-col {
+  min-width: 10rem;
+}
+
+.ctr-edit-col {
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.ctr-disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .inline-label-input {
