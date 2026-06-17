@@ -1,5 +1,6 @@
 <template>
-  <div class="risk-matrix-admin">
+  <b-card no-body class="risk-matrix-admin">
+    <b-card-body>
     <b-form-group class="mb-3">
       <c-switch
         color="primary"
@@ -11,6 +12,7 @@
       <small class="text-muted d-block mt-1">{{ $t('riskMatrix.enableCustomHelp') }}</small>
     </b-form-group>
 
+    <b-collapse :visible="draft.enabled">
     <b-card class="mb-3" no-body>
       <div class="matrix-card-header px-3 py-2">
         <span class="font-weight-bold">{{ $t('riskMatrix.sectionLabelsTitle') }}</span>
@@ -83,7 +85,7 @@
               v-bind="labelIcon"
               :disabled="!draft.enabled"
               @change="isDirty = true"
-            />{{ $t('riskMatrix.requireRiskAssessment') }}
+            />{{ $t('riskMatrix.requireLabel') }} {{ riskAssessmentLabel }}
           </b-col>
           <b-col sm="6">
             <c-switch
@@ -93,7 +95,7 @@
               v-bind="labelIcon"
               :disabled="!draft.enabled"
               @change="isDirty = true"
-            />{{ $t('riskMatrix.requireResidualRiskAssessment') }}
+            />{{ $t('riskMatrix.requireLabel') }} {{ residualRiskLabel }}
           </b-col>
         </b-row>
       </div>
@@ -287,7 +289,6 @@
     <b-card class="mb-3 risk-mapping-card" no-body>
       <div class="matrix-card-header d-flex justify-content-between align-items-center px-3 py-2">
         <span class="font-weight-bold">{{ $t('riskMatrix.mappingTitle') }}</span>
-        <b-badge variant="secondary">{{ $t('riskMatrix.grid') }}</b-badge>
       </div>
       <div class="matrix-card-body">
         <div class="matrix-tools d-flex align-items-center mb-3">
@@ -342,11 +343,13 @@
       </div>
     </b-card>
 
-    <div class="matrix-footer text-right">
+    </b-collapse>
+    </b-card-body>
+    <b-card-footer>
       <b-button variant="outline-primary" class="px-4" @click="saveSettings">
         {{ $t('message.update') }}
       </b-button>
-    </div>
+    </b-card-footer>
 
     <b-modal
       id="riskMatrixCellModal"
@@ -415,7 +418,7 @@
         <b-button size="sm" variant="primary" @click="saveLevelModal">{{ $t('message.save') }}</b-button>
       </template>
     </b-modal>
-  </div>
+  </b-card>
 </template>
 
 <script>
@@ -423,18 +426,19 @@ import { Switch as cSwitch } from '@coreui/vue';
 import { contrastTextColor } from '@/shared/colorUtils';
 
 const DEFAULT_ACTION_BY_LEVEL = {
-  VERY_LOW: 'accept',
-  LOW: 'monitor',
-  MEDIUM: 'monitor_plan',
+  LOW: 'accept',
+  MEDIUM: 'monitor',
   HIGH: 'mitigate',
-  CRITICAL: 'mitigate_immediately',
+  CRITICAL: 'escalate',
 };
 
 const ACTION_TEXT_BY_KEY = {
   accept: 'Accept',
   monitor: 'Monitor',
-  monitor_plan: 'Monitor & Plan',
   mitigate: 'Mitigate',
+  escalate: 'Escalate',
+  // kept for backward-compat with stored configs
+  monitor_plan: 'Monitor & Plan',
   mitigate_immediately: 'Mitigate Immediately',
 };
 
@@ -446,6 +450,8 @@ const LEGACY_ACTION_TO_KEY = {
   MITIGATE: 'mitigate',
   MITIGATE_IMMEDIATELY: 'mitigate_immediately',
   'MITIGATE IMMEDIATELY': 'mitigate_immediately',
+  ESCALATE: 'escalate',
+  BLOCK: 'escalate',
 };
 
 const LEVEL_COLOR_MAP = {
@@ -456,36 +462,31 @@ const LEVEL_COLOR_MAP = {
   CRITICAL: '#D32F2F',
 };
 
+// ISO 4×4 Risk Matrix (Impact × Likelihood)
 const DEFAULT_MATRIX = {
-  VIRTUALLY_IMPOSSIBLE: {
-    LOW: { levelKey: 'VERY_LOW', action: 'accept' },
-    MEDIUM: { levelKey: 'VERY_LOW', action: 'accept' },
-    HIGH: { levelKey: 'LOW', action: 'monitor' },
-    CRITICAL: { levelKey: 'LOW', action: 'monitor' },
+  RARE: {
+    INSIGNIFICANT: { levelKey: 'LOW', action: 'accept' },
+    MINOR:         { levelKey: 'LOW', action: 'accept' },
+    MAJOR:         { levelKey: 'LOW', action: 'accept' },
+    SEVERE:        { levelKey: 'MEDIUM', action: 'monitor' },
   },
   UNLIKELY: {
-    LOW: { levelKey: 'VERY_LOW', action: 'accept' },
-    MEDIUM: { levelKey: 'LOW', action: 'monitor' },
-    HIGH: { levelKey: 'MEDIUM', action: 'monitor_plan' },
-    CRITICAL: { levelKey: 'HIGH', action: 'mitigate' },
+    INSIGNIFICANT: { levelKey: 'LOW', action: 'accept' },
+    MINOR:         { levelKey: 'LOW', action: 'accept' },
+    MAJOR:         { levelKey: 'MEDIUM', action: 'monitor' },
+    SEVERE:        { levelKey: 'HIGH', action: 'mitigate' },
   },
   POSSIBLE: {
-    LOW: { levelKey: 'LOW', action: 'monitor' },
-    MEDIUM: { levelKey: 'MEDIUM', action: 'monitor_plan' },
-    HIGH: { levelKey: 'HIGH', action: 'mitigate' },
-    CRITICAL: { levelKey: 'CRITICAL', action: 'mitigate_immediately' },
+    INSIGNIFICANT: { levelKey: 'LOW', action: 'accept' },
+    MINOR:         { levelKey: 'MEDIUM', action: 'monitor' },
+    MAJOR:         { levelKey: 'HIGH', action: 'mitigate' },
+    SEVERE:        { levelKey: 'HIGH', action: 'mitigate' },
   },
   LIKELY: {
-    LOW: { levelKey: 'LOW', action: 'monitor' },
-    MEDIUM: { levelKey: 'HIGH', action: 'mitigate' },
-    HIGH: { levelKey: 'HIGH', action: 'mitigate' },
-    CRITICAL: { levelKey: 'CRITICAL', action: 'mitigate_immediately' },
-  },
-  ALMOST_CERTAIN: {
-    LOW: { levelKey: 'LOW', action: 'monitor' },
-    MEDIUM: { levelKey: 'HIGH', action: 'mitigate' },
-    HIGH: { levelKey: 'CRITICAL', action: 'mitigate_immediately' },
-    CRITICAL: { levelKey: 'CRITICAL', action: 'mitigate_immediately' },
+    INSIGNIFICANT: { levelKey: 'MEDIUM', action: 'monitor' },
+    MINOR:         { levelKey: 'MEDIUM', action: 'monitor' },
+    MAJOR:         { levelKey: 'HIGH', action: 'mitigate' },
+    SEVERE:        { levelKey: 'CRITICAL', action: 'escalate' },
   },
 };
 
@@ -503,6 +504,15 @@ function translateAction(actionKey, t) {
 
 function translateImpactLabel(impactKey, t) {
   switch (impactKey) {
+    case 'INSIGNIFICANT':
+      return translateOrFallback(t, 'riskMatrix.impacts.insignificant', 'Insignificant');
+    case 'MINOR':
+      return translateOrFallback(t, 'riskMatrix.impacts.minor', 'Minor');
+    case 'MAJOR':
+      return translateOrFallback(t, 'riskMatrix.impacts.major', 'Major');
+    case 'SEVERE':
+      return translateOrFallback(t, 'riskMatrix.impacts.severe', 'Severe');
+    // legacy keys kept for stored configs
     case 'LOW':
       return translateOrFallback(t, 'severity.low', 'Low');
     case 'MEDIUM':
@@ -518,14 +528,17 @@ function translateImpactLabel(impactKey, t) {
 
 function translateLikelihoodLabel(likelihoodKey, t) {
   switch (likelihoodKey) {
-    case 'VIRTUALLY_IMPOSSIBLE':
-      return translateOrFallback(t, 'riskMatrix.likelihoods.virtually_impossible', 'Virtually Impossible');
+    case 'RARE':
+      return translateOrFallback(t, 'riskMatrix.likelihoods.rare', 'Rare');
     case 'UNLIKELY':
       return translateOrFallback(t, 'riskMatrix.likelihoods.unlikely', 'Unlikely');
     case 'POSSIBLE':
       return translateOrFallback(t, 'riskMatrix.likelihoods.possible', 'Possible');
     case 'LIKELY':
       return translateOrFallback(t, 'riskMatrix.likelihoods.likely', 'Likely');
+    // legacy keys kept for stored configs
+    case 'VIRTUALLY_IMPOSSIBLE':
+      return translateOrFallback(t, 'riskMatrix.likelihoods.virtually_impossible', 'Virtually Impossible');
     case 'ALMOST_CERTAIN':
       return translateOrFallback(t, 'riskMatrix.likelihoods.almost_certain', 'Almost Certain');
     default:
@@ -588,24 +601,22 @@ function localizeDefaultLabel(value, key, localizedDefaults, englishDefaults) {
 
 function createDefaultDraft(t) {
   const impactValues = [
-    { key: 'LOW', label: translateImpactLabel('LOW', t), sortOrder: 1 },
-    { key: 'MEDIUM', label: translateImpactLabel('MEDIUM', t), sortOrder: 2 },
-    { key: 'HIGH', label: translateImpactLabel('HIGH', t), sortOrder: 3 },
-    { key: 'CRITICAL', label: translateImpactLabel('CRITICAL', t), sortOrder: 4 },
+    { key: 'INSIGNIFICANT', label: translateImpactLabel('INSIGNIFICANT', t), sortOrder: 1 },
+    { key: 'MINOR', label: translateImpactLabel('MINOR', t), sortOrder: 2 },
+    { key: 'MAJOR', label: translateImpactLabel('MAJOR', t), sortOrder: 3 },
+    { key: 'SEVERE', label: translateImpactLabel('SEVERE', t), sortOrder: 4 },
   ];
   const likelihoodValues = [
-    { key: 'VIRTUALLY_IMPOSSIBLE', label: translateLikelihoodLabel('VIRTUALLY_IMPOSSIBLE', t), sortOrder: 1 },
+    { key: 'RARE', label: translateLikelihoodLabel('RARE', t), sortOrder: 1 },
     { key: 'UNLIKELY', label: translateLikelihoodLabel('UNLIKELY', t), sortOrder: 2 },
     { key: 'POSSIBLE', label: translateLikelihoodLabel('POSSIBLE', t), sortOrder: 3 },
     { key: 'LIKELY', label: translateLikelihoodLabel('LIKELY', t), sortOrder: 4 },
-    { key: 'ALMOST_CERTAIN', label: translateLikelihoodLabel('ALMOST_CERTAIN', t), sortOrder: 5 },
   ];
   const levels = [
-    { key: 'VERY_LOW', label: translateLevelLabel('VERY_LOW', t), color: '#4CAF50', owaspSeverityMapping: 'LOW', action: defaultAction('VERY_LOW', t), sortOrder: 1 },
-    { key: 'LOW', label: translateLevelLabel('LOW', t), color: '#8BC34A', owaspSeverityMapping: 'LOW', action: defaultAction('LOW', t), sortOrder: 2 },
-    { key: 'MEDIUM', label: translateLevelLabel('MEDIUM', t), color: '#FF9800', owaspSeverityMapping: 'MEDIUM', action: defaultAction('MEDIUM', t), sortOrder: 3 },
-    { key: 'HIGH', label: translateLevelLabel('HIGH', t), color: '#f44336', owaspSeverityMapping: 'HIGH', action: defaultAction('HIGH', t), sortOrder: 4 },
-    { key: 'CRITICAL', label: translateLevelLabel('CRITICAL', t), color: '#D32F2F', owaspSeverityMapping: 'CRITICAL', action: defaultAction('CRITICAL', t), sortOrder: 5 },
+    { key: 'LOW', label: translateLevelLabel('LOW', t), color: '#8BC34A', owaspSeverityMapping: 'LOW', action: defaultAction('LOW', t), sortOrder: 1 },
+    { key: 'MEDIUM', label: translateLevelLabel('MEDIUM', t), color: '#FF9800', owaspSeverityMapping: 'MEDIUM', action: defaultAction('MEDIUM', t), sortOrder: 2 },
+    { key: 'HIGH', label: translateLevelLabel('HIGH', t), color: '#f44336', owaspSeverityMapping: 'HIGH', action: defaultAction('HIGH', t), sortOrder: 3 },
+    { key: 'CRITICAL', label: translateLevelLabel('CRITICAL', t), color: '#D32F2F', owaspSeverityMapping: 'CRITICAL', action: defaultAction('CRITICAL', t), sortOrder: 4 },
   ];
   const calculateToRiskEnabled = false;
 
@@ -981,6 +992,9 @@ export default {
         return;
       }
       const defaultDraft = createDefaultDraft(this.$t.bind(this));
+      this.draft.impactValues = clone(defaultDraft.impactValues);
+      this.draft.likelihoodValues = clone(defaultDraft.likelihoodValues);
+      this.draft.levels = clone(defaultDraft.levels);
       this.draft.cells = clone(defaultDraft.cells);
       this.isDirty = true;
     },

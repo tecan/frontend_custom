@@ -175,7 +175,6 @@
     "source_of_discovery_placeholder": "ソースを選択...",
     "add_source": "ソースを追加",
     "source_label": "ソースラベル",
-    "source_key": "ソースキー",
     "vulnerability_id_generation": "内部脆弱性ID生成",
     "use_custom_id_generator": "カスタム連番IDジェネレーターを使用する",
     "use_custom_id_generator_on_help": "有効時: 設定したテンプレートと連番を使用してIDが生成されます（例: ORG-project-2026-00001）。",
@@ -200,14 +199,14 @@
     "reset_to_defaults": "デフォルトにリセット",
     "create_vulnerability_texts": "脆弱性作成テキスト",
     "audit_vulnerability_texts": "脆弱性監査テキスト",
-    "description_placeholder": "説明プレースホルダー",
-    "description_placeholder_default": "脆弱性を詳しく説明してください...",
-    "recommendation_placeholder": "推奨事項プレースホルダー",
-    "recommendation_placeholder_default": "修復手順を提供してください...",
-    "risk_justification_placeholder": "リスク根拠プレースホルダー",
-    "risk_justification_placeholder_default": "このリスクが許容できる理由を説明してください...",
-    "residual_risk_placeholder": "残留リスクプレースホルダー",
-    "residual_risk_placeholder_default": "緩和後の残留リスクを説明してください...",
+    "description_placeholder": "説明",
+    "description_placeholder_default": "<脆弱性を詳しく説明してください>",
+    "recommendation_placeholder": "推奨事項",
+    "recommendation_placeholder_default": "<修復手順を提供してください>",
+    "risk_justification_placeholder": "リスク根拠",
+    "risk_justification_placeholder_default": "<このリスクが許容できる理由を説明してください>",
+    "residual_risk_placeholder": "残留リスク",
+    "residual_risk_placeholder_default": "<緩和後の残留リスクを説明してください>",
     "jira": "Jira",
     "jira_auth_with_token": "Jira 個人アクセス トークン",
     "jira_desc": "Jira サービス認証",
@@ -272,7 +271,6 @@
     "personal_access_token": "パーソナルアクセストークン",
     "portfolio_access_control": "ポートフォリオアクセス制御",
     "preferences": "好み",
-    "preview": "プレビュー",
     "project_access": "プロジェクトへのアクセス",
     "publisher": "パブリッシャー",
     "publisher_class": "パブリッシャークラス",
@@ -368,7 +366,9 @@
     "vulnsource_osv_base_url": "OSV ベース URL",
     "welcome_message": "ウェルカムメッセージ",
     "welcome_message_desc": "ユーザーがサインインする前に、Dependency-Track の開始ページに表示されるウェルカム メッセージをカスタマイズします。",
-    "welcome_message_enable": "ウェルカムメッセージを有効にする"
+    "welcome_message_enable": "ウェルカムメッセージを有効にする",
+    "enable_text_and_placeholders": "Enable text and placeholders",
+    "source_label_duplicate": "A source with this name already exists. Please use a unique name."
   },
   "condition": {
     "forbidden": "禁止 (403)",
@@ -701,6 +701,7 @@
     "oidc_redirect_failed": "OpenID Connect ID プロバイダーへのリダイレクト中にエラーが発生しました",
     "only_direct_tooltip": "直接的な依存関係のみを表示し、推移的な依存関係を非表示にする",
     "only_outdated_tooltip": "新しい安定バージョンが利用可能な依存関係のみを表示する",
+    "only_show_latest_project_versions": null,
     "operational_risk": "運用リスク",
     "operator": "オペレーター",
     "osi_approved": "OSI承認",
@@ -1028,13 +1029,14 @@
   "riskMatrix": {
     "title": "リスク評価",
     "impact": "影響",
-    "impactHelp": "リスクの潜在的なビジネスへの影響を評価するために使用するインパクトレベルを定義します。",
+    "impactHelp": "リスクマトリクスの横軸に使用する値を定義します。",
     "likelihood": "発生可能性",
-    "likelihoodHelp": "リスクが発生する可能性を評価するために使用する可能性レベルを定義します。",
+    "likelihoodHelp": "リスクマトリクスの縦軸に使用する値を定義します。",
     "impactValues": "影響値",
     "likelihoodValues": "可能性値",
     "levelDefinitions": "レベル定義",
     "sectionLabelsTitle": "セクションラベル",
+    "requireLabel": "要求する",
     "requireRiskAssessment": "リスク評価を要求（影響、可能性、根拠）",
     "requireResidualRiskAssessment": "残留リスク評価を要求（影響、可能性、根拠）",
     "riskAssessmentRequired": "{impact} and {likelihood} are required for {section}.",
@@ -1086,14 +1088,22 @@
       "monitor": "監視する",
       "monitor_plan": "監視して計画する",
       "mitigate": "軽減する",
-      "mitigate_immediately": "直ちに軽減する"
+      "mitigate_immediately": "直ちに軽減する",
+      "escalate": "Escalate"
     },
     "likelihoods": {
+      "rare": "Rare",
       "virtually_impossible": "ほぼ不可能",
       "unlikely": "起こりにくい",
       "possible": "起こりうる",
       "likely": "起こりやすい",
       "almost_certain": "ほぼ確実"
+    },
+    "impacts": {
+      "insignificant": "Insignificant",
+      "minor": "Minor",
+      "major": "Major",
+      "severe": "Severe"
     }
   },
   "severity": {

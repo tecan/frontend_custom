@@ -175,7 +175,6 @@
     "source_of_discovery_placeholder": "Quelle auswählen...",
     "add_source": "Quelle hinzufügen",
     "source_label": "Quellenbezeichnung",
-    "source_key": "Quellenschlüssel",
     "vulnerability_id_generation": "Interne Schwachstellen-ID-Generierung",
     "use_custom_id_generator": "Benutzerdefinierten sequenziellen ID-Generator verwenden",
     "use_custom_id_generator_on_help": "Aktiviert: IDs werden mit Ihrer konfigurierten Vorlage und Sequenz erzeugt (z. B. ORG-projekt-2026-00001).",
@@ -200,14 +199,14 @@
     "reset_to_defaults": "Auf Standardwerte zurücksetzen",
     "create_vulnerability_texts": "Schwachstellen erstellen – Texte",
     "audit_vulnerability_texts": "Schwachstellen prüfen – Texte",
-    "description_placeholder": "Beschreibungsplatzhalter",
-    "description_placeholder_default": "Beschreiben Sie die Schwachstelle im Detail...",
-    "recommendation_placeholder": "Empfehlungsplatzhalter",
-    "recommendation_placeholder_default": "Geben Sie Abhilfemaßnahmen an...",
-    "risk_justification_placeholder": "Risikobegründungsplatzhalter",
-    "risk_justification_placeholder_default": "Erläutern Sie, warum dieses Risiko akzeptabel ist...",
-    "residual_risk_placeholder": "Restrisikoplatzhalter",
-    "residual_risk_placeholder_default": "Beschreiben Sie das verbleibende Risiko nach der Schadensbegrenzung...",
+    "description_placeholder": "Beschreibung",
+    "description_placeholder_default": "<Beschreiben Sie die Schwachstelle im Detail>",
+    "recommendation_placeholder": "Empfehlung",
+    "recommendation_placeholder_default": "<Geben Sie Abhilfemaßnahmen an>",
+    "risk_justification_placeholder": "Risikobegründung",
+    "risk_justification_placeholder_default": "<Erläutern Sie, warum dieses Risiko akzeptabel ist>",
+    "residual_risk_placeholder": "Restrisiko",
+    "residual_risk_placeholder_default": "<Beschreiben Sie das verbleibende Risiko nach der Schadensbegrenzung>",
     "jira": "Jira",
     "jira_auth_with_token": "Persönlicher Jira-Zugriffstoken",
     "jira_desc": "Jira-Authentifizierung",
@@ -272,7 +271,6 @@
     "personal_access_token": "Persönlicher Zugriffstoken",
     "portfolio_access_control": "Portfolio-Zugriffskontrolle",
     "preferences": "Einstellungen",
-    "preview": "Vorschau",
     "project_access": "Projektzugriff",
     "publisher": "Publisher",
     "publisher_class": "Publisher-Klasse",
@@ -368,7 +366,9 @@
     "vulnsource_osv_base_url": "OSV-Basis-URL",
     "welcome_message": "Willkommensnachricht",
     "welcome_message_desc": "Passen Sie die Willkommensnachricht an, die auf der Startseite von Dependency-Track angezeigt wird, bevor sich Benutzer anmelden.",
-    "welcome_message_enable": "Willkommensnachricht aktivieren"
+    "welcome_message_enable": "Willkommensnachricht aktivieren",
+    "enable_text_and_placeholders": "Enable text and placeholders",
+    "source_label_duplicate": "A source with this name already exists. Please use a unique name."
   },
   "condition": {
     "forbidden": "Verboten (403)",
@@ -701,6 +701,7 @@
     "oidc_redirect_failed": "Beim Umleiten zum OpenID Connect-Identitätsanbieter ist ein Fehler aufgetreten",
     "only_direct_tooltip": "Nur direkte Abhängigkeiten anzeigen, transitive Abhängigkeiten ausblenden",
     "only_outdated_tooltip": "Nur Abhängigkeiten anzeigen, für die neuere stabile Versionen verfügbar sind",
+    "only_show_latest_project_versions": null,
     "operational_risk": "Betriebsrisiko",
     "operator": "Operator",
     "osi_approved": "OSI-Zulassung",
@@ -1028,13 +1029,14 @@
   "riskMatrix": {
     "title": "Risikobewertung",
     "impact": "Auswirkung",
-    "impactHelp": "Definieren Sie die Auswirkungsstufen zur Bewertung des potenziellen Geschäftsrisikos.",
+    "impactHelp": "Definieren Sie die Werte für die horizontale Achse der Risikomatrix.",
     "likelihood": "Eintrittswahrscheinlichkeit",
-    "likelihoodHelp": "Definieren Sie die Eintrittswahrscheinlichkeitsstufen zur Einschätzung der Wahrscheinlichkeit eines Risikos.",
+    "likelihoodHelp": "Definieren Sie die Werte für die vertikale Achse der Risikomatrix.",
     "impactValues": "Auswirkungswerte",
     "likelihoodValues": "Wahrscheinlichkeitswerte",
     "levelDefinitions": "Leveldefinitionen",
     "sectionLabelsTitle": "Abschnittsbezeichnungen",
+    "requireLabel": "Erfordern",
     "requireRiskAssessment": "Risikobewertung erforderlich (Auswirkung, Wahrscheinlichkeit, Begründung)",
     "requireResidualRiskAssessment": "Restrisikobewertung erforderlich (Auswirkung, Wahrscheinlichkeit, Begründung)",
     "riskAssessmentRequired": "{impact} und {likelihood} sind für {section} erforderlich.",
@@ -1086,14 +1088,22 @@
       "monitor": "Überwachen",
       "monitor_plan": "Überwachen & Planen",
       "mitigate": "Mindern",
-      "mitigate_immediately": "Sofort mindern"
+      "mitigate_immediately": "Sofort mindern",
+      "escalate": "Escalate"
     },
     "likelihoods": {
+      "rare": "Rare",
       "virtually_impossible": "Praktisch unmöglich",
       "unlikely": "Unwahrscheinlich",
       "possible": "Möglich",
       "likely": "Wahrscheinlich",
       "almost_certain": "Nahezu sicher"
+    },
+    "impacts": {
+      "insignificant": "Insignificant",
+      "minor": "Minor",
+      "major": "Major",
+      "severe": "Severe"
     }
   },
   "severity": {

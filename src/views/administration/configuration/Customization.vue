@@ -3,7 +3,8 @@
     <b-tabs v-model="activeTab" content-class="mt-3" @input="onTabChange">
       <!-- Vulnerability IDs Tab -->
       <b-tab :title="$t('admin.vulnerability_ids')">
-        <b-card class="mb-4">
+        <b-card no-body class="mb-4">
+        <b-card-body>
           <h5 class="mb-3">
             {{ $t('admin.vulnerability_id_generation') }}
           </h5>
@@ -26,7 +27,7 @@
               <b-form-group :label="$t('admin.organization_code')">
                 <b-form-input
                   v-model="vulnIdConfig.orgCode"
-                  :placeholder="$t('admin.organization_code_placeholder')"
+                  placeholder="e.g. OWASP"
                   maxlength="50"
                 />
               </b-form-group>
@@ -35,7 +36,7 @@
               <b-form-group :label="$t('admin.project_code')">
                 <b-form-input
                   v-model="vulnIdConfig.projectCode"
-                  :placeholder="$t('admin.project_code_placeholder')"
+                  placeholder="e.g. My Project Name"
                   maxlength="50"
                 />
               </b-form-group>
@@ -47,7 +48,7 @@
               <b-form-group :label="$t('admin.vulnerability_id_template')">
                 <b-form-input
                   v-model="vulnIdConfig.template"
-                  placeholder="{ORG_NAME}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}"
+                  :placeholder="$t('admin.vulnerability_id_template_placeholder')"
                 />
                 <div class="mt-2">
                   <b-badge
@@ -109,24 +110,26 @@
               </div>
             </div>
           </div>
-        </b-card>
-
-        <div class="text-right">
+        </b-card-body>
+        <b-card-footer>
           <b-button variant="outline-primary" class="px-4" @click="saveVulnIdConfig">
             {{ $t('message.update') }}
           </b-button>
-        </div>
+        </b-card-footer>
+        </b-card>
       </b-tab>
 
       <!-- Text & Placeholders Tab -->
       <b-tab :title="$t('admin.text_and_placeholders')">
+        <b-card no-body class="mb-4">
+        <b-card-body>
         <b-form-group class="mb-4">
           <c-switch
             color="primary"
             v-model="textConfig.enabled"
             label
             v-bind="labelIcon"
-          />{{ $t('admin.enabled') }}
+          />{{ $t('admin.enable_text_and_placeholders') }}
         </b-form-group>
 
         <b-collapse :visible="textConfig.enabled">
@@ -136,7 +139,7 @@
           <b-form-group :label="$t('admin.description_placeholder')">
             <b-form-textarea
               v-model="textConfig.descriptionPlaceholder"
-              rows="2"
+              rows="5"
               :placeholder="$t('admin.description_placeholder_default')"
             />
           </b-form-group>
@@ -144,7 +147,7 @@
           <b-form-group :label="$t('admin.recommendation_placeholder')">
             <b-form-textarea
               v-model="textConfig.recommendationPlaceholder"
-              rows="2"
+              rows="5"
               :placeholder="$t('admin.recommendation_placeholder_default')"
             />
           </b-form-group>
@@ -152,16 +155,16 @@
           <b-form-group :label="$t('message.details')">
             <b-form-textarea
               v-model="textConfig.detailPlaceholder"
-              rows="2"
-              placeholder="<Add additional details>"
+              rows="5"
+              :placeholder="$t('admin.detail_placeholder_default')"
             />
           </b-form-group>
 
           <b-form-group :label="$t('message.references')">
             <b-form-textarea
               v-model="textConfig.referencesPlaceholder"
-              rows="2"
-              placeholder="<Add any references if available, example: CPE / CVE references>"
+              rows="5"
+              :placeholder="$t('admin.references_placeholder_default')"
             />
           </b-form-group>
         </b-card>
@@ -172,7 +175,7 @@
           <b-form-group :label="$t('admin.risk_justification_placeholder')">
             <b-form-textarea
               v-model="textConfig.riskJustificationPlaceholder"
-              rows="2"
+              rows="5"
               :placeholder="$t('admin.risk_justification_placeholder_default')"
             />
           </b-form-group>
@@ -180,7 +183,7 @@
           <b-form-group :label="$t('admin.residual_risk_placeholder')">
             <b-form-textarea
               v-model="textConfig.residualRiskPlaceholder"
-              rows="2"
+              rows="5"
               :placeholder="$t('admin.residual_risk_placeholder_default')"
             />
           </b-form-group>
@@ -188,7 +191,7 @@
           <b-form-group :label="$t('message.comment')">
             <b-form-textarea
               v-model="textConfig.commentPlaceholder"
-              rows="2"
+              rows="5"
               :placeholder="$t('audit.comment_placeholder')"
             />
           </b-form-group>
@@ -196,18 +199,19 @@
           <b-form-group :label="$t('message.details')">
             <b-form-textarea
               v-model="textConfig.analysisDetailsInstruction"
-              rows="6"
+              rows="5"
               :placeholder="$t('audit.details_instruction')"
             />
           </b-form-group>
         </b-card>
         </b-collapse>
-
-        <div class="text-right">
+        </b-card-body>
+        <b-card-footer>
           <b-button variant="outline-primary" class="px-4" @click="saveTextConfig">
             {{ $t('message.update') }}
           </b-button>
-        </div>
+        </b-card-footer>
+        </b-card>
       </b-tab>
 
       <!-- Risk Matrix Tab -->
@@ -249,15 +253,15 @@ export default {
         { value: 'DAILY', text: this.$t('admin.reset_policy_daily') },
       ],
       vulnIdConfig: {
-        useCustomId: true,
-        orgCode: 'Org_Name',
-        projectCode: 'project_name',
+        useCustomId: false,
+        orgCode: '',
+        projectCode: '',
         template: '{ORG_NAME}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
         sequencePadding: 5,
         resetPolicy: 'YEARLY',
       },
       textConfig: {
-        enabled: true,
+        enabled: false,
         descriptionPlaceholder: '',
         detailPlaceholder: '',
         recommendationPlaceholder: '',
@@ -279,11 +283,11 @@ export default {
       const month = String(new Date().getMonth() + 1).padStart(2, '0');
       const day = String(new Date().getDate()).padStart(2, '0');
       const seq = '1'.padStart(this.vulnIdConfig.sequencePadding, '0');
-      const sanitizedProjectCode = this.sanitizeProjectCode(this.vulnIdConfig.projectCode || 'Project Name');
+      const sanitizedProjectCode = this.sanitizeProjectCode(this.vulnIdConfig.projectCode || 'My Project Name');
 
       let id = this.vulnIdConfig.template || '{ORG_NAME}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}';
-      id = id.replace(/{ORG_NAME}/g, this.vulnIdConfig.orgCode || 'Org_Name');
-      id = id.replace(/{ORG_CODE}/g, this.vulnIdConfig.orgCode || 'Org_Name');
+      id = id.replace(/{ORG_NAME}/g, this.vulnIdConfig.orgCode || 'OWASP');
+      id = id.replace(/{ORG_CODE}/g, this.vulnIdConfig.orgCode || 'OWASP');
       id = id.replace(/{PROJECT_NAME}/g, sanitizedProjectCode);
       id = id.replace(/{PROJECT_CODE}/g, sanitizedProjectCode);
       id = id.replace(/{YYYY}/g, year);
@@ -305,19 +309,19 @@ export default {
   methods: {
     sanitizeProjectCode(projectCode) {
       if (!projectCode || !projectCode.trim()) {
-        return 'project-name';
+        return 'project_name';
       }
 
       let sanitized = projectCode.trim()
-        .replace(/[^a-zA-Z0-9 _-]/g, '')
-        .replace(/[ _-]{2,}/g, match => match[0])
-        .replace(/^[ _-]+|[ _-]+$/g, '');
+        .replace(/[^a-zA-Z0-9_-]/g, '')
+        .replace(/[_-]{2,}/g, '_')
+        .replace(/^[_-]+|[_-]+$/g, '');
 
       if (!sanitized) {
-        sanitized = 'project-name';
+        sanitized = 'project_name';
       }
 
-      return sanitized.toLowerCase();
+      return sanitized;
     },
     setTabFromHash(hash) {
       const tabMap = {
@@ -351,13 +355,18 @@ export default {
       }
     },
     insertPlaceholder(placeholder) {
-      this.vulnIdConfig.template += placeholder;
+      const t = this.vulnIdConfig.template;
+      if (t && !t.endsWith('-') && !t.endsWith('_') && !t.endsWith('/')) {
+        this.vulnIdConfig.template = t + '-' + placeholder;
+      } else {
+        this.vulnIdConfig.template = t + placeholder;
+      }
     },
     resetVulnIdDefaults() {
       this.vulnIdConfig = {
-        useCustomId: true,
-        orgCode: 'Org_Name',
-        projectCode: 'project_name',
+        useCustomId: false,
+        orgCode: '',
+        projectCode: '',
         template: '{ORG_NAME}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
         sequencePadding: 5,
         resetPolicy: 'YEARLY',
@@ -438,12 +447,12 @@ export default {
         if (vulnIdResponse && vulnIdResponse.data) {
           // Load from API
           this.vulnIdConfig = {
-            useCustomId: vulnIdResponse.data.useCustomId !== undefined ? vulnIdResponse.data.useCustomId : true,
+            useCustomId: vulnIdResponse.data.useCustomId === true,
             orgCode: !vulnIdResponse.data.orgCode || vulnIdResponse.data.orgCode === 'DT'
-              ? 'Org_Name'
+              ? ''
               : vulnIdResponse.data.orgCode,
             projectCode: !vulnIdResponse.data.projectCode || vulnIdResponse.data.projectCode === 'project'
-              ? 'project_name'
+              ? ''
               : vulnIdResponse.data.projectCode,
             template: vulnIdResponse.data.template || '{ORG_NAME}-{PROJECT_NAME}-{YYYY}-{SEQUENCE}',
             sequencePadding: vulnIdResponse.data.sequencePadding || 5,
@@ -453,7 +462,7 @@ export default {
 
         if (textResponse && textResponse.data) {
           this.textConfig = {
-            enabled: textResponse.data.enabled !== false,
+            enabled: textResponse.data.enabled === true,
             descriptionPlaceholder: textResponse.data.descriptionPlaceholder || '',
             detailPlaceholder: textResponse.data.detailPlaceholder || '',
             recommendationPlaceholder: textResponse.data.recommendationPlaceholder || '',

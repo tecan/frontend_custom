@@ -68,14 +68,14 @@ export default {
 
     const buildDefaultTextPlaceholderSettings = (enabled = true) => ({
       enabled,
-      descriptionPlaceholder: '<Add detail description about the vulnerability>',
-      detailPlaceholder: '<Add additional details>',
-      recommendationPlaceholder: '<Add any recommendation from external companies / partners or internal security team>',
-      referencesPlaceholder: '<Add any references if available, example: CPE / CVE references>',
-      riskJustificationPlaceholder: 'Explain why this risk is acceptable...',
-      residualRiskPlaceholder: 'Describe any remaining risk after mitigation...',
-      commentPlaceholder: '<Add all participants for the review/assessment>',
-      analysisDetailsInstruction: '1.  Affected Software Items: Identify which software items are impacted. Assess whether third-party code within supported software is affected. If third-party or open source components are involved, determine in the next step whether the issue should be disclosed to the vendor or published on the appropriate platform.\n2.  Security Context: What is the security context in which the vulnerability was discovered? Consider the intended environment of use and any defense-in-depth strategies in place.\n3.  Risk Assessment: Perform a security risk assessment in accordance with the scoring defined in the SOP Product Security Risk Management.\n4.  Root Cause Analysis: What is the root cause of vulnerability? Is it consistent across different products or does it vary?\n5.  Threat Model Coverage: Is the vulnerability addressed by existing threat models?\n6.  Related Security Issues: Is there other related security issues present in the same product?\n7.  Product Safety Impact: Does vulnerability impact product safety? If yes, review and update the safety risk assessment as necessary.\n8.  Only for vulnerability with risk critical and high: define the Customer Communication strategy (PM with input from RA)'
+      descriptionPlaceholder: "Customize this text to assist your team, consistent with your organisation's processes and terminology. e.g.\n1. What is the vulnerability?\n2. Which component or system is affected?\n3. What behaviour or condition makes this exploitable?",
+      detailPlaceholder: "Customize this text to assist your team, consistent with your organisation's processes and terminology. e.g.\n1. List any affected third-party or open-source dependencies.\n2. Note any proof-of-concept or active exploitation evidence.\n3. Indicate if vendor notification or coordinated disclosure is required.",
+      recommendationPlaceholder: "Customize this text to assist your team, consistent with your organisation's processes and terminology. e.g.\n1. What patch, update, or fix is available?\n2. Are there compensating controls if a fix is not available?\n3. What is the recommended timeline for remediation?",
+      referencesPlaceholder: "Customize this text to assist your team, consistent with your organisation's processes and terminology. e.g.\n1. CVE ID or internal reference (e.g. CVE-2024-1234).\n2. Vendor advisory or official patch link.\n3. CPE identifier or affected version range.",
+      riskJustificationPlaceholder: "Customize this text to assist your team, consistent with your organisation's processes and terminology. e.g.\n1. Justify the selected impact level based on affected assets and data sensitivity.\n2. Justify the likelihood level based on exploitability and threat context.\n3. Reference any supporting threat intelligence or prior incidents.",
+      residualRiskPlaceholder: "Customize this text to assist your team, consistent with your organisation's processes and terminology. e.g.\n1. Describe the mitigations applied and their effectiveness.\n2. State the remaining exposure and why it is acceptable.\n3. Confirm who has formally approved the residual risk.",
+      commentPlaceholder: "Customize this text to assist your team, consistent with your organisation's processes and terminology. e.g.\n1. Summarise the audit decision and key findings.\n2. Note any escalation actions or follow-up tasks required.\n3. Record who reviewed this finding and when.",
+      analysisDetailsInstruction: "Customize this text to assist your team, consistent with your organisation's processes and terminology. e.g.\n1. Identify all affected software items and versions.\n2. Describe the security context and environment of discovery.\n3. Note any disclosure obligations or regulatory considerations."
     });
 
     const buildDisabledTextPlaceholderSettings = () => ({

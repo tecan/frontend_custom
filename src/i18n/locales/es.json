@@ -175,7 +175,6 @@
     "source_of_discovery_placeholder": "Seleccionar fuente...",
     "add_source": "Agregar fuente",
     "source_label": "Etiqueta de fuente",
-    "source_key": "Clave de fuente",
     "vulnerability_id_generation": "Generación de ID de vulnerabilidad interna",
     "use_custom_id_generator": "Usar generador secuencial de ID personalizado",
     "use_custom_id_generator_on_help": "Activado: los ID se generan usando la plantilla y secuencia configuradas (p. ej. ORG-proyecto-2026-00001).",
@@ -199,14 +198,14 @@
     "reset_to_defaults": "Restablecer valores predeterminados",
     "create_vulnerability_texts": "Textos de creación de vulnerabilidad",
     "audit_vulnerability_texts": "Textos de auditoría de vulnerabilidad",
-    "description_placeholder": "Marcador de posición de descripción",
-    "description_placeholder_default": "Describa la vulnerabilidad en detalle...",
-    "recommendation_placeholder": "Marcador de posición de recomendación",
-    "recommendation_placeholder_default": "Proporcione pasos de remediación...",
-    "risk_justification_placeholder": "Marcador de posición de justificación de riesgo",
-    "risk_justification_placeholder_default": "Explique por qué este riesgo es aceptable...",
-    "residual_risk_placeholder": "Marcador de posición de riesgo residual",
-    "residual_risk_placeholder_default": "Describa cualquier riesgo residual después de la mitigación...",
+    "description_placeholder": "Descripción",
+    "description_placeholder_default": "<Describa la vulnerabilidad en detalle>",
+    "recommendation_placeholder": "Recomendación",
+    "recommendation_placeholder_default": "<Proporcione pasos de remediación>",
+    "risk_justification_placeholder": "Justificación de riesgo",
+    "risk_justification_placeholder_default": "<Explique por qué este riesgo es aceptable>",
+    "residual_risk_placeholder": "Riesgo residual",
+    "residual_risk_placeholder_default": "<Describa cualquier riesgo residual después de la mitigación>",
     "jira": "Jira",
     "jira_auth_with_token": "Token de acceso personal de Jira",
     "jira_desc": "Autenticación del servicio Jira",
@@ -367,7 +366,9 @@
     "vulnsource_osv_base_url": "URL base de OSV",
     "welcome_message": "Mensaje de bienvenida",
     "welcome_message_desc": "Personalice el mensaje de bienvenida que aparece en la página de inicio de Dependency-Track antes de que los usuarios inicien sesión.",
-    "welcome_message_enable": "Habilitar mensaje de bienvenida"
+    "welcome_message_enable": "Habilitar mensaje de bienvenida",
+    "enable_text_and_placeholders": "Enable text and placeholders",
+    "source_label_duplicate": "A source with this name already exists. Please use a unique name."
   },
   "condition": {
     "forbidden": "Prohibido (403)",
@@ -700,6 +701,7 @@
     "oidc_redirect_failed": "Se produjo un error al redirigir al proveedor de identidad de OpenID Connect",
     "only_direct_tooltip": "Mostrar solo dependencias directas, ocultando dependencias transitivas",
     "only_outdated_tooltip": "Mostrar solo las dependencias que tengan versiones estables más nuevas disponibles",
+    "only_show_latest_project_versions": null,
     "operational_risk": "Riesgo operacional",
     "operator": "Operador",
     "osi_approved": "Aprobado por OSI",
@@ -1027,13 +1029,14 @@
   "riskMatrix": {
     "title": "Evaluación de riesgos",
     "impact": "Impacto",
-    "impactHelp": "Defina los niveles de impacto utilizados para evaluar el impacto potencial en el negocio de un riesgo.",
+    "impactHelp": "Defina los valores utilizados en el eje horizontal de la matriz de riesgos.",
     "likelihood": "Probabilidad",
-    "likelihoodHelp": "Defina los niveles de probabilidad utilizados para evaluar la probabilidad de que ocurra un riesgo.",
+    "likelihoodHelp": "Defina los valores utilizados en el eje vertical de la matriz de riesgos.",
     "impactValues": "Valores de impacto",
     "likelihoodValues": "Valores de probabilidad",
     "levelDefinitions": "Definiciones de nivel",
     "sectionLabelsTitle": "Etiquetas de sección",
+    "requireLabel": "Requerir",
     "requireRiskAssessment": "Requerir evaluación de riesgos (Impacto, Probabilidad, Justificación)",
     "requireResidualRiskAssessment": "Requerir evaluación de riesgos residuales (Impacto, Probabilidad, Justificación)",
     "riskAssessmentRequired": "{impact} and {likelihood} are required for {section}.",
@@ -1085,14 +1088,22 @@
       "monitor": "Monitorizar",
       "monitor_plan": "Monitorizar y planificar",
       "mitigate": "Mitigar",
-      "mitigate_immediately": "Mitigar de inmediato"
+      "mitigate_immediately": "Mitigar de inmediato",
+      "escalate": "Escalate"
     },
     "likelihoods": {
+      "rare": "Rare",
       "virtually_impossible": "Prácticamente imposible",
       "unlikely": "Improbable",
       "possible": "Posible",
       "likely": "Probable",
       "almost_certain": "Casi seguro"
+    },
+    "impacts": {
+      "insignificant": "Insignificant",
+      "minor": "Minor",
+      "major": "Major",
+      "severe": "Severe"
     }
   },
   "severity": {

@@ -308,7 +308,15 @@
     "vulnsource_osv_base_url": "OSV 基础 URL",
     "welcome_message": "欢迎消息",
     "welcome_message_desc": "自定义用户登录前 Dependency-Track 起始页上显示的欢迎消息。",
-    "welcome_message_enable": "启用欢迎消息"
+    "welcome_message_enable": "启用欢迎消息",
+    "enable_text_and_placeholders": "Enable text and placeholders",
+    "source_label_duplicate": "A source with this name already exists. Please use a unique name.",
+    "show_source_of_discovery_badge": "Show Source of Discovery badge on vulnerability page",
+    "vulnerability_sources_desc": "When enabled, the source of discovery badge is shown on the vulnerability detail page.",
+    "source_of_discovery": "Source of Discovery",
+    "source_of_discovery_placeholder": "Select source...",
+    "add_source": "Add Source",
+    "source_label": "Source Label"
   },
   "condition": {
     "forbidden": "禁止访问 (403)",
@@ -641,6 +649,7 @@
     "oidc_redirect_failed": "重定向至 OpenID Connect 身份提供商时发生错误",
     "only_direct_tooltip": "仅显示直接依赖，隐藏间接依赖",
     "only_outdated_tooltip": "仅显示存在更新稳定版本的依赖项",
+    "only_show_latest_project_versions": null,
     "operational_risk": "运营风险",
     "operator": "操作人",
     "osi_approved": "OSI 认证",
@@ -980,13 +989,14 @@
   "riskMatrix": {
     "title": "风险评估",
     "impact": "影响",
-    "impactHelp": "定义用于评估风险对业务潜在影响的影响级别。",
+    "impactHelp": "定义风险矩阵横轴上使用的值。",
     "likelihood": "可能性",
-    "likelihoodHelp": "定义用于评估风险发生概率的可能性级别。",
+    "likelihoodHelp": "定义风险矩阵纵轴上使用的值。",
     "impactValues": "影响值",
     "likelihoodValues": "可能性值",
     "levelDefinitions": "级别定义",
     "sectionLabelsTitle": "章节标签",
+    "requireLabel": "要求",
     "requireRiskAssessment": "要求风险评估（影响、可能性、理由）",
     "requireResidualRiskAssessment": "要求残余风险评估（影响、可能性、理由）",
     "riskAssessmentRequired": "{section} 需要 {impact} 和 {likelihood}。",
@@ -1038,14 +1048,22 @@
       "monitor": "监控",
       "monitor_plan": "监控并规划",
       "mitigate": "缓解",
-      "mitigate_immediately": "立即缓解"
+      "mitigate_immediately": "立即缓解",
+      "escalate": "Escalate"
     },
     "likelihoods": {
+      "rare": "Rare",
       "virtually_impossible": "几乎不可能",
       "unlikely": "不太可能",
       "possible": "可能",
       "likely": "很可能",
       "almost_certain": "几乎肯定"
+    },
+    "impacts": {
+      "insignificant": "Insignificant",
+      "minor": "Minor",
+      "major": "Major",
+      "severe": "Severe"
     }
   },
   "severity": {
@@ -1082,5 +1100,9 @@
     "low": "低危漏洞（不含别名）",
     "medium": "中危漏洞（不含别名）",
     "unassigned": "未分配漏洞（不含别名）"
+  },
+  "audit": {
+    "comment_placeholder": "Customize this text to assist your team, consistent with your organisation's processes and terminology. e.g.\n1. Summarise the audit decision and key findings.\n2. Note any escalation actions or follow-up tasks required.\n3. Record who reviewed this finding and when.",
+    "details_instruction": "Customize this text to assist your team, consistent with your organisation's processes and terminology. e.g.\n1. Identify all affected software items and versions.\n2. Describe the security context and environment of discovery.\n3. Note any disclosure obligations or regulatory considerations."
   }
 }
