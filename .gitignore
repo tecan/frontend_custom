@@ -1,3 +1,6 @@
+# Azure DevOps pipeline config (not relevant to public fork)
+azure-pipelines.yml
+
 .DS_Store
 node_modules
 /dist
