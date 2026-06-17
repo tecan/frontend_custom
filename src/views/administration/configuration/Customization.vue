@@ -378,17 +378,14 @@ export default {
           this.$toastr.w(this.$t('admin.organization_code_required'));
           return;
         }
-        if (!this.vulnIdConfig.projectCode || !this.vulnIdConfig.projectCode.trim()) {
-          this.$toastr.w(this.$t('admin.project_code_required'));
-          return;
-        }
+
       }
       try {
         this.isLoading = true;
         const payload = {
           useCustomId: this.vulnIdConfig.useCustomId,
           orgCode: this.vulnIdConfig.orgCode,
-          projectCode: this.vulnIdConfig.projectCode,
+          projectCode: this.vulnIdConfig.projectCode || '',
           template: this.vulnIdConfig.template,
           resetPolicy: this.vulnIdConfig.resetPolicy,
           sequencePadding: this.vulnIdConfig.sequencePadding,
